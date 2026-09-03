@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -37,7 +36,7 @@
   }
 
   .top-bar {
-    padding: 40px 20px 16px;
+    padding: 20px 20px 16px;
     background: var(--bg);
     position: sticky;
     top: 0;
@@ -96,10 +95,10 @@
   }
 
   .btn {
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: var(--radius-sm);
     border: none;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: opacity .15s;
@@ -108,7 +107,7 @@
   .btn-primary { background: var(--accent); color: white; }
   .btn-ghost { background: var(--surface2); color: var(--text); }
   .btn-danger { background: rgba(255,107,107,0.15); color: var(--red); }
-  .btn-sm { padding: 6px 10px; font-size: 11px; }
+  .btn-sm { padding: 4px 8px; font-size: 11px; }
 
   .dday-card {
     background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%);
@@ -161,26 +160,30 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     margin-bottom: 8px;
-    cursor: pointer;
   }
   .action-btns { display: flex; gap: 4px; }
 
   .filter-bar {
     display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 8px;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: 12px;
+    background: var(--surface);
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
   }
+  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-size: 11px; color: var(--text2); font-weight: bold; width: 45px; }
   .filter-chip {
-    padding: 6px 10px;
+    padding: 4px 8px;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 20px;
+    border-radius: 6px;
     font-size: 11px;
     color: var(--text2);
     cursor: pointer;
-    white-space: nowrap;
+    user-select: none;
   }
   .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
 
@@ -194,7 +197,15 @@
   .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .prob-num { font-size: 14px; font-weight: 700; }
   .history-list { font-size: 11px; color: var(--text2); border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
-  .history-item { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .history-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 0; }
+
+  .sub-tab-bar { display: flex; gap: 6px; margin-bottom: 12px; }
+  .sub-tab-btn {
+    flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center;
+    background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm);
+    border: 1px solid var(--border); cursor: pointer;
+  }
+  .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   .modal-overlay {
     display: none;
@@ -323,10 +334,15 @@
 
 <!-- 캘린더 -->
 <div id="page-calendar" class="page">
+  <div class="sub-tab-bar">
+    <div class="sub-tab-btn active" id="calTabDaily" onclick="setCalView('daily')">Daily</div>
+    <div class="sub-tab-btn" id="calTabWeekly" onclick="setCalView('weekly')">Weekly</div>
+    <div class="sub-tab-btn" id="calTabMonthly" onclick="setCalView('monthly')">Monthly</div>
+  </div>
   <div id="calList"></div>
 </div>
 
-<!-- 문제 풀이 기록 모달 -->
+<!-- 문제 풀이 기록 추가/수정 모달 -->
 <div class="modal-overlay" id="probModal">
   <div class="modal">
     <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">문제 기록 추가</div>
@@ -414,7 +430,9 @@ function resetToDefault() {
 }
 
 let studyPath = [];
-let activeFilter = 'all';
+let selectedRounds = [];
+let selectedStatuses = [];
+let calViewMode = 'daily';
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -458,16 +476,19 @@ function renderStudy() {
   const depth = studyPath.length;
 
   if (depth === 0) { // 1단계: 대과목
-    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addMainSubject()">+ 대과목 추가 (예: 경제학, 세법)</button>`;
-    Object.keys(struct).forEach(subj => {
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addMainSubject()">+ 대과목 추가</button>`;
+    const keys = Object.keys(struct);
+    keys.forEach((subj, idx) => {
       const subCount = struct[subj] ? Object.keys(struct[subj]).length : 0;
       list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}'])" style="flex:1">
-          <strong>${subj}</strong> <span style="font-size:11px;color:var(--text2)">(${subCount}개 하위과목)</span>
+        <div onclick="navTo(['${subj}'])" style="flex:1;cursor:pointer">
+          <strong>${subj}</strong> <span style="font-size:11px;color:var(--text2)">(${subCount}개)</span>
         </div>
         <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); editMainSubject('${subj}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteMainSubject('${subj}')">삭제</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveMainSubject(${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveMainSubject(${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editMainSubject('${subj}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteMainSubject('${subj}')">삭제</button>
         </div>
       </div>`;
     });
@@ -476,39 +497,50 @@ function renderStudy() {
     const subj = studyPath[0];
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addSubSubject('${subj}')">+ 하위 과목 추가</button>`;
     
-    Object.keys(struct[subj] || {}).forEach(sub => {
+    const keys = Object.keys(struct[subj] || {});
+    keys.forEach((sub, idx) => {
       list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}','${sub}'])" style="flex:1"><strong>${sub}</strong></div>
+        <div onclick="navTo(['${subj}','${sub}'])" style="flex:1;cursor:pointer"><strong>${sub}</strong></div>
         <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); editSubSubject('${subj}','${sub}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteSubSubject('${subj}','${sub}')">삭제</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveSubSubject('${subj}', ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveSubSubject('${subj}', ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editSubSubject('${subj}','${sub}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSubSubject('${subj}','${sub}')">삭제</button>
         </div>
       </div>`;
     });
   } 
-  else if (depth === 2) { // 3단계: 태스크 목록
+  else if (depth === 2) { // 3단계: 태스크
     const [subj, sub] = studyPath;
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 태스크 추가</button>`;
     
-    (struct[subj][sub] || []).forEach(task => {
+    const tasks = struct[subj][sub] || [];
+    tasks.forEach((task, idx) => {
       list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}','${sub}','${task}'])" style="flex:1"><strong>${task}</strong></div>
+        <div onclick="navTo(['${subj}','${sub}','${task}'])" style="flex:1;cursor:pointer"><strong>${task}</strong></div>
         <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); editTask('${subj}','${sub}','${task}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteTask('${subj}','${sub}','${task}')">삭제</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveTask('${subj}','${sub}', ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveTask('${subj}','${sub}', ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editTask('${subj}','${sub}','${task}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteTask('${subj}','${sub}','${task}')">삭제</button>
         </div>
       </div>`;
     });
   } 
-  else if (depth === 3) { // 4단계: 문제 풀이 및 기록
+  else if (depth === 3) { // 4단계: 문제 풀이 목록
     const [subj, sub, task] = studyPath;
     const pathKey = `${subj}|${sub}|${task}`;
     
-    list.innerHTML = `<div class="filter-bar">
-      <div class="filter-chip ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">전체</div>
-      <div class="filter-chip ${activeFilter==='r1'?'active':''}" onclick="setFilter('r1')">1회독</div>
-      <div class="filter-chip ${activeFilter==='r2'?'active':''}" onclick="setFilter('r2')">2회독</div>
-      <div class="filter-chip ${activeFilter==='wrong'?'active':''}" onclick="setFilter('wrong')">오답만(☆/♥/△)</div>
+    list.innerHTML = `
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">회독:</span>
+        ${['1','2','3','4','5'].map(r => `<div class="filter-chip ${selectedRounds.includes(r)?'active':''}" onclick="toggleFilterRound('${r}')">${r}회독</div>`).join('')}
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">상태:</span>
+        ${['☆','♥','△','O'].map(s => `<div class="filter-chip ${selectedStatuses.includes(s)?'active':''}" onclick="toggleFilterStatus('${s}')">${s}</div>`).join('')}
+      </div>
     </div>
     <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 추가 (예: 1-20 또는 5)</button>`;
 
@@ -518,10 +550,17 @@ function renderStudy() {
     probs.forEach(pKey => {
       const probNum = pKey.split('|')[3];
       const history = records[pKey].history || [];
-      
-      if (activeFilter === 'r1' && !history.some(h => h.round === '1')) return;
-      if (activeFilter === 'r2' && !history.some(h => h.round === '2')) return;
-      if (activeFilter === 'wrong' && !history.some(h => ['☆','♥','△'].includes(h.status))) return;
+
+      // 필터링 적용
+      const matchedHistory = history.filter(h => {
+        const roundMatch = selectedRounds.length === 0 || selectedRounds.includes(h.round);
+        const statusMatch = selectedStatuses.length === 0 || selectedStatuses.includes(h.status);
+        return roundMatch && statusMatch;
+      });
+
+      if ((selectedRounds.length > 0 || selectedStatuses.length > 0) && matchedHistory.length === 0) {
+        return;
+      }
 
       let historyHtml = history.map((h, idx) => {
         let termStr = '';
@@ -532,15 +571,18 @@ function renderStudy() {
           termStr = ` (${diffDays}일 텀)`;
         }
         return `<div class="history-item">
-          <span>${h.round}회독 [${h.status}] - ${h.date}${termStr}</span>
-          <span>${h.memo || ''}</span>
+          <div><strong>${h.round}회독 [${h.status}]</strong> - ${h.date}${termStr} <span style="color:var(--text3)">${h.memo ? '| ' + h.memo : ''}</span></div>
+          <div>
+            <button class="btn btn-sm btn-ghost" onclick="openProbModal('${pKey}', ${idx})">수정</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteProbRecord('${pKey}', ${idx})">삭제</button>
+          </div>
         </div>`;
       }).join('');
 
       list.innerHTML += `<div class="prob-card">
         <div class="prob-header">
           <div class="prob-num">${probNum}번 문제</div>
-          <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}')">+ 회독 풀이 추가</button>
+          <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}')">+ 회독 기록</button>
         </div>
         <div class="history-list">${historyHtml || '풀이 기록 없음'}</div>
       </div>`;
@@ -549,11 +591,58 @@ function renderStudy() {
 }
 
 function navTo(path) { studyPath = path; renderStudy(); }
-function setFilter(f) { activeFilter = f; renderStudy(); }
 
-// 1단계 (대과목) 추가/수정/삭제
+function toggleFilterRound(r) {
+  if (selectedRounds.includes(r)) selectedRounds = selectedRounds.filter(x => x !== r);
+  else selectedRounds.push(r);
+  renderStudy();
+}
+function toggleFilterStatus(s) {
+  if (selectedStatuses.includes(s)) selectedStatuses = selectedStatuses.filter(x => x !== s);
+  else selectedStatuses.push(s);
+  renderStudy();
+}
+
+// 순서 이동 함수
+function moveArray(arr, from, to) {
+  if (to < 0 || to >= arr.length) return;
+  const item = arr.splice(from, 1)[0];
+  arr.splice(to, 0, item);
+}
+
+function moveMainSubject(idx, dir) {
+  const struct = getStructure();
+  const keys = Object.keys(struct);
+  if (idx + dir < 0 || idx + dir >= keys.length) return;
+  const newStruct = {};
+  moveArray(keys, idx, idx + dir);
+  keys.forEach(k => newStruct[k] = struct[k]);
+  saveStructure(newStruct);
+  renderStudy();
+}
+
+function moveSubSubject(subj, idx, dir) {
+  const struct = getStructure();
+  const keys = Object.keys(struct[subj]);
+  if (idx + dir < 0 || idx + dir >= keys.length) return;
+  moveArray(keys, idx, idx + dir);
+  const newSub = {};
+  keys.forEach(k => newSub[k] = struct[subj][k]);
+  struct[subj] = newSub;
+  saveStructure(struct);
+  renderStudy();
+}
+
+function moveTask(subj, sub, idx, dir) {
+  const struct = getStructure();
+  moveArray(struct[subj][sub], idx, idx + dir);
+  saveStructure(struct);
+  renderStudy();
+}
+
+// 과목 추가 / 수정 / 삭제
 function addMainSubject() {
-  const name = prompt('새 대과목 이름 (예: 경제학, 상법 등)');
+  const name = prompt('새 대과목 이름 (예: 경제학, 세법 등)');
   if (!name) return;
   const struct = getStructure();
   if (!struct[name]) struct[name] = {};
@@ -561,26 +650,19 @@ function addMainSubject() {
   renderStudy();
 }
 function editMainSubject(oldName) {
-  const newName = prompt('변경할 대과목 이름을 입력하세요:', oldName);
+  const newName = prompt('변경할 대과목 이름:', oldName);
   if (!newName || newName === oldName) return;
-  
   const struct = getStructure();
   struct[newName] = struct[oldName];
   delete struct[oldName];
   saveStructure(struct);
 
-  // 문제 기록 경로 업데이트
   const records = getData();
-  const updatedRecords = {};
-  Object.keys(records).forEach(key => {
-    if (key.startsWith(oldName + '|')) {
-      const newKey = key.replace(oldName + '|', newName + '|');
-      updatedRecords[newKey] = records[key];
-    } else {
-      updatedRecords[key] = records[key];
-    }
+  const updated = {};
+  Object.keys(records).forEach(k => {
+    updated[k.startsWith(oldName + '|') ? k.replace(oldName + '|', newName + '|') : k] = records[k];
   });
-  saveData(updatedRecords);
+  saveData(updated);
   renderStudy();
 }
 function deleteMainSubject(subj) {
@@ -591,9 +673,8 @@ function deleteMainSubject(subj) {
   renderStudy();
 }
 
-// 2단계 (하위 과목) 추가/수정/삭제
 function addSubSubject(subj) {
-  const name = prompt('하위 과목 이름 (예: 중급회계, 회사법 등)');
+  const name = prompt('하위 과목 이름 (예: 중급회계 등)');
   if (!name) return;
   const struct = getStructure();
   if (!struct[subj][name]) struct[subj][name] = [];
@@ -601,27 +682,20 @@ function addSubSubject(subj) {
   renderStudy();
 }
 function editSubSubject(subj, oldName) {
-  const newName = prompt('변경할 하위 과목 이름을 입력하세요:', oldName);
+  const newName = prompt('변경할 하위 과목 이름:', oldName);
   if (!newName || newName === oldName) return;
-
   const struct = getStructure();
   struct[subj][newName] = struct[subj][oldName];
   delete struct[subj][oldName];
   saveStructure(struct);
 
   const records = getData();
-  const updatedRecords = {};
-  const prefix = `${subj}|${oldName}|`;
-  const newPrefix = `${subj}|${newName}|`;
-  Object.keys(records).forEach(key => {
-    if (key.startsWith(prefix)) {
-      const newKey = key.replace(prefix, newPrefix);
-      updatedRecords[newKey] = records[key];
-    } else {
-      updatedRecords[key] = records[key];
-    }
+  const updated = {};
+  const p = `${subj}|${oldName}|`, np = `${subj}|${newName}|`;
+  Object.keys(records).forEach(k => {
+    updated[k.startsWith(p) ? k.replace(p, np) : k] = records[k];
   });
-  saveData(updatedRecords);
+  saveData(updated);
   renderStudy();
 }
 function deleteSubSubject(subj, sub) {
@@ -632,7 +706,6 @@ function deleteSubSubject(subj, sub) {
   renderStudy();
 }
 
-// 3단계 (태스크) 추가/수정/삭제
 function addTask(subj, sub) {
   const name = prompt('태스크 이름 (예: 객관식 기출, 연습서)');
   if (!name) return;
@@ -642,27 +715,20 @@ function addTask(subj, sub) {
   renderStudy();
 }
 function editTask(subj, sub, oldName) {
-  const newName = prompt('변경할 태스크 이름을 입력하세요:', oldName);
+  const newName = prompt('변경할 태스크 이름:', oldName);
   if (!newName || newName === oldName) return;
-
   const struct = getStructure();
   const idx = struct[subj][sub].indexOf(oldName);
   if (idx !== -1) struct[subj][sub][idx] = newName;
   saveStructure(struct);
 
   const records = getData();
-  const updatedRecords = {};
-  const prefix = `${subj}|${sub}|${oldName}|`;
-  const newPrefix = `${subj}|${sub}|${newName}|`;
-  Object.keys(records).forEach(key => {
-    if (key.startsWith(prefix)) {
-      const newKey = key.replace(prefix, newPrefix);
-      updatedRecords[newKey] = records[key];
-    } else {
-      updatedRecords[key] = records[key];
-    }
+  const updated = {};
+  const p = `${subj}|${sub}|${oldName}|`, np = `${subj}|${sub}|${newName}|`;
+  Object.keys(records).forEach(k => {
+    updated[k.startsWith(p) ? k.replace(p, np) : k] = records[k];
   });
-  saveData(updatedRecords);
+  saveData(updated);
   renderStudy();
 }
 function deleteTask(subj, sub, task) {
@@ -688,10 +754,27 @@ function addProblem(pathKey) {
   renderStudy();
 }
 
+// 회독 풀이 기록 추가 및 수정 / 삭제
 let targetProbKey = null;
-function openProbModal(pKey) {
+let editingHistoryIndex = null;
+
+function openProbModal(pKey, historyIndex = null) {
   targetProbKey = pKey;
-  document.getElementById('probDate').value = new Date().toISOString().split('T')[0];
+  editingHistoryIndex = historyIndex;
+  
+  if (historyIndex !== null) {
+    const records = getData();
+    const item = records[pKey].history[historyIndex];
+    document.getElementById('probModalTitle').textContent = '문제 기록 수정';
+    document.getElementById('probRound').value = item.round;
+    document.getElementById('probStatus').value = item.status;
+    document.getElementById('probDate').value = item.date;
+    document.getElementById('probMemo').value = item.memo || '';
+  } else {
+    document.getElementById('probModalTitle').textContent = '문제 기록 추가';
+    document.getElementById('probDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('probMemo').value = '';
+  }
   document.getElementById('probModal').classList.add('open');
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -705,11 +788,24 @@ function saveProbRecord() {
   const memo = document.getElementById('probMemo').value;
 
   if (!records[targetProbKey]) records[targetProbKey] = { history: [] };
-  records[targetProbKey].history.push({ round, status, date, memo });
-  records[targetProbKey].history.sort((a,b) => Number(a.round) - Number(b.round));
 
+  if (editingHistoryIndex !== null) {
+    records[targetProbKey].history[editingHistoryIndex] = { round, status, date, memo };
+  } else {
+    records[targetProbKey].history.push({ round, status, date, memo });
+  }
+
+  records[targetProbKey].history.sort((a,b) => Number(a.round) - Number(b.round));
   saveData(records);
   closeModal('probModal');
+  renderStudy();
+}
+
+function deleteProbRecord(pKey, idx) {
+  if (!confirm('이 풀이 기록을 삭제하시겠습니까?')) return;
+  const records = getData();
+  records[pKey].history.splice(idx, 1);
+  saveData(records);
   renderStudy();
 }
 
@@ -756,18 +852,73 @@ function generateSchedule() {
   showPage('calendar');
 }
 
+// 캘린더 Daily / Weekly / Monthly 뷰
+function setCalView(mode) {
+  calViewMode = mode;
+  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('calTab' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+  renderCalendar();
+}
+
 function renderCalendar() {
   const todos = JSON.parse(localStorage.getItem('cpaSchedulerTodos') || '[]');
   const list = document.getElementById('calList');
+  
   if (todos.length === 0) {
     list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">배분된 일정이 없습니다.</div>';
     return;
   }
+
   todos.sort((a,b) => new Date(a.date) - new Date(b.date));
-  list.innerHTML = todos.map(t => `<div class="list-item">
-    <div><strong>${t.date}</strong></div>
-    <div>${t.task}</div>
-  </div>`).join('');
+
+  if (calViewMode === 'daily') {
+    list.innerHTML = todos.map(t => `<div class="list-item">
+      <div><strong>${t.date}</strong></div>
+      <div>${t.task}</div>
+    </div>`).join('');
+  } 
+  else if (calViewMode === 'weekly') {
+    const weeks = {};
+    todos.forEach(t => {
+      const d = new Date(t.date);
+      const weekNum = getWeekOfYear(d);
+      const weekKey = `${d.getFullYear()}년 ${weekNum}주차`;
+      if (!weeks[weekKey]) weeks[weekKey] = [];
+      weeks[weekKey].push(t);
+    });
+
+    list.innerHTML = Object.keys(weeks).map(w => `
+      <div class="card">
+        <div style="font-weight:bold;margin-bottom:8px;color:var(--accent)">${w}</div>
+        ${weeks[w].map(item => `<div style="font-size:12px;margin-bottom:4px;display:flex;justify-content:space-between">
+          <span>${item.date}</span><span>${item.task}</span>
+        </div>`).join('')}
+      </div>
+    `).join('');
+  } 
+  else if (calViewMode === 'monthly') {
+    const months = {};
+    todos.forEach(t => {
+      const monthKey = t.date.substring(0, 7);
+      if (!months[monthKey]) months[monthKey] = [];
+      months[monthKey].push(t);
+    });
+
+    list.innerHTML = Object.keys(months).map(m => `
+      <div class="card">
+        <div style="font-weight:bold;margin-bottom:8px;color:var(--purple)">${m}</div>
+        ${months[m].map(item => `<div style="font-size:12px;margin-bottom:4px;display:flex;justify-content:space-between">
+          <span>${item.date}</span><span>${item.task}</span>
+        </div>`).join('')}
+      </div>
+    `).join('');
+  }
+}
+
+function getWeekOfYear(d) {
+  const start = new Date(d.getFullYear(), 0, 1);
+  const days = Math.floor((d - start) / (24 * 3600 * 1000));
+  return Math.ceil((days + start.getDay() + 1) / 7);
 }
 
 function exportData() {
