@@ -207,6 +207,21 @@
   }
   .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
+  /* 캘린더 전용 스타일 */
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
+  .cal-cell {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    min-height: 52px; padding: 4px 2px; font-size: 10px; display: flex; flex-direction: column; align-items: center;
+  }
+  .cal-cell.today { border-color: var(--accent); background: rgba(91,127,255,0.1); }
+  .cal-cell .date-num { font-weight: bold; margin-bottom: 2px; }
+  .cal-dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin-top: 2px; }
+  .cal-task-text { font-size: 8px; color: var(--text2); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%; }
+
+  .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
+
   .modal-overlay {
     display: none;
     position: fixed;
@@ -433,6 +448,7 @@ let studyPath = [];
 let selectedRounds = [];
 let selectedStatuses = [];
 let calViewMode = 'daily';
+let currentCalDate = new Date();
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -475,7 +491,7 @@ function renderStudy() {
 
   const depth = studyPath.length;
 
-  if (depth === 0) { // 1단계: 대과목
+  if (depth === 0) {
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addMainSubject()">+ 대과목 추가</button>`;
     const keys = Object.keys(struct);
     keys.forEach((subj, idx) => {
@@ -493,7 +509,7 @@ function renderStudy() {
       </div>`;
     });
   } 
-  else if (depth === 1) { // 2단계: 하위 과목
+  else if (depth === 1) {
     const subj = studyPath[0];
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addSubSubject('${subj}')">+ 하위 과목 추가</button>`;
     
@@ -510,7 +526,7 @@ function renderStudy() {
       </div>`;
     });
   } 
-  else if (depth === 2) { // 3단계: 태스크
+  else if (depth === 2) {
     const [subj, sub] = studyPath;
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 태스크 추가</button>`;
     
@@ -527,7 +543,7 @@ function renderStudy() {
       </div>`;
     });
   } 
-  else if (depth === 3) { // 4단계: 문제 풀이 목록
+  else if (depth === 3) {
     const [subj, sub, task] = studyPath;
     const pathKey = `${subj}|${sub}|${task}`;
     
@@ -551,16 +567,13 @@ function renderStudy() {
       const probNum = pKey.split('|')[3];
       const history = records[pKey].history || [];
 
-      // 필터링 적용
       const matchedHistory = history.filter(h => {
         const roundMatch = selectedRounds.length === 0 || selectedRounds.includes(h.round);
         const statusMatch = selectedStatuses.length === 0 || selectedStatuses.includes(h.status);
         return roundMatch && statusMatch;
       });
 
-      if ((selectedRounds.length > 0 || selectedStatuses.length > 0) && matchedHistory.length === 0) {
-        return;
-      }
+      if ((selectedRounds.length > 0 || selectedStatuses.length > 0) && matchedHistory.length === 0) return;
 
       let historyHtml = history.map((h, idx) => {
         let termStr = '';
@@ -603,7 +616,6 @@ function toggleFilterStatus(s) {
   renderStudy();
 }
 
-// 순서 이동 함수
 function moveArray(arr, from, to) {
   if (to < 0 || to >= arr.length) return;
   const item = arr.splice(from, 1)[0];
@@ -640,7 +652,6 @@ function moveTask(subj, sub, idx, dir) {
   renderStudy();
 }
 
-// 과목 추가 / 수정 / 삭제
 function addMainSubject() {
   const name = prompt('새 대과목 이름 (예: 경제학, 세법 등)');
   if (!name) return;
@@ -754,7 +765,6 @@ function addProblem(pathKey) {
   renderStudy();
 }
 
-// 회독 풀이 기록 추가 및 수정 / 삭제
 let targetProbKey = null;
 let editingHistoryIndex = null;
 
@@ -852,7 +862,7 @@ function generateSchedule() {
   showPage('calendar');
 }
 
-// 캘린더 Daily / Weekly / Monthly 뷰
+// 캘린더 Daily / Weekly / Monthly 구현
 function setCalView(mode) {
   calViewMode = mode;
   document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
@@ -860,65 +870,106 @@ function setCalView(mode) {
   renderCalendar();
 }
 
+function changeMonth(offset) {
+  currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+  renderCalendar();
+}
+
 function renderCalendar() {
   const todos = JSON.parse(localStorage.getItem('cpaSchedulerTodos') || '[]');
   const list = document.getElementById('calList');
   
-  if (todos.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">배분된 일정이 없습니다.</div>';
-    return;
-  }
-
-  todos.sort((a,b) => new Date(a.date) - new Date(b.date));
+  const todayStr = new Date().toISOString().split('T')[0];
 
   if (calViewMode === 'daily') {
-    list.innerHTML = todos.map(t => `<div class="list-item">
+    todos.sort((a,b) => new Date(a.date) - new Date(b.date));
+    const futureTodos = todos.filter(t => t.date >= todayStr);
+    
+    if (futureTodos.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">오늘 이후 남아있는 배분 일정이 없습니다.</div>';
+      return;
+    }
+
+    list.innerHTML = futureTodos.map(t => `<div class="list-item">
       <div><strong>${t.date}</strong></div>
       <div>${t.task}</div>
     </div>`).join('');
   } 
   else if (calViewMode === 'weekly') {
-    const weeks = {};
-    todos.forEach(t => {
-      const d = new Date(t.date);
-      const weekNum = getWeekOfYear(d);
-      const weekKey = `${d.getFullYear()}년 ${weekNum}주차`;
-      if (!weeks[weekKey]) weeks[weekKey] = [];
-      weeks[weekKey].push(t);
-    });
+    // 오늘 기준 해당 주(월~일) 구하기
+    const curr = new Date();
+    const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1);
+    const monday = new Date(curr.setDate(first));
 
-    list.innerHTML = Object.keys(weeks).map(w => `
-      <div class="card">
-        <div style="font-weight:bold;margin-bottom:8px;color:var(--accent)">${w}</div>
-        ${weeks[w].map(item => `<div style="font-size:12px;margin-bottom:4px;display:flex;justify-content:space-between">
-          <span>${item.date}</span><span>${item.task}</span>
-        </div>`).join('')}
-      </div>
-    `).join('');
+    let html = `<div style="font-weight:bold;margin-bottom:12px;color:var(--accent);text-align:center;">
+      📅 이번 주 일정 (${monday.toISOString().split('T')[0]} ~ )
+    </div>`;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dStr = d.toISOString().split('T')[0];
+      const dayName = ['일','월','화','수','목','금','토'][d.getDay()];
+      const dayTasks = todos.filter(t => t.date === dStr);
+
+      html += `<div class="weekly-card">
+        <div style="font-size:12px;font-weight:bold;color:${dStr===todayStr?'var(--accent)':'var(--text)'};margin-bottom:4px;">
+          ${dStr} (${dayName}) ${dStr===todayStr?'[오늘]':''}
+        </div>
+        ${dayTasks.length > 0 
+          ? dayTasks.map(t => `<div style="font-size:12px;color:var(--text2);margin-top:2px;">• ${t.task}</div>`).join('') 
+          : '<div style="font-size:11px;color:var(--text3);">일정 없음</div>'}
+      </div>`;
+    }
+    list.innerHTML = html;
   } 
   else if (calViewMode === 'monthly') {
-    const months = {};
-    todos.forEach(t => {
-      const monthKey = t.date.substring(0, 7);
-      if (!months[monthKey]) months[monthKey] = [];
-      months[monthKey].push(t);
-    });
+    const year = currentCalDate.getFullYear();
+    const month = currentCalDate.getMonth();
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
 
-    list.innerHTML = Object.keys(months).map(m => `
-      <div class="card">
-        <div style="font-weight:bold;margin-bottom:8px;color:var(--purple)">${m}</div>
-        ${months[m].map(item => `<div style="font-size:12px;margin-bottom:4px;display:flex;justify-content:space-between">
-          <span>${item.date}</span><span>${item.task}</span>
-        </div>`).join('')}
-      </div>
-    `).join('');
+    let html = `
+    <div class="cal-header">
+      <button class="btn btn-sm btn-ghost" onclick="changeMonth(-1)">◀ 이전달</button>
+      <strong style="font-size:14px;color:var(--accent)">${year}년 ${month + 1}월</strong>
+      <button class="btn btn-sm btn-ghost" onclick="changeMonth(1)">다음달 ▶</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-day-head" style="color:var(--red)">일</div>
+      <div class="cal-day-head">월</div>
+      <div class="cal-day-head">화</div>
+      <div class="cal-day-head">수</div>
+      <div class="cal-day-head">목</div>
+      <div class="cal-day-head">금</div>
+      <div class="cal-day-head" style="color:var(--accent)">토</div>
+    `;
+
+    // 빈 날짜 채우기
+    for (let i = 0; i < firstDay; i++) {
+      html += `<div class="cal-cell" style="opacity:0.2"></div>`;
+    }
+
+    // 날짜 그리기
+    for (let date = 1; date <= lastDate; date++) {
+      const mStr = String(month + 1).padStart(2, '0');
+      const dStr = String(date).padStart(2, '0');
+      const fullDate = `${year}-${mStr}-${dStr}`;
+      const isToday = fullDate === todayStr;
+
+      const dayTasks = todos.filter(t => t.date === fullDate);
+
+      html += `<div class="cal-cell ${isToday ? 'today' : ''}">
+        <div class="date-num">${date}</div>
+        ${dayTasks.length > 0 ? '<div class="cal-dot"></div>' : ''}
+        ${dayTasks.map(t => `<div class="cal-task-text" title="${t.task}">${t.task}</div>`).join('')}
+      </div>`;
+    }
+
+    html += `</div>`;
+    list.innerHTML = html;
   }
-}
-
-function getWeekOfYear(d) {
-  const start = new Date(d.getFullYear(), 0, 1);
-  const days = Math.floor((d - start) / (24 * 3600 * 1000));
-  return Math.ceil((days + start.getDay() + 1) / 7);
 }
 
 function exportData() {
