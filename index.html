@@ -229,6 +229,8 @@ function saveData(data) { localStorage.setItem('cpaRecords', JSON.stringify(data
 function resetToDefault() {
   if (confirm('초기화하시겠습니까?')) {
     localStorage.removeItem('cpaStructure');
+    localStorage.removeItem('cpaRecords');
+    localStorage.removeItem('cpaSchedulerTodos');
     location.reload();
   }
 }
@@ -412,7 +414,6 @@ function toggleFilterStatus(s) {
   renderStudy();
 }
 
-// 순서 변경 함수 (▲ / ▼)
 function moveItem(depth, path, index, direction) {
   const struct = getStructure();
   let targetArrayOrObj;
@@ -449,7 +450,6 @@ function moveItem(depth, path, index, direction) {
   renderStudy();
 }
 
-// 수정 함수
 function editMainSubject(oldName) {
   const newName = prompt('수정할 대과목 이름', oldName);
   if (!newName || newName === oldName) return;
@@ -504,7 +504,6 @@ function editChapter(subj, sub, task, oldName) {
   renderStudy();
 }
 
-// 추가 및 삭제 함수
 function addMainSubject() {
   const name = prompt('새 대과목 이름');
   if (!name) return;
@@ -810,17 +809,27 @@ function exportData() {
 function importData() {
   const input = document.createElement('input');
   input.type = 'file';
+  input.accept = '.json';
   input.onchange = e => {
     const reader = new FileReader();
     reader.onload = event => {
       try {
         const parsed = JSON.parse(event.target.result);
-        if (parsed.struct) saveStructure(parsed.struct);
-        if (parsed.records) saveData(parsed.records);
-        if (parsed.todos) localStorage.setItem('cpaSchedulerTodos') || '[]';
-        alert('복구 완료!');
-        location.reload();
-      } catch { alert('올바른 백업 파일이 아닙니다.'); }
+        
+        // 데이터 형식 유연하게 검증 및 복구
+        if (parsed.struct || parsed.records || parsed.todos || typeof parsed === 'object') {
+          if (parsed.struct) saveStructure(parsed.struct);
+          if (parsed.records) saveData(parsed.records);
+          if (parsed.todos) localStorage.setItem('cpaSchedulerTodos', JSON.stringify(parsed.todos));
+          
+          alert('복구가 완료되었습니다!');
+          location.reload();
+        } else {
+          alert('올바른 백업 파일 형식이 아닙니다.');
+        }
+      } catch (err) { 
+        alert('파일을 읽는 도중 오류가 발생했습니다. JSON 파일인지 확인해 주세요.'); 
+      }
     };
     reader.readAsText(event.target.files[0]);
   };
