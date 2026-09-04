@@ -14,254 +14,74 @@
     --text2: #8b90a7;
     --text3: #4a4f6a;
     --accent: #5b7fff;
-    --accent2: #3d5cdb;
     --green: #3ecf8e;
     --red: #ff6b6b;
-    --yellow: #ffd166;
-    --purple: #b388ff;
     --radius: 12px;
     --radius-sm: 8px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: -apple-system, 'Pretendard', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
-    padding-bottom: 80px;
-  }
-
-  .top-bar {
-    padding: 20px 20px 16px;
-    background: var(--bg);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  body { font-family: -apple-system, 'Pretendard', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; padding-bottom: 80px; }
+  .top-bar { padding: 20px 20px 16px; background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
   .top-bar h1 { font-size: 18px; font-weight: 700; }
   .top-bar .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-  .tab-bar {
-    display: flex;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
+  .tab-bar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
   .tab-bar::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    flex: 1;
-    min-width: 60px;
-    padding: 12px 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text3);
-    background: none;
-    border: none;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color .15s, border-color .15s;
-    white-space: nowrap;
-    text-align: center;
-  }
+  .tab-btn { flex: 1; min-width: 60px; padding: 12px 6px; font-size: 12px; font-weight: 600; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; }
   .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-
   .page { display: none; padding: 16px 20px; }
   .page.active { display: block; }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-
-  .section-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text2);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    margin: 16px 0 8px;
-  }
-
-  .btn {
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    border: none;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity .15s;
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.8px; text-transform: uppercase; margin: 16px 0 8px; }
+  .btn { padding: 8px 12px; border-radius: var(--radius-sm); border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
   .btn:active { opacity: 0.75; }
   .btn-primary { background: var(--accent); color: white; }
   .btn-ghost { background: var(--surface2); color: var(--text); }
   .btn-danger { background: rgba(255,107,107,0.15); color: var(--red); }
   .btn-sm { padding: 4px 8px; font-size: 11px; }
-
-  .dday-card {
-    background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%);
-    border: 1px solid #3d4a8a;
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  .dday-card { background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%); border: 1px solid #3d4a8a; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
   .dday-num { font-size: 36px; font-weight: 800; color: var(--accent); line-height: 1; }
-  .dday-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
   .dday-right { text-align: right; }
-
   .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .stat-item {
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    text-align: center;
-  }
+  .stat-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
   .stat-num { font-size: 20px; font-weight: 800; }
   .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
-  .bc-item {
-    font-size: 12px;
-    color: var(--text2);
-    cursor: pointer;
-    padding: 3px 6px;
-    border-radius: 4px;
-    background: var(--surface2);
-  }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .bc-item { font-size: 12px; color: var(--text2); cursor: pointer; padding: 3px 6px; border-radius: 4px; background: var(--surface2); }
   .bc-sep { font-size: 10px; color: var(--text3); }
   .bc-current { font-size: 12px; color: var(--text); font-weight: 600; }
-
-  .list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    margin-bottom: 8px;
-  }
+  .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
   .action-btns { display: flex; gap: 4px; }
-
-  .filter-bar {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-    background: var(--surface);
-    padding: 10px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-  }
+  .filter-bar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; background: var(--surface); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
   .filter-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   .filter-label { font-size: 11px; color: var(--text2); font-weight: bold; width: 45px; }
-  .filter-chip {
-    padding: 4px 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 11px;
-    color: var(--text2);
-    cursor: pointer;
-    user-select: none;
-  }
+  .filter-chip { padding: 4px 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; color: var(--text2); cursor: pointer; }
   .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-  .prob-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    margin-bottom: 8px;
-  }
+  .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
   .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .prob-num { font-size: 14px; font-weight: 700; }
   .history-list { font-size: 11px; color: var(--text2); border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
   .history-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 0; }
-
   .sub-tab-bar { display: flex; gap: 6px; margin-bottom: 12px; }
-  .sub-tab-btn {
-    flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center;
-    background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm);
-    border: 1px solid var(--border); cursor: pointer;
-  }
+  .sub-tab-btn { flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center; background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; }
   .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-  /* 캘린더 전용 스타일 */
   .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
   .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
-  .cal-cell {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
-    min-height: 52px; padding: 4px 2px; font-size: 10px; display: flex; flex-direction: column; align-items: center;
-  }
+  .cal-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; min-height: 52px; padding: 4px 2px; font-size: 10px; display: flex; flex-direction: column; align-items: center; }
   .cal-cell.today { border-color: var(--accent); background: rgba(91,127,255,0.1); }
   .cal-cell .date-num { font-weight: bold; margin-bottom: 2px; }
   .cal-dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin-top: 2px; }
   .cal-task-text { font-size: 8px; color: var(--text2); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%; }
-
   .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
-
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.7);
-    z-index: 200;
-    align-items: flex-end;
-  }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border-radius: 16px 16px 0 0;
-    padding: 20px;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
-  }
+  .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
   .form-group { margin-bottom: 12px; }
   .form-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; display: block; }
-  .form-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 10px;
-    font-size: 13px;
-    color: var(--text);
-    outline: none;
-  }
-
+  .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; color: var(--text); outline: none; }
   .days-checkboxes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
   .day-chk { display: none; }
-  .day-lbl {
-    padding: 6px 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 11px;
-    cursor: pointer;
-  }
+  .day-lbl { padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; cursor: pointer; }
   .day-chk:checked + .day-lbl { background: var(--accent); color: white; border-color: var(--accent); }
 </style>
 </head>
@@ -286,7 +106,6 @@
   <button class="tab-btn" onclick="showPage('calendar')">캘린더</button>
 </div>
 
-<!-- 대시보드 -->
 <div id="page-dashboard" class="page active">
   <div class="dday-card">
     <div>
@@ -298,7 +117,6 @@
       <div style="font-size:14px;font-weight:700;">CPA 1차 시험</div>
     </div>
   </div>
-
   <div class="section-title">전체 공부 현황</div>
   <div class="stat-grid">
     <div class="stat-item"><div class="stat-num" id="statTotal">0</div><div class="stat-label">등록된 문제</div></div>
@@ -306,13 +124,11 @@
   </div>
 </div>
 
-<!-- 공부기록 -->
 <div id="page-study" class="page">
   <div class="breadcrumb" id="breadcrumb"></div>
   <div id="studyList"></div>
 </div>
 
-<!-- 스케줄러 -->
 <div id="page-scheduler" class="page">
   <div class="card">
     <div style="font-weight:700;margin-bottom:12px;">📅 자동 강좌/분량 배분기</div>
@@ -347,7 +163,6 @@
   </div>
 </div>
 
-<!-- 캘린더 -->
 <div id="page-calendar" class="page">
   <div class="sub-tab-bar">
     <div class="sub-tab-btn active" id="calTabDaily" onclick="setCalView('daily')">Daily</div>
@@ -357,7 +172,6 @@
   <div id="calList"></div>
 </div>
 
-<!-- 문제 풀이 기록 추가/수정 모달 -->
 <div class="modal-overlay" id="probModal">
   <div class="modal">
     <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">문제 기록 추가</div>
@@ -386,7 +200,7 @@
     </div>
     <div class="form-group">
       <label class="form-label">메모</label>
-      <input type="text" class="form-input" id="probMemo" placeholder="오답 이유, 풀이 시간 등">
+      <input type="text" class="form-input" id="probMemo" placeholder="오답 이유 등">
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button class="btn btn-ghost" style="flex:1" onclick="closeModal('probModal')">취소</button>
@@ -397,48 +211,23 @@
 
 <script>
 const DEFAULT_STRUCTURE = {
-  "경영학": {
-    "일반경영": ["객관식 기출", "모의고사"],
-    "재무관리": ["연습서 문풀", "객관식 기출"]
-  },
-  "경제학": {
-    "미시경제": ["객관식 기출"],
-    "거시경제": ["객관식 기출"]
-  },
-  "상법": {
-    "회사법": ["객관식 기출", "조문 암기"],
-    "어음수표법/기타법": ["객관식 기출"]
-  },
-  "세법": {
-    "법인세": ["연습서 문풀", "객관식 기출"],
-    "소득세": ["연습서 문풀", "객관식 기출"],
-    "부가가치세": ["연습서 문풀", "객관식 기출"],
-    "기타세법": ["객관식 기출"]
-  },
-  "회계학": {
-    "중급회계": ["연습서 문풀", "객관식 기출"],
-    "고급회계": ["연습서 인강", "객관식 기출"],
-    "원가관리회계": ["연습서 문풀"],
-    "정부회계": ["객관식 기출"]
-  }
+  "경영학": { "일반경영": { "객관식 기출": ["기본"] }, "재무관리": { "연습서 문풀": ["기본"] } },
+  "경제학": { "미시경제": { "객관식 기출": ["기본"] } },
+  "상법": { "회사법": { "객관식 기출": ["기본"] } },
+  "세법": { "법인세": { "(객)강경태": ["CH.1 총설"] } },
+  "회계학": { "중급회계": { "연습서 문풀": ["기본"] } }
 };
 
 function getStructure() {
   const data = localStorage.getItem('cpaStructure');
   return data ? JSON.parse(data) : DEFAULT_STRUCTURE;
 }
-function saveStructure(struct) {
-  localStorage.setItem('cpaStructure', JSON.stringify(struct));
-}
-function getData() {
-  return JSON.parse(localStorage.getItem('cpaRecords') || '{}');
-}
-function saveData(data) {
-  localStorage.setItem('cpaRecords', JSON.stringify(data));
-}
+function saveStructure(struct) { localStorage.setItem('cpaStructure', JSON.stringify(struct)); }
+function getData() { return JSON.parse(localStorage.getItem('cpaRecords') || '{}'); }
+function saveData(data) { localStorage.setItem('cpaRecords', JSON.stringify(data)); }
 
 function resetToDefault() {
-  if (confirm('과목 구조를 CPA 1차 전체 기본 과목 구조로 초기화하시겠습니까?')) {
+  if (confirm('초기화하시겠습니까?')) {
     localStorage.removeItem('cpaStructure');
     location.reload();
   }
@@ -493,59 +282,47 @@ function renderStudy() {
 
   if (depth === 0) {
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addMainSubject()">+ 대과목 추가</button>`;
-    const keys = Object.keys(struct);
-    keys.forEach((subj, idx) => {
-      const subCount = struct[subj] ? Object.keys(struct[subj]).length : 0;
+    Object.keys(struct).forEach((subj) => {
       list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}'])" style="flex:1;cursor:pointer">
-          <strong>${subj}</strong> <span style="font-size:11px;color:var(--text2)">(${subCount}개)</span>
-        </div>
-        <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="moveMainSubject(${idx}, -1)">▲</button>
-          <button class="btn btn-sm btn-ghost" onclick="moveMainSubject(${idx}, 1)">▼</button>
-          <button class="btn btn-sm btn-ghost" onclick="editMainSubject('${subj}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteMainSubject('${subj}')">삭제</button>
-        </div>
+        <div onclick="navTo(['${subj}'])" style="flex:1;cursor:pointer"><strong>${subj}</strong></div>
+        <div class="action-btns"><button class="btn btn-sm btn-danger" onclick="deleteMainSubject('${subj}')">삭제</button></div>
       </div>`;
     });
   } 
   else if (depth === 1) {
     const subj = studyPath[0];
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addSubSubject('${subj}')">+ 하위 과목 추가</button>`;
-    
-    const keys = Object.keys(struct[subj] || {});
-    keys.forEach((sub, idx) => {
+    Object.keys(struct[subj] || {}).forEach((sub) => {
       list.innerHTML += `<div class="list-item">
         <div onclick="navTo(['${subj}','${sub}'])" style="flex:1;cursor:pointer"><strong>${sub}</strong></div>
-        <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="moveSubSubject('${subj}', ${idx}, -1)">▲</button>
-          <button class="btn btn-sm btn-ghost" onclick="moveSubSubject('${subj}', ${idx}, 1)">▼</button>
-          <button class="btn btn-sm btn-ghost" onclick="editSubSubject('${subj}','${sub}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteSubSubject('${subj}','${sub}')">삭제</button>
-        </div>
+        <div class="action-btns"><button class="btn btn-sm btn-danger" onclick="deleteSubSubject('${subj}','${sub}')">삭제</button></div>
       </div>`;
     });
   } 
   else if (depth === 2) {
     const [subj, sub] = studyPath;
-    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 태스크 추가</button>`;
-    
-    const tasks = struct[subj][sub] || [];
-    tasks.forEach((task, idx) => {
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 문제집/강좌 추가</button>`;
+    Object.keys(struct[subj][sub] || {}).forEach((task) => {
       list.innerHTML += `<div class="list-item">
         <div onclick="navTo(['${subj}','${sub}','${task}'])" style="flex:1;cursor:pointer"><strong>${task}</strong></div>
-        <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="moveTask('${subj}','${sub}', ${idx}, -1)">▲</button>
-          <button class="btn btn-sm btn-ghost" onclick="moveTask('${subj}','${sub}', ${idx}, 1)">▼</button>
-          <button class="btn btn-sm btn-ghost" onclick="editTask('${subj}','${sub}','${task}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteTask('${subj}','${sub}','${task}')">삭제</button>
-        </div>
+        <div class="action-btns"><button class="btn btn-sm btn-danger" onclick="deleteTask('${subj}','${sub}','${task}')">삭제</button></div>
       </div>`;
     });
-  } 
+  }
   else if (depth === 3) {
     const [subj, sub, task] = studyPath;
-    const pathKey = `${subj}|${sub}|${task}`;
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addChapter('${subj}','${sub}','${task}')">+ 챕터 추가 (예: CH.1 총설)</button>`;
+    const chs = struct[subj][sub][task] || [];
+    chs.forEach((ch) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}','${sub}','${task}','${ch}'])" style="flex:1;cursor:pointer"><strong>${ch}</strong></div>
+        <div class="action-btns"><button class="btn btn-sm btn-danger" onclick="deleteChapter('${subj}','${sub}','${task}','${ch}')">삭제</button></div>
+      </div>`;
+    });
+  }
+  else if (depth === 4) {
+    const [subj, sub, task, ch] = studyPath;
+    const pathKey = `${subj}|${sub}|${task}|${ch}`;
     
     list.innerHTML = `
     <div class="filter-bar">
@@ -558,13 +335,13 @@ function renderStudy() {
         ${['☆','♥','△','O'].map(s => `<div class="filter-chip ${selectedStatuses.includes(s)?'active':''}" onclick="toggleFilterStatus('${s}')">${s}</div>`).join('')}
       </div>
     </div>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 추가 (예: 1-20 또는 5)</button>`;
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 추가 (예: 1-10 또는 5)</button>`;
 
     const records = getData();
     const probs = Object.keys(records).filter(k => k.startsWith(pathKey + '|'));
 
     probs.forEach(pKey => {
-      const probNum = pKey.split('|')[3];
+      const probNum = pKey.split('|')[4];
       const history = records[pKey].history || [];
 
       const matchedHistory = history.filter(h => {
@@ -576,15 +353,8 @@ function renderStudy() {
       if ((selectedRounds.length > 0 || selectedStatuses.length > 0) && matchedHistory.length === 0) return;
 
       let historyHtml = history.map((h, idx) => {
-        let termStr = '';
-        if (idx > 0) {
-          const prevDate = new Date(history[idx-1].date);
-          const currDate = new Date(h.date);
-          const diffDays = Math.round((currDate - prevDate) / (1000 * 3600 * 24));
-          termStr = ` (${diffDays}일 텀)`;
-        }
         return `<div class="history-item">
-          <div><strong>${h.round}회독 [${h.status}]</strong> - ${h.date}${termStr} <span style="color:var(--text3)">${h.memo ? '| ' + h.memo : ''}</span></div>
+          <div><strong>${h.round}회독 [${h.status}]</strong> - ${h.date} <span style="color:var(--text3)">${h.memo ? '| ' + h.memo : ''}</span></div>
           <div>
             <button class="btn btn-sm btn-ghost" onclick="openProbModal('${pKey}', ${idx})">수정</button>
             <button class="btn btn-sm btn-danger" onclick="deleteProbRecord('${pKey}', ${idx})">삭제</button>
@@ -616,68 +386,16 @@ function toggleFilterStatus(s) {
   renderStudy();
 }
 
-function moveArray(arr, from, to) {
-  if (to < 0 || to >= arr.length) return;
-  const item = arr.splice(from, 1)[0];
-  arr.splice(to, 0, item);
-}
-
-function moveMainSubject(idx, dir) {
-  const struct = getStructure();
-  const keys = Object.keys(struct);
-  if (idx + dir < 0 || idx + dir >= keys.length) return;
-  const newStruct = {};
-  moveArray(keys, idx, idx + dir);
-  keys.forEach(k => newStruct[k] = struct[k]);
-  saveStructure(newStruct);
-  renderStudy();
-}
-
-function moveSubSubject(subj, idx, dir) {
-  const struct = getStructure();
-  const keys = Object.keys(struct[subj]);
-  if (idx + dir < 0 || idx + dir >= keys.length) return;
-  moveArray(keys, idx, idx + dir);
-  const newSub = {};
-  keys.forEach(k => newSub[k] = struct[subj][k]);
-  struct[subj] = newSub;
-  saveStructure(struct);
-  renderStudy();
-}
-
-function moveTask(subj, sub, idx, dir) {
-  const struct = getStructure();
-  moveArray(struct[subj][sub], idx, idx + dir);
-  saveStructure(struct);
-  renderStudy();
-}
-
 function addMainSubject() {
-  const name = prompt('새 대과목 이름 (예: 경제학, 세법 등)');
+  const name = prompt('새 대과목 이름');
   if (!name) return;
   const struct = getStructure();
   if (!struct[name]) struct[name] = {};
   saveStructure(struct);
   renderStudy();
 }
-function editMainSubject(oldName) {
-  const newName = prompt('변경할 대과목 이름:', oldName);
-  if (!newName || newName === oldName) return;
-  const struct = getStructure();
-  struct[newName] = struct[oldName];
-  delete struct[oldName];
-  saveStructure(struct);
-
-  const records = getData();
-  const updated = {};
-  Object.keys(records).forEach(k => {
-    updated[k.startsWith(oldName + '|') ? k.replace(oldName + '|', newName + '|') : k] = records[k];
-  });
-  saveData(updated);
-  renderStudy();
-}
 function deleteMainSubject(subj) {
-  if (!confirm(`${subj} 과목과 하위 데이터 전체를 삭제하시겠습니까?`)) return;
+  if (!confirm(`${subj} 과목을 삭제하시겠습니까?`)) return;
   const struct = getStructure();
   delete struct[subj];
   saveStructure(struct);
@@ -685,28 +403,11 @@ function deleteMainSubject(subj) {
 }
 
 function addSubSubject(subj) {
-  const name = prompt('하위 과목 이름 (예: 중급회계 등)');
+  const name = prompt('하위 과목 이름');
   if (!name) return;
   const struct = getStructure();
-  if (!struct[subj][name]) struct[subj][name] = [];
+  if (!struct[subj][name]) struct[subj][name] = {};
   saveStructure(struct);
-  renderStudy();
-}
-function editSubSubject(subj, oldName) {
-  const newName = prompt('변경할 하위 과목 이름:', oldName);
-  if (!newName || newName === oldName) return;
-  const struct = getStructure();
-  struct[subj][newName] = struct[subj][oldName];
-  delete struct[subj][oldName];
-  saveStructure(struct);
-
-  const records = getData();
-  const updated = {};
-  const p = `${subj}|${oldName}|`, np = `${subj}|${newName}|`;
-  Object.keys(records).forEach(k => {
-    updated[k.startsWith(p) ? k.replace(p, np) : k] = records[k];
-  });
-  saveData(updated);
   renderStudy();
 }
 function deleteSubSubject(subj, sub) {
@@ -718,33 +419,31 @@ function deleteSubSubject(subj, sub) {
 }
 
 function addTask(subj, sub) {
-  const name = prompt('태스크 이름 (예: 객관식 기출, 연습서)');
+  const name = prompt('문제집/강좌 이름 (예: (객)강경태)');
   if (!name) return;
   const struct = getStructure();
-  struct[subj][sub].push(name);
+  if (!struct[subj][sub][name]) struct[subj][sub][name] = [];
   saveStructure(struct);
-  renderStudy();
-}
-function editTask(subj, sub, oldName) {
-  const newName = prompt('변경할 태스크 이름:', oldName);
-  if (!newName || newName === oldName) return;
-  const struct = getStructure();
-  const idx = struct[subj][sub].indexOf(oldName);
-  if (idx !== -1) struct[subj][sub][idx] = newName;
-  saveStructure(struct);
-
-  const records = getData();
-  const updated = {};
-  const p = `${subj}|${sub}|${oldName}|`, np = `${subj}|${sub}|${newName}|`;
-  Object.keys(records).forEach(k => {
-    updated[k.startsWith(p) ? k.replace(p, np) : k] = records[k];
-  });
-  saveData(updated);
   renderStudy();
 }
 function deleteTask(subj, sub, task) {
   const struct = getStructure();
-  struct[subj][sub] = struct[subj][sub].filter(t => t !== task);
+  delete struct[subj][sub][task];
+  saveStructure(struct);
+  renderStudy();
+}
+
+function addChapter(subj, sub, task) {
+  const name = prompt('챕터 이름 (예: CH.1 총설)');
+  if (!name) return;
+  const struct = getStructure();
+  struct[subj][sub][task].push(name);
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteChapter(subj, sub, task, ch) {
+  const struct = getStructure();
+  struct[subj][sub][task] = struct[subj][sub][task].filter(c => c !== ch);
   saveStructure(struct);
   renderStudy();
 }
@@ -862,7 +561,6 @@ function generateSchedule() {
   showPage('calendar');
 }
 
-// 캘린더 Daily / Weekly / Monthly 구현
 function setCalView(mode) {
   calViewMode = mode;
   document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
@@ -878,7 +576,6 @@ function changeMonth(offset) {
 function renderCalendar() {
   const todos = JSON.parse(localStorage.getItem('cpaSchedulerTodos') || '[]');
   const list = document.getElementById('calList');
-  
   const todayStr = new Date().toISOString().split('T')[0];
 
   if (calViewMode === 'daily') {
@@ -896,7 +593,6 @@ function renderCalendar() {
     </div>`).join('');
   } 
   else if (calViewMode === 'weekly') {
-    // 오늘 기준 해당 주(월~일) 구하기
     const curr = new Date();
     const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1);
     const monday = new Date(curr.setDate(first));
@@ -946,18 +642,15 @@ function renderCalendar() {
       <div class="cal-day-head" style="color:var(--accent)">토</div>
     `;
 
-    // 빈 날짜 채우기
     for (let i = 0; i < firstDay; i++) {
       html += `<div class="cal-cell" style="opacity:0.2"></div>`;
     }
 
-    // 날짜 그리기
     for (let date = 1; date <= lastDate; date++) {
       const mStr = String(month + 1).padStart(2, '0');
       const dStr = String(date).padStart(2, '0');
       const fullDate = `${year}-${mStr}-${dStr}`;
       const isToday = fullDate === todayStr;
-
       const dayTasks = todos.filter(t => t.date === fullDate);
 
       html += `<div class="cal-cell ${isToday ? 'today' : ''}">
