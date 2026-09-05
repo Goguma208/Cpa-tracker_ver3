@@ -82,7 +82,6 @@
   .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
   .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
   
-  /* 먼슬리 연결형 막대 달력 CSS 개편 */
   .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
   .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
   .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
@@ -95,7 +94,7 @@
   
   .gantt-bars-container { position: absolute; top: 22px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
   .gantt-bar-slot { height: 14px; position: relative; width: 100%; }
-  .gantt-bar { position: absolute; height: 14px; line-height: 14px; font-size: 8px; font-weight: 600; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10; box-sizing: border-border; }
+  .gantt-bar { position: absolute; height: 14px; line-height: 14px; font-size: 8px; font-weight: 600; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10; box-sizing: border-box; }
   .gantt-start { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
   .gantt-end { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
   
@@ -223,6 +222,9 @@
     <div class="sub-tab-btn" id="calTabWeekly" onclick="setCalView('weekly')">Weekly</div>
     <div class="sub-tab-btn" id="calTabMonthly" onclick="setCalView('monthly')">Monthly</div>
   </div>
+  <div style="margin-bottom:12px; display:flex; gap:6px;">
+    <button class="btn btn-sm btn-danger" style="flex:1;" onclick="cleanOldAccountingRecords()">🗑️ 회계학 고스트/구 기록 일괄 정리</button>
+  </div>
   <div id="calList"></div>
 </div>
 
@@ -265,6 +267,28 @@
   </div>
 </div>
 
+<!-- 날짜 일괄 변경 모달 -->
+<div class="modal-overlay" id="bulkDateModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;">🗓️ 날짜 일괄 변경</div>
+    <div class="form-group">
+      <label class="form-label">기존 날짜</label>
+      <input type="date" class="form-input" id="bulkFromDate" readonly style="opacity:0.6;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">이동할 변경 날짜</label>
+      <input type="date" class="form-input" id="bulkToDate">
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">
+      * 해당 날짜의 [미진행] 처리된 할 일 문제 전체가 변경된 날짜로 이동됩니다.
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('bulkDateModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="executeBulkDateMove()">일괄 이동 적용</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const DEFAULT_STRUCTURE = {
   "경영학": { "일반경영": { "객관식 기출": ["기본"] }, "재무관리": { "연습서 문풀": ["기본"] } },
@@ -289,6 +313,40 @@ function resetToDefault() {
     localStorage.clear();
     location.reload();
   }
+}
+
+// 회계학 관련 구 데이터/유령 스케줄 정리 기능
+function cleanOldAccountingRecords() {
+  if (!confirm('9/7~9/11에 걸친 구 회계학 기록 및 스케줄 데이터를 정리하시겠습니까?')) return;
+  const records = getData();
+  let count = 0;
+
+  Object.keys(records).forEach(key => {
+    if (key.includes('회계학')) {
+      const history = records[key].history || [];
+      const filtered = history.filter(h => {
+        const d = h.date || h.scheduledDate;
+        return !(d >= '2026-09-07' && d <= '2026-09-11');
+      });
+      if (filtered.length !== history.length) {
+        count += (history.length - filtered.length);
+        records[key].history = filtered;
+      }
+      if (records[key].history.length === 0) delete records[key];
+    }
+  });
+
+  const schedules = getSchedules().filter(s => {
+    if (s.subj === '회계학') {
+      return !(s.start <= '2026-09-11' && s.end >= '2026-09-07');
+    }
+    return true;
+  });
+
+  saveData(records);
+  saveSchedules(schedules);
+  alert(`${count}개의 구 회계학 문제 기록이 성공적으로 삭제되었습니다.`);
+  renderCalendar();
 }
 
 let studyPath = [];
@@ -575,11 +633,55 @@ function resetCalToToday() {
   renderCalendar();
 }
 
-/* 먼슬리 날짜 클릭 시 데일리로 이동 */
 function goToDailyView(dateStr) {
   const parts = dateStr.split('-');
   currentCalDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
   setCalView('daily');
+}
+
+/* 날짜 일괄 이일/변경 모달 오픈 */
+function openBulkDateModal(currentDateStr) {
+  document.getElementById('bulkFromDate').value = currentDateStr;
+  document.getElementById('bulkToDate').value = currentDateStr;
+  document.getElementById('bulkDateModal').classList.add('open');
+}
+
+/* 선택 일자의 미진행 문제들을 다른 날짜로 일괄 변경 처리 */
+function executeBulkDateMove() {
+  const fromDate = document.getElementById('bulkFromDate').value;
+  const toDate = document.getElementById('bulkToDate').value;
+
+  if (!fromDate || !toDate) {
+    alert('날짜를 올바르게 선택해 주세요.');
+    return;
+  }
+  if (fromDate === toDate) {
+    alert('변경할 날짜가 동일합니다.');
+    return;
+  }
+
+  const records = getData();
+  let moveCount = 0;
+
+  Object.keys(records).forEach(pKey => {
+    const history = records[pKey].history || [];
+    history.forEach(h => {
+      if (h.date === fromDate && h.status === '미진행') {
+        h.date = toDate;
+        h.scheduledDate = toDate;
+        moveCount++;
+      }
+    });
+  });
+
+  if (moveCount === 0) {
+    alert('해당 날짜에 이동할 미진행 문제 기록이 없습니다.');
+  } else {
+    saveData(records);
+    alert(`${moveCount}개의 문제가 성공적으로 [${toDate}] 로 일괄 이동되었습니다.`);
+    closeModal('bulkDateModal');
+    renderCalendar();
+  }
 }
 
 function getDailyEvents(targetDateStr) {
@@ -639,6 +741,9 @@ function renderCalendar() {
         ${curStr} (${dayName}) ${curStr === todayStr ? '[오늘]' : ''}
       </strong>
       <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음날 ▶</button>
+    </div>
+    <div style="margin-bottom:12px; display:flex; justify-content:flex-end;">
+      <button class="btn btn-sm btn-primary" onclick="openBulkDateModal('${curStr}')">🚚 이 날짜 문제 전체 이동</button>
     </div>`;
 
     if (events.length === 0) {
@@ -658,7 +763,7 @@ function renderCalendar() {
   else if (calViewMode === 'weekly') {
     const curr = new Date(currentCalDate);
     const dayOfWeek = curr.getDay();
-    const first = curr.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    const first = curr.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
     
     const monday = new Date(curr.setDate(first));
     const sunday = new Date(monday);
@@ -701,16 +806,19 @@ function renderCalendar() {
     const firstDate = new Date(year, month, 1);
     const lastDate = new Date(year, month + 1, 0);
     
-    // 달력 시작(일요일) 및 종료(토요일) 구하기
+    // 월요일 시작 기준으로 첫 날 구하기
     const startDate = new Date(firstDate);
-    startDate.setDate(startDate.getDate() - startDate.getDay());
+    const firstDay = firstDate.getDay();
+    const dayDiff = firstDay === 0 ? 6 : firstDay - 1;
+    startDate.setDate(startDate.getDate() - dayDiff);
     
     const endDate = new Date(lastDate);
-    endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+    const lastDay = lastDate.getDay();
+    const endDiff = lastDay === 0 ? 0 : 7 - lastDay;
+    endDate.setDate(endDate.getDate() + endDiff);
 
     const schedules = getSchedules();
 
-    // 날짜별 셀 매핑 데이터 구조 생성
     let calendarWeeks = [];
     let curr = new Date(startDate);
     
@@ -738,27 +846,24 @@ function renderCalendar() {
     </div>
     <div class="monthly-container">
       <div class="cal-grid-header">
-        <div class="cal-day-head" style="color:var(--red)">일</div>
         <div class="cal-day-head">월</div>
         <div class="cal-day-head">화</div>
         <div class="cal-day-head">수</div>
         <div class="cal-day-head">목</div>
         <div class="cal-day-head">금</div>
         <div class="cal-day-head" style="color:var(--accent)">토</div>
+        <div class="cal-day-head" style="color:var(--red)">일</div>
       </div>
     `;
 
-    // 주(Week) 단위 연결 막대 렌더링
     calendarWeeks.forEach(week => {
       const weekStartStr = week[0].dateStr;
       const weekEndStr = week[6].dateStr;
 
-      // 해당 주에 걸쳐 있는 스케줄 필터링
       const weekSchedules = schedules.filter(s => s.start <= weekEndStr && s.end >= weekStartStr);
 
       html += `<div class="month-week-row">`;
 
-      // 7개 날짜 셀 생성 (클릭 시 데일리로 이동)
       week.forEach((day) => {
         html += `
           <div class="month-cell ${day.isToday ? 'today' : ''} ${!day.isCurrentMonth ? 'other-month' : ''}" onclick="goToDailyView('${day.dateStr}')">
@@ -767,7 +872,6 @@ function renderCalendar() {
         `;
       });
 
-      // 막대 렌더링 오버레이
       html += `<div class="gantt-bars-container">`;
       weekSchedules.slice(0, 3).forEach((s) => {
         let startCol = 0;
