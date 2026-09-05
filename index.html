@@ -123,7 +123,7 @@
   .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
   .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
 
-  /* 회독/기호 필터바 스타일 추가 */
+  /* 회독/기호 필터바 스타일 */
   .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); align-items: center; }
   .filter-select { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 11px; padding: 6px; outline: none; }
 </style>
@@ -518,7 +518,6 @@ function renderStudy() {
   bc.innerHTML = bcHtml;
   list.innerHTML = '';
 
-  // 필터가 켜진 경우 모아보기 모드로 전환
   if (isFiltering) {
     renderFilteredProblems(filterRound, filterStatus);
     return;
@@ -647,7 +646,6 @@ function renderStudy() {
   }
 }
 
-// 회독 및 기호 필터링 모아보기 렌더링
 function renderFilteredProblems(fRound, fStatus) {
   const list = document.getElementById('studyList');
   const records = getData();
@@ -1047,7 +1045,7 @@ function openProbModal(pKey, historyIndex = null) {
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// 복습 자동 스케줄링이 통합된 기록 저장 함수
+/* 수정 완료된 복습 자동 스케줄링 저장 함수 */
 function saveProbRecord() {
   if (!targetProbKey) return;
   const records = getData();
@@ -1063,29 +1061,29 @@ function saveProbRecord() {
     records[targetProbKey].history[editingHistoryIndex] = { ...old, round, status, date, memo };
   } else {
     records[targetProbKey].history.push({ round, status, date, scheduledDate: date, memo });
+  }
 
-    // 기호별 복습 자동 스케줄링 (2일 / 7일 / 14일 후)
-    let reviewDays = 0;
-    if (status === '☆') reviewDays = 2;
-    else if (status === '♥') reviewDays = 7;
-    else if (status === '△') reviewDays = 14;
+  // 기호별 복습 일수 계산 (☆: 2일, ♥: 7일, △: 14일)
+  let reviewDays = 0;
+  if (status.includes('☆') || status.includes('★')) reviewDays = 2;
+  else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
+  else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
 
-    if (reviewDays > 0) {
-      const baseDate = new Date(date);
-      baseDate.setDate(baseDate.getDate() + reviewDays);
-      const reviewDateStr = baseDate.toISOString().split('T')[0];
-      const nextRound = String(Number(round) + 1);
+  if (reviewDays > 0) {
+    const baseDate = new Date(date);
+    baseDate.setDate(baseDate.getDate() + reviewDays);
+    const reviewDateStr = baseDate.toISOString().split('T')[0];
+    const nextRound = String(Number(round) + 1);
 
-      records[targetProbKey].history.push({
-        round: nextRound,
-        status: '미진행',
-        date: reviewDateStr,
-        scheduledDate: reviewDateStr,
-        memo: `[자동 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
-      });
+    records[targetProbKey].history.push({
+      round: nextRound,
+      status: '미진행',
+      date: reviewDateStr,
+      scheduledDate: reviewDateStr,
+      memo: `[자동 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
+    });
 
-      alert(`[오답 복습 스케줄 생성]\n${reviewDays}일 후인 ${reviewDateStr}에 ${nextRound}회독 복습 할 일이 자동으로 생성되었습니다.`);
-    }
+    alert(`[오답 복습 스케줄 생성]\n${reviewDays}일 후인 ${reviewDateStr}에 ${nextRound}회독 복습 할 일이 자동으로 생성되었습니다.`);
   }
 
   saveData(records);
