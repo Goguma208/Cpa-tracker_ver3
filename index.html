@@ -1,1056 +1,1189 @@
+
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CPA 수험 진도 및 회독 관리 시스템</title>
-  <!-- React & ReactDOM CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <!-- Babel CDN -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    :root {
-      --color-경영학-bg: rgba(34, 197, 94, 0.2);
-      --color-경영학-border: #22c55e;
-      --color-경영학-text: #86efac;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CPA 트래커 Pro</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222636;
+    --border: #2e3348;
+    --text: #e8eaf0;
+    --text2: #8b90a7;
+    --text3: #4a4f6a;
+    --accent: #5b7fff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --radius: 12px;
+    --radius-sm: 8px;
 
-      --color-경제학-bg: rgba(249, 115, 22, 0.2);
-      --color-경제학-border: #f97316;
-      --color-경제학-text: #fdba74;
+    /* 과목별 파스텔 색상 정의 */
+    --color-경영학-bg: rgba(34, 197, 94, 0.25);
+    --color-경영학-border: #22c55e;
+    --color-경영학-text: #86efac;
 
-      --color-상법-bg: rgba(234, 179, 8, 0.2);
-      --color-상법-border: #eab308;
-      --color-상법-text: #fef08a;
+    --color-경제학-bg: rgba(249, 115, 22, 0.25);
+    --color-경제학-border: #f97316;
+    --color-경제학-text: #fdba74;
 
-      --color-세법-bg: rgba(14, 165, 233, 0.2);
-      --color-세법-border: #0ea5e9;
-      --color-세법-text: #7dd3fc;
+    --color-상법-bg: rgba(234, 179, 8, 0.25);
+    --color-상법-border: #eab308;
+    --color-상법-text: #fef08a;
 
-      --color-회계학-bg: rgba(239, 68, 68, 0.2);
-      --color-회계학-border: #ef4444;
-      --color-회계학-text: #fca5a5;
-    }
-  </style>
+    --color-세법-bg: rgba(14, 165, 233, 0.25);
+    --color-세법-border: #0ea5e9;
+    --color-세법-text: #7dd3fc;
+
+    --color-회계학-bg: rgba(239, 68, 68, 0.25);
+    --color-회계학-border: #ef4444;
+    --color-회계학-text: #fca5a5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, 'Pretendard', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; padding-bottom: 80px; }
+  .top-bar { padding: 20px 20px 16px; background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .top-bar h1 { font-size: 18px; font-weight: 700; }
+  .top-bar .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .tab-bar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { flex: 1; min-width: 60px; padding: 12px 6px; font-size: 12px; font-weight: 600; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .page { display: none; padding: 16px 20px; }
+  .page.active { display: block; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.8px; text-transform: uppercase; margin: 16px 0 8px; }
+  .btn { padding: 8px 12px; border-radius: var(--radius-sm); border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn:active { opacity: 0.75; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-ghost { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: rgba(255,107,107,0.15); color: var(--red); }
+  .btn-sm { padding: 4px 8px; font-size: 11px; }
+  .dday-card { background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%); border: 1px solid #3d4a8a; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .dday-num { font-size: 36px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .dday-right { text-align: right; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+  .stat-num { font-size: 20px; font-weight: 800; }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .bc-item { font-size: 12px; color: var(--text2); cursor: pointer; padding: 3px 6px; border-radius: 4px; background: var(--surface2); }
+  .bc-sep { font-size: 10px; color: var(--text3); }
+  .bc-current { font-size: 12px; color: var(--text); font-weight: 600; }
+  .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
+  .action-btns { display: flex; gap: 4px; }
+  .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
+  .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .prob-num { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .history-list { font-size: 11px; color: var(--text2); border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
+  .history-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 0; }
+  .sub-tab-bar { display: flex; gap: 6px; margin-bottom: 12px; }
+  .sub-tab-btn { flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center; background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; }
+  .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+  
+  .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
+  .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
+  .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
+  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 72px; }
+  .month-cell { position: relative; min-height: 72px; padding: 4px; cursor: pointer; transition: background 0.15s; }
+  .month-cell:hover { background: rgba(255, 255, 255, 0.03); }
+  .month-cell.today .date-num { color: var(--accent); font-weight: 800; }
+  .month-cell.other-month { opacity: 0.25; }
+  .date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 4px; pointer-events: none; }
+  
+  .gantt-bars-container { position: absolute; top: 22px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+  .gantt-bar-slot { height: 14px; position: relative; width: 100%; }
+  .gantt-bar { position: absolute; height: 14px; line-height: 14px; font-size: 8px; font-weight: 600; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10; box-sizing: border-box; }
+  .gantt-start { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
+  .gantt-end { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
+  
+  .gantt-경영학 { background: var(--color-경영학-bg); border: 1px solid var(--color-경영학-border); color: var(--color-경영학-text); }
+  .gantt-경제학 { background: var(--color-경제학-bg); border: 1px solid var(--color-경제학-border); color: var(--color-경제학-text); }
+  .gantt-상법   { background: var(--color-상법-bg); border: 1px solid var(--color-상법-border); color: var(--color-상법-text); }
+  .gantt-세법   { background: var(--color-세법-bg); border: 1px solid var(--color-세법-border); color: var(--color-세법-text); }
+  .gantt-회계학 { background: var(--color-회계학-bg); border: 1px solid var(--color-회계학-border); color: var(--color-회계학-text); }
+
+  .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; display: block; }
+  .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; color: var(--text); outline: none; }
+  .days-checkboxes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .day-chk { display: none; }
+  .day-lbl { padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; cursor: pointer; }
+  .day-chk:checked + .day-lbl { background: var(--accent); color: white; border-color: var(--accent); }
+  
+  .badge-pending { background: rgba(255, 255, 255, 0.1); color: #bbb; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+  .badge-rollover { background: rgba(249, 115, 22, 0.2); color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+  .badge-done { background: rgba(62, 207, 142, 0.15); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+
+  .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
+  .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
-  <div id="root"></div>
+<body>
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+<div class="top-bar">
+  <div>
+    <h1>📚 CPA 트래커 Pro</h1>
+    <div class="sub">2027년 1차 합격 목표</div>
+  </div>
+  <div>
+    <button class="btn btn-sm btn-ghost" onclick="resetToDefault()">🔄 초기화</button>
+    <button class="btn btn-sm btn-ghost" onclick="exportData()">💾 백업</button>
+    <button class="btn btn-sm btn-ghost" onclick="importData()">📂 복구</button>
+  </div>
+</div>
 
-    const INITIAL_EXAM_DATE = "2027-02-28";
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showPage('dashboard')">대시보드</button>
+  <button class="tab-btn" onclick="showPage('study')">공부기록</button>
+  <button class="tab-btn" onclick="showPage('scheduler')">스케줄러</button>
+  <button class="tab-btn" onclick="showPage('calendar')">캘린더</button>
+</div>
 
-    const INITIAL_STRUCTURE = [
-      {
-        id: "sub_1",
-        name: "회계학",
-        subSubjects: [
-          {
-            id: "sub_1_1",
-            name: "중급회계",
-            textbooks: [
-              { id: "tb_1_1_1", name: "(객)김기동", chapters: ["재무회계 프레임워크", "수익인식", "유형자산", "금융자산", "부채", "자본"] }
-            ]
-          },
-          {
-            id: "sub_1_2",
-            name: "고급회계",
-            textbooks: [
-              { id: "tb_1_2_1", name: "(객)김기동", chapters: ["사업결합", "연결재무제표", "관계기업"] }
-            ]
+<!-- 대시보드 -->
+<div id="page-dashboard" class="page active">
+  <div class="dday-card">
+    <div>
+      <div class="dday-num" id="ddayNum">—</div>
+      <div class="dday-label">일 남음</div>
+    </div>
+    <div class="dday-right">
+      <div style="font-size:12px;color:var(--text2);" id="todayDate"></div>
+      <div style="font-size:14px;font-weight:700;">CPA 1차 시험</div>
+    </div>
+  </div>
+  <div class="section-title">전체 공부 현황</div>
+  <div class="stat-grid">
+    <div class="stat-item"><div class="stat-num" id="statTotal">0</div><div class="stat-label">등록된 문제</div></div>
+    <div class="stat-item"><div class="stat-num" id="statSolved" style="color:var(--green)">0</div><div class="stat-label">풀이 완료 문제</div></div>
+  </div>
+</div>
+
+<!-- 공부기록 트래커 -->
+<div id="page-study" class="page">
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <div id="studyList"></div>
+</div>
+
+<!-- 스케줄러 -->
+<div id="page-scheduler" class="page">
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:12px;">📅 공부 목표 및 기간 배분기</div>
+    <div class="form-group">
+      <label class="form-label">1. 대과목 선택</label>
+      <select class="form-input" id="schSubj" onchange="updateSubSelect()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">2. 하위 과목 선택</label>
+      <select class="form-input" id="schSub" onchange="updateTaskSelect()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">3. 교재 / 강좌 선택</label>
+      <select class="form-input" id="schTask" onchange="updateChSelect()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">4. 챕터 선택</label>
+      <select class="form-input" id="schCh"></select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">배분할 총 문제 수 (예: 50)</label>
+      <input type="number" class="form-input" id="schTotal" placeholder="예: 50">
+    </div>
+    <div class="form-group">
+      <label class="form-label">시작일 ~ 종료일</label>
+      <div style="display:flex;gap:6px;">
+        <input type="date" class="form-input" id="schStart">
+        <input type="date" class="form-input" id="schEnd">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">공부 요일 지정</label>
+      <div class="days-checkboxes">
+        <input type="checkbox" id="d1" class="day-chk" value="1" checked><label for="d1" class="day-lbl">월</label>
+        <input type="checkbox" id="d2" class="day-chk" value="2" checked><label for="d2" class="day-lbl">화</label>
+        <input type="checkbox" id="d3" class="day-chk" value="3" checked><label for="d3" class="day-lbl">수</label>
+        <input type="checkbox" id="d4" class="day-chk" value="4" checked><label for="d4" class="day-lbl">목</label>
+        <input type="checkbox" id="d5" class="day-chk" value="5" checked><label for="d5" class="day-lbl">금</label>
+        <input type="checkbox" id="d6" class="day-chk" value="6"><label for="d6" class="day-lbl">토</label>
+        <input type="checkbox" id="d0" class="day-chk" value="0"><label for="d0" class="day-lbl">일</label>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="generateSchedule()">배분 실행 & 공부기록 자동 연동</button>
+  </div>
+</div>
+
+<!-- 캘린더 -->
+<div id="page-calendar" class="page">
+  <div class="sub-tab-bar">
+    <div class="sub-tab-btn active" id="calTabDaily" onclick="setCalView('daily')">Daily</div>
+    <div class="sub-tab-btn" id="calTabWeekly" onclick="setCalView('weekly')">Weekly</div>
+    <div class="sub-tab-btn" id="calTabMonthly" onclick="setCalView('monthly')">Monthly</div>
+  </div>
+  <div id="calList"></div>
+</div>
+
+<!-- 개별 풀이 기록 모달 -->
+<div class="modal-overlay" id="probModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">문제 기록 수정</div>
+    <div class="form-group">
+      <label class="form-label">회독 선택</label>
+      <select class="form-input" id="probRound">
+        <option value="1">1회독</option>
+        <option value="2">2회독</option>
+        <option value="3">3회독</option>
+        <option value="4">4회독</option>
+        <option value="5">5회독</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">상태 변경</label>
+      <select class="form-input" id="probStatus">
+        <option value="O">O (맞음)</option>
+        <option value="△">△ (실수)</option>
+        <option value="☆">☆ (오답)</option>
+        <option value="♥">♥ (다시풀기)</option>
+        <option value="미진행">미진행</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">풀이/예정 날짜</label>
+      <input type="date" class="form-input" id="probDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">메모</label>
+      <input type="text" class="form-input" id="probMemo" placeholder="오답 이유 등">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('probModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveProbRecord()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 일괄 날짜 변경 모달 -->
+<div class="modal-overlay" id="bulkDateModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;">🗓️ 선택한 문제 날짜 일괄 변경</div>
+    <div class="form-group">
+      <label class="form-label">변경할 지정 날짜</label>
+      <input type="date" class="form-input" id="bulkTargetDate">
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">
+      * 체크 박스로 선택하신 모든 문제의 기록 날짜가 이 날짜로 일괄 변경됩니다.
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('bulkDateModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="executeSelectedBulkDateChange()">날짜 일괄 변경 실행</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_STRUCTURE = {
+  "경영학": { "일반경영": { "객관식 기출": ["기본"] }, "재무관리": { "연습서 문풀": ["기본"] } },
+  "경제학": { "미시경제": { "객관식 기출": ["기본"] } },
+  "상법": { "회사법": { "객관식 기출": ["기본"] } },
+  "세법": { "법인세": { "(객)강경태": ["CH.1 총설"] } },
+  "회계학": { "중급회계": { "연습서 문풀": ["기본"] } }
+};
+
+function getStructure() {
+  const data = localStorage.getItem('cpaStructure');
+  return data ? JSON.parse(data) : DEFAULT_STRUCTURE;
+}
+function saveStructure(struct) { localStorage.setItem('cpaStructure', JSON.stringify(struct)); }
+function getData() { return JSON.parse(localStorage.getItem('cpaRecords') || '{}'); }
+function saveData(data) { localStorage.setItem('cpaRecords', JSON.stringify(data)); }
+function getSchedules() { return JSON.parse(localStorage.getItem('cpaSchedules') || '[]'); }
+function saveSchedules(schs) { localStorage.setItem('cpaSchedules', JSON.stringify(schs)); }
+
+function resetToDefault() {
+  if (confirm('초기화하시겠습니까? 데이터가 전부 삭제됩니다.')) {
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+// 이름 변경 시 cpaRecords의 저장된 키(Key) 값들을 일괄 수정해주는 함수
+function updateRecordKeys(oldPrefix, newPrefix) {
+  const records = getData();
+  const updatedRecords = {};
+
+  Object.keys(records).forEach(key => {
+    if (key.startsWith(oldPrefix + '|')) {
+      const newKey = key.replace(oldPrefix + '|', newPrefix + '|');
+      updatedRecords[newKey] = records[key];
+    } else {
+      updatedRecords[key] = records[key];
+    }
+  });
+
+  saveData(updatedRecords);
+}
+
+let studyPath = [];
+let calViewMode = 'daily';
+let currentCalDate = new Date();
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'study') renderStudy();
+  if (id === 'scheduler') initSchedulerSelects();
+  if (id === 'calendar') renderCalendar();
+}
+
+function renderDashboard() {
+  const exam = new Date('2027-02-28');
+  const diff = Math.ceil((exam - new Date()) / 86400000);
+  document.getElementById('ddayNum').textContent = diff;
+  document.getElementById('todayDate').textContent = new Date().toISOString().split('T')[0];
+
+  const records = getData();
+  let total = 0, solved = 0;
+  Object.values(records).forEach(item => {
+    total++;
+    const hasDone = (item.history || []).some(h => h.status !== '미진행');
+    if (hasDone) solved++;
+  });
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statSolved').textContent = solved;
+}
+
+function initSchedulerSelects() {
+  const struct = getStructure();
+  const subjSelect = document.getElementById('schSubj');
+  subjSelect.innerHTML = '';
+  
+  Object.keys(struct).forEach(s => {
+    subjSelect.innerHTML += `<option value="${s}">${s}</option>`;
+  });
+  updateSubSelect();
+}
+
+function updateSubSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const subSelect = document.getElementById('schSub');
+  subSelect.innerHTML = '';
+
+  if (struct[subj]) {
+    Object.keys(struct[subj]).forEach(s => {
+      subSelect.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+  }
+  updateTaskSelect();
+}
+
+function updateTaskSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const taskSelect = document.getElementById('schTask');
+  taskSelect.innerHTML = '';
+
+  if (struct[subj] && struct[subj][sub]) {
+    Object.keys(struct[subj][sub]).forEach(t => {
+      taskSelect.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+  }
+  updateChSelect();
+}
+
+function updateChSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const task = document.getElementById('schTask').value;
+  const chSelect = document.getElementById('schCh');
+  chSelect.innerHTML = '';
+
+  if (struct[subj] && struct[subj][sub] && struct[subj][sub][task]) {
+    struct[subj][sub][task].forEach(ch => {
+      chSelect.innerHTML += `<option value="${ch}">${ch}</option>`;
+    });
+  }
+}
+
+function generateSchedule() {
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const task = document.getElementById('schTask').value;
+  const ch = document.getElementById('schCh').value;
+  const total = Number(document.getElementById('schTotal').value);
+  const startStr = document.getElementById('schStart').value;
+  const endStr = document.getElementById('schEnd').value;
+  const selectedDays = Array.from(document.querySelectorAll('.day-chk:checked')).map(cb => Number(cb.value));
+
+  if (!subj || !sub || !task || !ch || !total || !startStr || !endStr || selectedDays.length === 0) {
+    alert('모든 단계를 정확히 선택/입력해 주세요.');
+    return;
+  }
+
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  let dates = [];
+  let curr = new Date(start);
+  while (curr <= end) {
+    if (selectedDays.includes(curr.getDay())) dates.push(new Date(curr));
+    curr.setDate(curr.getDate() + 1);
+  }
+
+  if (dates.length === 0) {
+    alert('선택한 기간 내에 지정한 공부 요일이 없습니다.');
+    return;
+  }
+
+  const schedules = getSchedules();
+  schedules.push({ subj, title: `${task} (${ch})`, start: startStr, end: endStr });
+  saveSchedules(schedules);
+
+  const records = getData();
+  const perDay = Math.ceil(total / dates.length);
+  let currentNum = 1;
+
+  dates.forEach(d => {
+    if (currentNum > total) return;
+    const endNum = Math.min(currentNum + perDay - 1, total);
+    const dateFormatted = d.toISOString().split('T')[0];
+
+    for (let i = currentNum; i <= endNum; i++) {
+      const pKey = `${subj}|${sub}|${task}|${ch}|${i}`;
+      if (!records[pKey]) records[pKey] = { history: [] };
+      records[pKey].history.push({
+        round: '1',
+        status: '미진행',
+        date: dateFormatted,
+        scheduledDate: dateFormatted,
+        memo: '스케줄 자동 배분'
+      });
+    }
+    currentNum = endNum + 1;
+  });
+
+  saveData(records);
+  alert('선택한 공부기록 위치로 문제 생성이 완료되었습니다.');
+  showPage('calendar');
+}
+
+function renderStudy() {
+  const struct = getStructure();
+  const bc = document.getElementById('breadcrumb');
+  const list = document.getElementById('studyList');
+
+  let bcHtml = '<span class="bc-item" onclick="navTo([])">전체 과목</span>';
+  studyPath.forEach((p, i) => {
+    bcHtml += ' <span class="bc-sep">›</span> ';
+    bcHtml += i < studyPath.length - 1 
+      ? `<span class="bc-item" onclick="navTo(studyPath.slice(0,${i+1}))">${p}</span>`
+      : `<span class="bc-current">${p}</span>`;
+  });
+  bc.innerHTML = bcHtml;
+  list.innerHTML = '';
+
+  const depth = studyPath.length;
+
+  if (depth === 0) {
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addMainSubject()">+ 대과목 추가</button>`;
+    Object.keys(struct).forEach((subj, idx) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}'])" style="flex:1;cursor:pointer"><strong>${subj}</strong></div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(0, [], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(0, [], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editMainSubject('${subj}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteMainSubject('${subj}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  } 
+  else if (depth === 1) {
+    const subj = studyPath[0];
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addSubSubject('${subj}')">+ 하위 과목 추가</button>`;
+    Object.keys(struct[subj] || {}).forEach((sub, idx) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}','${sub}'])" style="flex:1;cursor:pointer"><strong>${sub}</strong></div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(1, ['${subj}'], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(1, ['${subj}'], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editSubSubject('${subj}','${sub}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSubSubject('${subj}','${sub}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  } 
+  else if (depth === 2) {
+    const [subj, sub] = studyPath;
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 문제집/강좌 추가</button>`;
+    Object.keys(struct[subj][sub] || {}).forEach((task, idx) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}','${sub}','${task}'])" style="flex:1;cursor:pointer"><strong>${task}</strong></div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editTask('${subj}','${sub}','${task}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteTask('${subj}','${sub}','${task}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  }
+  else if (depth === 3) {
+    const [subj, sub, task] = studyPath;
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addChapter('${subj}','${sub}','${task}')">+ 챕터 추가</button>`;
+    (struct[subj][sub][task] || []).forEach((ch, idx) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}','${sub}','${task}','${ch}'])" style="flex:1;cursor:pointer"><strong>${ch}</strong></div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(3, ['${subj}','${sub}','${task}'], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(3, ['${subj}','${sub}','${task}'], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editChapter('${subj}','${sub}','${task}','${ch}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteChapter('${subj}','${sub}','${task}','${ch}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  }
+  else if (depth === 4) {
+    const [subj, sub, task, ch] = studyPath;
+    const pathKey = `${subj}|${sub}|${task}|${ch}`;
+    
+    const records = getData();
+    const probs = Object.keys(records).filter(k => k.startsWith(pathKey + '|'));
+
+    let html = `
+      <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>
+    `;
+
+    if (probs.length > 0) {
+      html += `
+        <div class="bulk-bar">
+          <label style="font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" class="chk-custom" id="selectAllProb" onchange="toggleSelectAllProbs(this)">
+            전체 선택
+          </label>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-ghost" onclick="openSelectedBulkDateModal()">📅 선택 날짜 일괄 변경</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteSelectedProblems()">🗑️ 선택 일괄 삭제</button>
+          </div>
+        </div>
+      `;
+    }
+
+    probs.forEach(pKey => {
+      const probNum = pKey.split('|')[4];
+      const history = records[pKey].history || [];
+
+      let historyHtml = history.map((h, idx) => {
+        return `<div class="history-item">
+          <div>
+            <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
+            ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
+          </div>
+          <div>
+            <button class="btn btn-sm btn-ghost" onclick="openProbModal('${pKey}', ${idx})">수정</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteProbRecord('${pKey}', ${idx})">삭제</button>
+          </div>
+        </div>`;
+      }).join('');
+
+      html += `<div class="prob-card">
+        <div class="prob-header">
+          <div class="prob-num">
+            <input type="checkbox" class="chk-custom prob-chk" value="${pKey}">
+            ${probNum}번 문제
+          </div>
+          <div>
+            <button class="btn btn-sm btn-danger" style="margin-right:4px;" onclick="deleteProblem('${pKey}')">삭제</button>
+            <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}')">+ 회독 기록</button>
+          </div>
+        </div>
+        <div class="history-list">${historyHtml || '기록 없음'}</div>
+      </div>`;
+    });
+
+    list.innerHTML = html;
+  }
+}
+
+function navTo(path) { studyPath = path; renderStudy(); }
+
+function toggleSelectAllProbs(master) {
+  const chks = document.querySelectorAll('.prob-chk');
+  chks.forEach(c => c.checked = master.checked);
+}
+
+function getSelectedProbKeys() {
+  const chks = document.querySelectorAll('.prob-chk:checked');
+  return Array.from(chks).map(c => c.value);
+}
+
+function deleteSelectedProblems() {
+  const selectedKeys = getSelectedProbKeys();
+  if (selectedKeys.length === 0) {
+    alert('삭제할 문제를 체크박스로 하나 이상 선택해 주세요.');
+    return;
+  }
+
+  if (!confirm(`선택한 ${selectedKeys.length}개 문제 기록을 삭제하시겠습니까?`)) return;
+
+  const records = getData();
+  selectedKeys.forEach(k => {
+    delete records[k];
+  });
+
+  saveData(records);
+  alert(`${selectedKeys.length}개 문제가 성공적으로 삭제되었습니다.`);
+  renderStudy();
+}
+
+function openSelectedBulkDateModal() {
+  const selectedKeys = getSelectedProbKeys();
+  if (selectedKeys.length === 0) {
+    alert('날짜를 변경할 문제를 체크박스로 하나 이상 선택해 주세요.');
+    return;
+  }
+  document.getElementById('bulkTargetDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bulkDateModal').classList.add('open');
+}
+
+function executeSelectedBulkDateChange() {
+  const targetDate = document.getElementById('bulkTargetDate').value;
+  if (!targetDate) {
+    alert('날짜를 지정해 주세요.');
+    return;
+  }
+
+  const selectedKeys = getSelectedProbKeys();
+  const records = getData();
+  let updatedCount = 0;
+
+  selectedKeys.forEach(k => {
+    if (records[k] && records[k].history) {
+      records[k].history.forEach(h => {
+        h.date = targetDate;
+        h.scheduledDate = targetDate;
+        updatedCount++;
+      });
+    }
+  });
+
+  saveData(records);
+  alert(`선택된 문제들의 ${updatedCount}개 회독/예정 날짜가 [${targetDate}] 로 일괄 변경되었습니다.`);
+  closeModal('bulkDateModal');
+  renderStudy();
+}
+
+function setCalView(mode) {
+  calViewMode = mode;
+  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('calTab' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+  renderCalendar();
+}
+
+function navigateCal(offset) {
+  if (calViewMode === 'daily') currentCalDate.setDate(currentCalDate.getDate() + offset);
+  else if (calViewMode === 'weekly') currentCalDate.setDate(currentCalDate.getDate() + (offset * 7));
+  else if (calViewMode === 'monthly') currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+  renderCalendar();
+}
+
+function resetCalToToday() {
+  currentCalDate = new Date();
+  renderCalendar();
+}
+
+function goToDailyView(dateStr) {
+  const parts = dateStr.split('-');
+  currentCalDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  setCalView('daily');
+}
+
+function getDailyEvents(targetDateStr) {
+  const records = getData();
+  const todayStr = new Date().toISOString().split('T')[0];
+  const events = [];
+
+  Object.keys(records).forEach(pKey => {
+    const parts = pKey.split('|');
+    if (parts.length >= 5) {
+      const [subj, sub, task, ch, num] = parts;
+      const history = records[pKey].history || [];
+
+      history.forEach(h => {
+        const isPast = h.scheduledDate < todayStr;
+        const isUnfinished = h.status === '미진행';
+
+        if (h.date === targetDateStr) {
+          if (isUnfinished && isPast && targetDateStr < todayStr) {
+            events.push({
+              type: 'rollover-past',
+              text: `➡️ [이월됨] ${subj} > ${task} : ${num}번 문제 (${h.status})`
+            });
+          } else {
+            events.push({
+              type: isUnfinished ? 'pending' : 'done',
+              text: `[${subj} > ${task} > ${ch}] ${num}번 문제 (${h.status})`
+            });
           }
-        ]
-      },
-      {
-        id: "sub_2",
-        name: "원가관리회계",
-        subSubjects: [
-          {
-            id: "sub_2_1",
-            name: "원가관리회계",
-            textbooks: [
-              { id: "tb_2_1_1", name: "(객)임세진", chapters: ["개별원가계산", "활동기준원가계산", "CVP분석"] }
-            ]
-          }
-        ]
-      },
-      {
-        id: "sub_3",
-        name: "세법",
-        subSubjects: [
-          {
-            id: "sub_3_1",
-            name: "법인세법",
-            textbooks: [
-              { id: "tb_3_1_1", name: "(객)강경태", chapters: ["익금/손금", "감가상각비", "충당금/준비금"] }
-            ]
-          },
-          {
-            id: "sub_3_2",
-            name: "소득세법",
-            textbooks: [
-              { id: "tb_3_2_1", name: "(객)강경태", chapters: ["이자/배당소득", "사업소득", "종합소득공제"] }
-            ]
-          }
-        ]
-      }
-    ];
-
-    const PROGRESS_COLUMNS = ["연습서인강", "연습서문풀", "객관식", "객기출", "객모고", "기타"];
-    const PROGRESS_STATUSES = ["(해당없음)", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
-
-    const SYMBOL_DAYS = {
-      "★": 2, "☆": 2,
-      "♥": 7, "♡": 7,
-      "▲": 14, "△": 14
-    };
-
-    function MainApp() {
-      const [examDate, setExamDate] = useState(() => localStorage.getItem("cpa_examDate") || INITIAL_EXAM_DATE);
-      const [subjects, setSubjects] = useState(() => {
-        const saved = localStorage.getItem("cpaStructure");
-        return saved ? JSON.parse(saved) : INITIAL_STRUCTURE;
-      });
-      const [records, setRecords] = useState(() => {
-        const saved = localStorage.getItem("cpaRecords");
-        return saved ? JSON.parse(saved) : [];
-      });
-      const [schedules, setSchedules] = useState(() => {
-        const saved = localStorage.getItem("cpaSchedules");
-        return saved ? JSON.parse(saved) : [];
-      });
-      const [matrixProgress, setMatrixProgress] = useState(() => {
-        const saved = localStorage.getItem("cpa_matrixProgress");
-        return saved ? JSON.parse(saved) : {};
-      });
-
-      const [activeTab, setActiveTab] = useState("dashboard");
-
-      useEffect(() => { localStorage.setItem("cpa_examDate", examDate); }, [examDate]);
-      useEffect(() => { localStorage.setItem("cpaStructure", JSON.stringify(subjects)); }, [subjects]);
-      useEffect(() => { localStorage.setItem("cpaRecords", JSON.stringify(records)); }, [records]);
-      useEffect(() => { localStorage.setItem("cpaSchedules", JSON.stringify(schedules)); }, [schedules]);
-      useEffect(() => { localStorage.setItem("cpa_matrixProgress", JSON.stringify(matrixProgress)); }, [matrixProgress]);
-
-      useEffect(() => {
-        if (window.lucide) window.lucide.createIcons();
-      }, [activeTab, subjects, records, schedules]);
-
-      // 3. 대시보드 D-Day 포맷 변경 (D-nn 형식)
-      const dDayStr = useMemo(() => {
-        if (!examDate) return "D-Day 미설정";
-        const target = new Date(examDate);
-        const today = new Date();
-        target.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-        const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-        if (diffDays === 0) return "D-DAY";
-        return diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`;
-      }, [examDate]);
-
-      const allSubSubjects = useMemo(() => {
-        const list = [];
-        subjects.forEach(s => {
-          s.subSubjects.forEach(sub => {
-            list.push({ mainName: s.name, subName: sub.name, id: sub.id });
+        }
+        else if (targetDateStr === todayStr && isPast && isUnfinished) {
+          events.push({
+            type: 'rollover-today',
+            text: `↪️ [이월 할일] ${subj} > ${task} : ${num}번 문제 (원래:${h.scheduledDate})`
           });
-        });
-        return list;
-      }, [subjects]);
-
-      // 2. 기호별 오답 복습 자동 스케줄링
-      const addAutoSchedule = (symbol, problemInfo) => {
-        const addDays = SYMBOL_DAYS[symbol];
-        if (!addDays) return;
-
-        const targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + addDays);
-        const dateStr = targetDate.toISOString().split("T")[0];
-
-        const newTodo = {
-          id: "sch_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
-          date: dateStr,
-          text: `[오답복습: ${symbol}] ${problemInfo}`,
-          completed: false,
-          autoGenerated: true
-        };
-
-        setSchedules(prev => [...prev, newTodo]);
-      };
-
-      const handleAddRecord = (newRecord) => {
-        setRecords(prev => [newRecord, ...prev]);
-        if (newRecord.symbol && SYMBOL_DAYS[newRecord.symbol]) {
-          const info = `${newRecord.subject} > ${newRecord.subSubject} > ${newRecord.textbook} (${newRecord.chapter}) - ${newRecord.problemNo}번 (${newRecord.round}회독)`;
-          addAutoSchedule(newRecord.symbol, info);
         }
-      };
+      });
+    }
+  });
 
-      return (
-        <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-          {/* Header */}
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl gap-4">
-            <div>
-              <h1 className="text-2xl font-extrabold text-blue-400 tracking-tight flex items-center gap-2">
-                <i data-lucide="book-open-check" className="w-7 h-7"></i>
-                CPA 수험 진도 & 회독 관리 Pro
-              </h1>
-              <p className="text-slate-400 text-sm mt-1">회독 기호 기반 자동 복습 스케줄링 & 과목별 총괄 진도 매트릭스</p>
-            </div>
-            <div className="bg-slate-900/80 px-6 py-3 rounded-xl border border-blue-500/30 flex items-center gap-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">목표 시험</span>
-              <span className="text-2xl font-black text-amber-400 font-mono tracking-wider">{dDayStr}</span>
-            </div>
-          </header>
+  return events;
+}
 
-          {/* Nav */}
-          <nav className="flex gap-2 border-b border-slate-700/60 pb-2 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "dashboard" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-              }`}
-            >
-              <i data-lucide="layout-dashboard" className="w-4 h-4"></i> 대시보드
-            </button>
-            <button
-              onClick={() => setActiveTab("records")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "records" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-              }`}
-            >
-              <i data-lucide="filter" className="w-4 h-4"></i> 공부기록 & 회독 필터
-            </button>
-            <button
-              onClick={() => setActiveTab("schedules")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "schedules" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-              }`}
-            >
-              <i data-lucide="calendar-check" className="w-4 h-4"></i> 복습 스케줄
-            </button>
-            <button
-              onClick={() => setActiveTab("settings")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "settings" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-              }`}
-            >
-              <i data-lucide="settings" className="w-4 h-4"></i> 과목 & 시험일 설정
-            </button>
-          </nav>
+function renderCalendar() {
+  const list = document.getElementById('calList');
+  const todayStr = new Date().toISOString().split('T')[0];
 
-          {/* Main Content */}
-          <main>
-            {activeTab === "dashboard" && (
-              <DashboardView
-                allSubSubjects={allSubSubjects}
-                matrixProgress={matrixProgress}
-                setMatrixProgress={setMatrixProgress}
-                schedules={schedules}
-                setSchedules={setSchedules}
-              />
-            )}
+  if (calViewMode === 'daily') {
+    const curStr = currentCalDate.toISOString().split('T')[0];
+    const dayName = ['일','월','화','수','목','금','토'][currentCalDate.getDay()];
+    const events = getDailyEvents(curStr);
 
-            {activeTab === "records" && (
-              <RecordsView
-                subjects={subjects}
-                records={records}
-                onAddRecord={handleAddRecord}
-                onDeleteRecord={(id) => setRecords(prev => prev.filter(r => r.id !== id))}
-              />
-            )}
+    let html = `
+    <div class="cal-header">
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전날</button>
+      <strong style="font-size:14px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">
+        ${curStr} (${dayName}) ${curStr === todayStr ? '[오늘]' : ''}
+      </strong>
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음날 ▶</button>
+    </div>`;
 
-            {activeTab === "schedules" && (
-              <SchedulesView schedules={schedules} setSchedules={setSchedules} />
-            )}
-
-            {activeTab === "settings" && (
-              <SettingsView
-                subjects={subjects}
-                setSubjects={setSubjects}
-                records={records}
-                setRecords={setRecords}
-                examDate={examDate}
-                setExamDate={setExamDate}
-              />
-            )}
-          </main>
+    if (events.length === 0) {
+      html += '<div style="text-align:center;padding:30px;color:var(--text2)">해당 날짜에 일정이 없거나 완료한 기록이 없습니다.</div>';
+    } else {
+      html += events.map(e => `
+        <div class="list-item" style="align-items:flex-start;flex-direction:column;gap:4px;">
+          <span class="${e.type.includes('rollover') ? 'badge-rollover' : (e.type === 'done' ? 'badge-done' : 'badge-pending')}">
+            ${e.type === 'done' ? '완료' : (e.type.includes('rollover') ? '미달성 이월' : '할 일')}
+          </span>
+          <div style="font-size:13px;line-height:1.4;">${e.text}</div>
         </div>
-      );
+      `).join('');
+    }
+    list.innerHTML = html;
+  } 
+  else if (calViewMode === 'weekly') {
+    const curr = new Date(currentCalDate);
+    const dayOfWeek = curr.getDay();
+    const first = curr.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+    
+    const monday = new Date(curr.setDate(first));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    const monStr = monday.toISOString().split('T')[0];
+    const sunStr = sunday.toISOString().split('T')[0];
+
+    let html = `
+    <div class="cal-header">
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전주</button>
+      <strong style="font-size:13px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">
+        ${monStr} ~ ${sunStr}
+      </strong>
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음주 ▶</button>
+    </div>`;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dStr = d.toISOString().split('T')[0];
+      const dayName = ['일','월','화','수','목','금','토'][d.getDay()];
+      const events = getDailyEvents(dStr);
+
+      html += `<div class="weekly-card">
+        <div style="font-size:12px;font-weight:bold;color:${dStr===todayStr?'var(--accent)':'var(--text)'};margin-bottom:6px;">
+          ${dStr} (${dayName}) ${dStr===todayStr?'[오늘]':''}
+        </div>
+        ${events.length > 0 
+          ? events.map(e => `<div style="font-size:11px;color:${e.type==='done'?'var(--green)':'var(--text2)'};margin-top:2px;">• ${e.text}</div>`).join('') 
+          : '<div style="font-size:11px;color:var(--text3);">기록 없음</div>'}
+      </div>`;
+    }
+    list.innerHTML = html;
+  } 
+  else if (calViewMode === 'monthly') {
+    const year = currentCalDate.getFullYear();
+    const month = currentCalDate.getMonth();
+    
+    const firstDate = new Date(year, month, 1);
+    const lastDate = new Date(year, month + 1, 0);
+    
+    const startDate = new Date(firstDate);
+    const firstDay = firstDate.getDay();
+    const dayDiff = firstDay === 0 ? 6 : firstDay - 1;
+    startDate.setDate(startDate.getDate() - dayDiff);
+    
+    const endDate = new Date(lastDate);
+    const lastDay = lastDate.getDay();
+    const endDiff = lastDay === 0 ? 0 : 7 - lastDay;
+    endDate.setDate(endDate.getDate() + endDiff);
+
+    const schedules = getSchedules();
+
+    let calendarWeeks = [];
+    let curr = new Date(startDate);
+    
+    while (curr <= endDate) {
+      let week = [];
+      for (let i = 0; i < 7; i++) {
+        const dStr = curr.toISOString().split('T')[0];
+        week.push({
+          dateObj: new Date(curr),
+          dateStr: dStr,
+          dayNum: curr.getDate(),
+          isCurrentMonth: curr.getMonth() === month,
+          isToday: dStr === todayStr
+        });
+        curr.setDate(curr.getDate() + 1);
+      }
+      calendarWeeks.push(week);
     }
 
-    // 4. 대시보드 : 총괄 진도표 매트릭스 반영
-    function DashboardView({ allSubSubjects, matrixProgress, setMatrixProgress, schedules, setSchedules }) {
-      const handleMatrixChange = (subName, col, value) => {
-        setMatrixProgress(prev => ({
-          ...prev,
-          [`${subName}_${col}`]: value
-        }));
-      };
+    let html = `
+    <div class="cal-header">
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전달</button>
+      <strong style="font-size:14px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">${year}년 ${month + 1}월</strong>
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음달 ▶</button>
+    </div>
+    <div class="monthly-container">
+      <div class="cal-grid-header">
+        <div class="cal-day-head">월</div>
+        <div class="cal-day-head">화</div>
+        <div class="cal-day-head">수</div>
+        <div class="cal-day-head">목</div>
+        <div class="cal-day-head">금</div>
+        <div class="cal-day-head" style="color:var(--accent)">토</div>
+        <div class="cal-day-head" style="color:var(--red)">일</div>
+      </div>
+    `;
 
-      const todayStr = new Date().toISOString().split("T")[0];
-      const todaySchedules = schedules.filter(s => s.date === todayStr);
+    calendarWeeks.forEach(week => {
+      const weekStartStr = week[0].dateStr;
+      const weekEndStr = week[6].dateStr;
 
-      const toggleSchedule = (id) => {
-        setSchedules(prev => prev.map(s => s.id === id ? { ...s, completed: !s.completed } : s));
-      };
+      const weekSchedules = schedules.filter(s => s.start <= weekEndStr && s.end >= weekStartStr);
 
-      const getStatusStyle = (val) => {
-        switch (val) {
-          case "완료": return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
-          case "1회독": return "bg-blue-500/20 text-blue-300 border-blue-500/40";
-          case "2회독": return "bg-indigo-500/20 text-indigo-300 border-indigo-500/40";
-          case "3회독": return "bg-purple-500/20 text-purple-300 border-purple-500/40";
-          case "4회독": return "bg-pink-500/20 text-pink-300 border-pink-500/40";
-          case "5회독": return "bg-amber-500/20 text-amber-300 border-amber-500/40";
-          default: return "bg-slate-800 text-slate-500 border-slate-700";
+      html += `<div class="month-week-row">`;
+
+      week.forEach((day) => {
+        html += `
+          <div class="month-cell ${day.isToday ? 'today' : ''} ${!day.isCurrentMonth ? 'other-month' : ''}" onclick="goToDailyView('${day.dateStr}')">
+            <div class="date-num">${day.dayNum}</div>
+          </div>
+        `;
+      });
+
+      html += `<div class="gantt-bars-container">`;
+      weekSchedules.slice(0, 3).forEach((s) => {
+        let startCol = 0;
+        let endCol = 6;
+
+        for (let i = 0; i < 7; i++) {
+          if (week[i].dateStr === s.start) startCol = i;
+          if (week[i].dateStr === s.end) endCol = i;
         }
-      };
 
-      return (
-        <div className="space-y-6">
-          {/* 오늘 복습할 일 */}
-          <div className="bg-slate-800/90 p-5 rounded-2xl border border-slate-700/60 shadow-lg">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <i data-lucide="bell" className="w-5 h-5 text-amber-400"></i>
-                오늘의 오답 복습 할 일 ({todaySchedules.length}건)
-              </h3>
-              <span className="text-xs text-slate-400">{todayStr} 기준</span>
-            </div>
-            {todaySchedules.length === 0 ? (
-              <p className="text-sm text-slate-400 py-2">오늘 예정된 오답 복습 할 일이 없습니다.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {todaySchedules.map(item => (
-                  <div
-                    key={item.id}
-                    onClick={() => toggleSchedule(item.id)}
-                    className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                      item.completed ? "bg-slate-900/50 border-slate-800 text-slate-500 line-through" : "bg-slate-900 border-amber-500/30 text-amber-200 hover:border-amber-500/60"
-                    }`}
-                  >
-                    <span className="text-sm font-medium">{item.text}</span>
-                    <i data-lucide={item.completed ? "check-circle" : "circle"} className={`w-5 h-5 ${item.completed ? "text-slate-600" : "text-amber-400"}`}></i>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        if (s.start < weekStartStr) startCol = 0;
+        if (s.end > weekEndStr) endCol = 6;
 
-          {/* 총괄 진도표 */}
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
-            <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <i data-lucide="table" className="w-5 h-5 text-blue-400"></i>
-                과목별 총괄 진도표
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">하위과목별/과정별 회독 및 진도 상태를 매트릭스로 바로 관리하세요.</p>
-            </div>
+        const leftPercent = (startCol / 7) * 100;
+        const widthPercent = ((endCol - startCol + 1) / 7) * 100;
+        const isStart = s.start >= weekStartStr;
+        const isEnd = s.end <= weekEndStr;
 
-            <div className="overflow-x-auto rounded-xl border border-slate-700/80">
-              <table className="w-full text-left border-collapse min-w-[700px]">
-                <thead>
-                  <tr className="bg-slate-900/80 border-b border-slate-700 text-slate-300 text-sm font-semibold">
-                    <th className="p-3.5 pl-5 w-40">하위과목</th>
-                    {PROGRESS_COLUMNS.map(col => (
-                      <th key={col} className="p-3.5 text-center">{col}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700/50 text-sm">
-                  {allSubSubjects.map(sub => (
-                    <tr key={sub.id} className="hover:bg-slate-700/30 transition-colors">
-                      <td className="p-3.5 pl-5 font-semibold text-slate-200">
-                        <span className="text-xs font-normal text-slate-400 block">{sub.mainName}</span>
-                        {sub.subName}
-                      </td>
-                      {PROGRESS_COLUMNS.map(col => {
-                        const key = `${sub.subName}_${col}`;
-                        const val = matrixProgress[key] || "(해당없음)";
-                        return (
-                          <td key={col} className="p-2 text-center">
-                            <select
-                              value={val}
-                              onChange={(e) => handleMatrixChange(sub.subName, col, e.target.value)}
-                              className={`w-full text-xs font-bold py-1.5 px-2 rounded-lg border focus:outline-none transition-all text-center cursor-pointer ${getStatusStyle(val)}`}
-                            >
-                              {PROGRESS_STATUSES.map(st => (
-                                <option key={st} value={st} className="bg-slate-800 text-slate-100">{st}</option>
-                              ))}
-                            </select>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        html += `
+          <div class="gantt-bar-slot">
+            <div class="gantt-bar gantt-${s.subj} ${isStart ? 'gantt-start' : ''} ${isEnd ? 'gantt-end' : ''}" 
+                 style="left: ${leftPercent}%; width: ${widthPercent}%;" 
+                 title="${s.subj}: ${s.title}">
+                 ${isStart ? s.title : ''}
             </div>
           </div>
-        </div>
-      );
+        `;
+      });
+      html += `</div></div>`;
+    });
+
+    html += `</div>`;
+    list.innerHTML = html;
+  }
+}
+
+let targetProbKey = null;
+let editingHistoryIndex = null;
+
+function openProbModal(pKey, historyIndex = null) {
+  targetProbKey = pKey;
+  editingHistoryIndex = historyIndex;
+  
+  if (historyIndex !== null) {
+    const records = getData();
+    const item = records[pKey].history[historyIndex];
+    document.getElementById('probModalTitle').textContent = '문제 기록 수정';
+    document.getElementById('probRound').value = item.round || '1';
+    document.getElementById('probStatus').value = item.status || 'O';
+    document.getElementById('probDate').value = item.date || new Date().toISOString().split('T')[0];
+    document.getElementById('probMemo').value = item.memo || '';
+  } else {
+    document.getElementById('probModalTitle').textContent = '문제 기록 추가';
+    document.getElementById('probDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('probMemo').value = '';
+  }
+  document.getElementById('probModal').classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function saveProbRecord() {
+  if (!targetProbKey) return;
+  const records = getData();
+  const round = document.getElementById('probRound').value;
+  const status = document.getElementById('probStatus').value;
+  const date = document.getElementById('probDate').value;
+  const memo = document.getElementById('probMemo').value;
+
+  if (!records[targetProbKey]) records[targetProbKey] = { history: [] };
+
+  if (editingHistoryIndex !== null) {
+    const old = records[targetProbKey].history[editingHistoryIndex];
+    records[targetProbKey].history[editingHistoryIndex] = { ...old, round, status, date, memo };
+  } else {
+    records[targetProbKey].history.push({ round, status, date, scheduledDate: date, memo });
+  }
+
+  saveData(records);
+  closeModal('probModal');
+  renderStudy();
+}
+
+function deleteProbRecord(pKey, idx) {
+  if (!confirm('이 기록을 삭제하시겠습니까?')) return;
+  const records = getData();
+  records[pKey].history.splice(idx, 1);
+  saveData(records);
+  renderStudy();
+}
+
+function addProblem(pathKey) {
+  const input = prompt('추가할 문제 번호/범위 입력 (예: 1-10 또는 5)');
+  if (!input) return;
+  const records = getData();
+  if (input.includes('-')) {
+    const [start, end] = input.split('-').map(Number);
+    for (let i = start; i <= end; i++) {
+      records[`${pathKey}|${i}`] = records[`${pathKey}|${i}`] || { history: [] };
     }
+  } else {
+    records[`${pathKey}|${input}`] = records[`${pathKey}|${input}`] || { history: [] };
+  }
+  saveData(records);
+  renderStudy();
+}
 
-    // 1. 공부기록 탭 : 회독 및 기호 필터링 지원
-    function RecordsView({ subjects, records, onAddRecord, onDeleteRecord }) {
-      const [selSubject, setSelSubject] = useState(subjects[0]?.name || "");
-      const [selSubSubject, setSelSubSubject] = useState("");
-      const [selTextbook, setSelTextbook] = useState("");
-      const [selChapter, setSelChapter] = useState("");
-      const [round, setRound] = useState(1);
-      const [problemNo, setProblemNo] = useState("");
-      const [symbol, setSymbol] = useState("★");
-      const [memo, setMemo] = useState("");
+function deleteProblem(pKey) {
+  if (!confirm('이 문제를 완전히 삭제하시겠습니까?')) return;
+  const records = getData();
+  delete records[pKey];
+  saveData(records);
+  renderStudy();
+}
 
-      // 필터
-      const [filterSubject, setFilterSubject] = useState("ALL");
-      const [filterSubSubject, setFilterSubSubject] = useState("ALL");
-      const [filterRound, setFilterRound] = useState("ALL");
-      const [filterSymbol, setFilterSymbol] = useState("ALL");
+function moveItem(depth, path, index, direction) {
+  const struct = getStructure();
+  let target;
+  if (depth === 0) target = struct;
+  else if (depth === 1) target = struct[path[0]];
+  else if (depth === 2) target = struct[path[0]][path[1]];
+  else if (depth === 3) target = struct[path[0]][path[1]][path[2]];
 
-      const currentSubSubjectList = useMemo(() => {
-        const sub = subjects.find(s => s.name === selSubject);
-        return sub ? sub.subSubjects : [];
-      }, [subjects, selSubject]);
+  if (Array.isArray(target)) {
+    const newIdx = index + direction;
+    if (newIdx < 0 || newIdx >= target.length) return;
+    const temp = target[index];
+    target[index] = target[newIdx];
+    target[newIdx] = temp;
+  } else {
+    const keys = Object.keys(target);
+    const newIdx = index + direction;
+    if (newIdx < 0 || newIdx >= keys.length) return;
+    const newObj = {};
+    const keyToMove = keys[index];
+    keys.splice(index, 1);
+    keys.splice(newIdx, 0, keyToMove);
+    keys.forEach(k => { newObj[k] = target[k]; });
 
-      const currentTextbookList = useMemo(() => {
-        const subSub = currentSubSubjectList.find(s => s.name === selSubSubject);
-        return subSub ? subSub.textbooks : [];
-      }, [currentSubSubjectList, selSubSubject]);
+    if (depth === 0) saveStructure(newObj);
+    else if (depth === 1) struct[path[0]] = newObj;
+    else if (depth === 2) struct[path[0]][path[1]] = newObj;
+  }
+  saveStructure(struct);
+  renderStudy();
+}
 
-      const currentChapterList = useMemo(() => {
-        const tb = currentTextbookList.find(t => t.name === selTextbook);
-        return tb ? tb.chapters : [];
-      }, [currentTextbookList, selTextbook]);
+function addMainSubject() {
+  const name = prompt('새 대과목 이름');
+  if (!name) return;
+  const struct = getStructure();
+  if (!struct[name]) struct[name] = {};
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteMainSubject(subj) {
+  if (!confirm(`${subj} 과목을 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  delete struct[subj];
+  saveStructure(struct);
+  renderStudy();
+}
+function editMainSubject(oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const newStruct = {};
+  Object.keys(struct).forEach(k => { newStruct[k === oldName ? newName : k] = struct[k]; });
+  saveStructure(newStruct);
+  updateRecordKeys(oldName, newName); // 회독 데이터의 Key값 일괄 변경
+  renderStudy();
+}
 
-      useEffect(() => {
-        if (currentSubSubjectList.length > 0) setSelSubSubject(currentSubSubjectList[0].name);
-        else setSelSubSubject("");
-      }, [selSubject, currentSubSubjectList]);
+function addSubSubject(subj) {
+  const name = prompt('하위 과목 이름');
+  if (!name) return;
+  const struct = getStructure();
+  if (!struct[subj][name]) struct[subj][name] = {};
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteSubSubject(subj, sub) {
+  if (!confirm(`${sub} 과목을 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  delete struct[subj][sub];
+  saveStructure(struct);
+  renderStudy();
+}
+function editSubSubject(subj, oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const oldObj = struct[subj];
+  const newObj = {};
+  Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
+  struct[subj] = newObj;
+  saveStructure(struct);
+  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`); // 회독 데이터의 Key값 일괄 변경
+  renderStudy();
+}
 
-      useEffect(() => {
-        if (currentTextbookList.length > 0) setSelTextbook(currentTextbookList[0].name);
-        else setSelTextbook("");
-      }, [selSubSubject, currentTextbookList]);
+function addTask(subj, sub) {
+  const name = prompt('문제집/강좌 이름');
+  if (!name) return;
+  const struct = getStructure();
+  if (!struct[subj][sub][name]) struct[subj][sub][name] = [];
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteTask(subj, sub, task) {
+  if (!confirm(`${task} 항목을 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  delete struct[subj][sub][task];
+  saveStructure(struct);
+  renderStudy();
+}
+function editTask(subj, sub, oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const oldObj = struct[subj][sub];
+  const newObj = {};
+  Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
+  struct[subj][sub] = newObj;
+  saveStructure(struct);
+  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`); // 회독 데이터의 Key값 일괄 변경
+  renderStudy();
+}
 
-      useEffect(() => {
-        if (currentChapterList.length > 0) setSelChapter(currentChapterList[0]);
-        else setSelChapter("");
-      }, [selTextbook, currentChapterList]);
+function addChapter(subj, sub, task) {
+  const name = prompt('챕터 이름');
+  if (!name) return;
+  const struct = getStructure();
+  struct[subj][sub][task].push(name);
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteChapter(subj, sub, task, ch) {
+  if (!confirm(`${ch} 챕터를 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  struct[subj][sub][task] = struct[subj][sub][task].filter(c => c !== ch);
+  saveStructure(struct);
+  renderStudy();
+}
+function editChapter(subj, sub, task, oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const arr = struct[subj][sub][task];
+  const idx = arr.indexOf(oldName);
+  if (idx !== -1) arr[idx] = newName;
+  saveStructure(struct);
+  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`); // 회독 데이터의 Key값 일괄 변경
+  renderStudy();
+}
 
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!problemNo.trim()) return alert("문제 번호를 입력하세요.");
+function exportData() {
+  const data = {
+    struct: getStructure(),
+    records: getData(),
+    schedules: getSchedules()
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `CPA_Tracker_Backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+}
 
-        const record = {
-          id: "rec_" + Date.now(),
-          date: new Date().toISOString().split("T")[0],
-          subject: selSubject,
-          subSubject: selSubSubject,
-          textbook: selTextbook,
-          chapter: selChapter,
-          round: Number(round),
-          problemNo: problemNo.trim(),
-          symbol: symbol,
-          memo: memo.trim()
-        };
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = event => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed.struct) saveStructure(parsed.struct);
+        if (parsed.records) saveData(parsed.records);
+        if (parsed.schedules) saveSchedules(parsed.schedules);
+        alert('복구가 완료되었습니다!');
+        location.reload();
+      } catch (err) { alert('백업 파일 형식이 올바르지 않습니다.'); }
+    };
+    reader.readAsText(event.target.files[0]);
+  };
+  input.click();
+}
 
-        onAddRecord(record);
-        setProblemNo("");
-        setMemo("");
-      };
-
-      const filteredRecords = useMemo(() => {
-        return records.filter(r => {
-          if (filterSubject !== "ALL" && r.subject !== filterSubject) return false;
-          if (filterSubSubject !== "ALL" && r.subSubject !== filterSubSubject) return false;
-          if (filterRound !== "ALL" && r.round !== Number(filterRound)) return false;
-          if (filterSymbol !== "ALL" && r.symbol !== filterSymbol) return false;
-          return true;
-        });
-      }, [records, filterSubject, filterSubSubject, filterRound, filterSymbol]);
-
-      return (
-        <div className="space-y-6">
-          {/* 기록 입력 폼 */}
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <i data-lucide="plus-circle" className="w-5 h-5 text-blue-400"></i>
-              새 문제 풀이/회독 기록
-            </h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">대과목</label>
-                <select
-                  value={selSubject}
-                  onChange={e => setSelSubject(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-                >
-                  {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">하위과목</label>
-                <select
-                  value={selSubSubject}
-                  onChange={e => setSelSubSubject(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-                >
-                  {currentSubSubjectList.map(sub => <option key={sub.id} value={sub.name}>{sub.name}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">교재</label>
-                <select
-                  value={selTextbook}
-                  onChange={e => setSelTextbook(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-                >
-                  {currentTextbookList.map(tb => <option key={tb.id} value={tb.name}>{tb.name}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">단원/챕터</label>
-                <select
-                  value={selChapter}
-                  onChange={e => setSelChapter(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-                >
-                  {currentChapterList.map(ch => <option key={ch} value={ch}>{ch}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">회독 수</label>
-                <select
-                  value={round}
-                  onChange={e => setRound(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-                >
-                  {[1,2,3,4,5,6,7,8,9,10].map(num => <option key={num} value={num}>{num}회독</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">문제 번호</label>
-                <input
-                  type="text"
-                  placeholder="예: 12, 15-1"
-                  value={problemNo}
-                  onChange={e => setProblemNo(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">기호 (복습 주기)</label>
-                <select
-                  value={symbol}
-                  onChange={e => setSymbol(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm font-bold text-amber-400"
-                >
-                  <option value="★">★ 별 (2일 후 복습)</option>
-                  <option value="☆">☆ 빈별 (2일 후 복습)</option>
-                  <option value="♥">♥ 하트 (7일 후 복습)</option>
-                  <option value="♡">♡ 빈하트 (7일 후 복습)</option>
-                  <option value="▲">▲ 세모 (14일 후 복습)</option>
-                  <option value="△">△ 빈세모 (14일 후 복습)</option>
-                  <option value="O">O 정답</option>
-                  <option value="X">X 오답</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">메모 (선택)</label>
-                <input
-                  type="text"
-                  placeholder="오답 원인 요약"
-                  value={memo}
-                  onChange={e => setMemo(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-                />
-              </div>
-
-              <div className="md:col-span-4 flex justify-end">
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2"
-                >
-                  <i data-lucide="check" className="w-4 h-4"></i> 기록 저장하기
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* 조건 필터링 모아보기 */}
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700/80 pb-4">
-              <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <i data-lucide="search-code" className="w-5 h-5 text-emerald-400"></i>
-                  회독 수 & 기호 필터 모아보기
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">원하는 회독 수와 표시 기호별로 모아서 반복 틀린 문제만 정밀 복습하세요.</p>
-              </div>
-              <span className="text-xs font-bold text-slate-300 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
-                검색결과: {filteredRecords.length}건
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">대과목 필터</label>
-                <select
-                  value={filterSubject}
-                  onChange={e => { setFilterSubject(e.target.value); setFilterSubSubject("ALL"); }}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-200"
-                >
-                  <option value="ALL">전체 대과목</option>
-                  {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">하위과목 필터</label>
-                <select
-                  value={filterSubSubject}
-                  onChange={e => setFilterSubSubject(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-200"
-                >
-                  <option value="ALL">전체 하위과목</option>
-                  {filterSubject !== "ALL" && subjects.find(s => s.name === filterSubject)?.subSubjects.map(sub => (
-                    <option key={sub.id} value={sub.name}>{sub.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">회독 수 필터</label>
-                <select
-                  value={filterRound}
-                  onChange={e => setFilterRound(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-slate-200"
-                >
-                  <option value="ALL">전체 회독</option>
-                  {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n}회독</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">표시기호 필터</label>
-                <select
-                  value={filterSymbol}
-                  onChange={e => setFilterSymbol(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs font-bold text-amber-400"
-                >
-                  <option value="ALL">전체 기호</option>
-                  <option value="★">★ 별 (2일)</option>
-                  <option value="☆">☆ 빈별 (2일)</option>
-                  <option value="♥">♥ 하트 (7일)</option>
-                  <option value="♡">♡ 빈하트 (7일)</option>
-                  <option value="▲">▲ 세모 (14일)</option>
-                  <option value="△">△ 빈세모 (14일)</option>
-                  <option value="O">O 정답</option>
-                  <option value="X">X 오답</option>
-                </select>
-              </div>
-            </div>
-
-            {/* 필터링 목록 */}
-            {filteredRecords.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 text-sm bg-slate-900/30 rounded-xl border border-dashed border-slate-800">
-                선택한 필터 조건에 해당하는 회독/오답 기록이 없습니다.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredRecords.map(rec => (
-                  <div key={rec.id} className="bg-slate-900 p-4 rounded-xl border border-slate-700/70 flex justify-between items-start space-x-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">{rec.symbol}</span>
-                        <span className="text-xs bg-blue-500/20 text-blue-300 font-semibold px-2 py-0.5 rounded">{rec.round}회독</span>
-                        <span className="text-xs text-slate-400">{rec.date}</span>
-                      </div>
-                      <h4 className="text-sm font-bold text-slate-100">
-                        {rec.subSubject} &gt; {rec.textbook} ({rec.chapter})
-                      </h4>
-                      <p className="text-xs text-emerald-400 font-mono font-bold">문제 번호: {rec.problemNo}번</p>
-                      {rec.memo && <p className="text-xs text-slate-400 mt-1 italic">"{rec.memo}"</p>}
-                    </div>
-                    <button
-                      onClick={() => onDeleteRecord(rec.id)}
-                      className="text-slate-500 hover:text-red-400 p-1 transition-colors"
-                    >
-                      <i data-lucide="trash-2" className="w-4 h-4"></i>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    // 복습 스케줄 뷰
-    function SchedulesView({ schedules, setSchedules }) {
-      const [newTodo, setNewTodo] = useState("");
-      const [targetDate, setTargetDate] = useState(new Date().toISOString().split("T")[0]);
-
-      const handleAdd = (e) => {
-        e.preventDefault();
-        if (!newTodo.trim()) return;
-        const item = {
-          id: "sch_" + Date.now(),
-          date: targetDate,
-          text: newTodo.trim(),
-          completed: false,
-          autoGenerated: false
-        };
-        setSchedules(prev => [...prev, item]);
-        setNewTodo("");
-      };
-
-      const toggleTodo = (id) => {
-        setSchedules(prev => prev.map(s => s.id === id ? { ...s, completed: !s.completed } : s));
-      };
-
-      const deleteTodo = (id) => {
-        setSchedules(prev => prev.filter(s => s.id !== id));
-      };
-
-      const groupedSchedules = useMemo(() => {
-        const map = {};
-        schedules.forEach(s => {
-          if (!map[s.date]) map[s.date] = [];
-          map[s.date].push(s);
-        });
-        return Object.keys(map).sort().reduce((acc, key) => {
-          acc[key] = map[key];
-          return acc;
-        }, {});
-      }, [schedules]);
-
-      return (
-        <div className="space-y-6">
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <i data-lucide="calendar-plus" className="w-5 h-5 text-blue-400"></i>
-              직접 복습/공부 할 일 등록
-            </h2>
-            <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="date"
-                value={targetDate}
-                onChange={e => setTargetDate(e.target.value)}
-                className="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-              />
-              <input
-                type="text"
-                placeholder="할 일을 입력하세요"
-                value={newTodo}
-                onChange={e => setNewTodo(e.target.value)}
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2.5 rounded-xl transition-all"
-              >
-                추가
-              </button>
-            </form>
-          </div>
-
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-6">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <i data-lucide="list-checks" className="w-5 h-5 text-amber-400"></i>
-              전체 복습 스케줄 (기호 자동 생성 포함)
-            </h2>
-
-            {Object.keys(groupedSchedules).length === 0 ? (
-              <div className="text-center py-12 text-slate-500 text-sm">등록된 스케줄이 없습니다.</div>
-            ) : (
-              Object.entries(groupedSchedules).map(([date, list]) => (
-                <div key={date} className="space-y-2">
-                  <div className="text-xs font-bold text-blue-400 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700/60 w-max">
-                    {date}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-2">
-                    {list.map(item => (
-                      <div
-                        key={item.id}
-                        className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
-                          item.completed ? "bg-slate-900/40 border-slate-800 text-slate-500 line-through" : "bg-slate-900 border-slate-700 text-slate-200"
-                        }`}
-                      >
-                        <div
-                          onClick={() => toggleTodo(item.id)}
-                          className="flex items-center gap-2 cursor-pointer flex-1"
-                        >
-                          <i data-lucide={item.completed ? "check-square" : "square"} className={`w-4 h-4 ${item.completed ? "text-slate-600" : "text-blue-400"}`}></i>
-                          <span className="text-xs font-medium">{item.text}</span>
-                        </div>
-                        <button onClick={() => deleteTodo(item.id)} className="text-slate-600 hover:text-red-400">
-                          <i data-lucide="x" className="w-4 h-4"></i>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    // 5. 과목 설정 : 이름 수정 시 cpaRecords 데이터 연동 자동 업데이트 처리
-    function SettingsView({ subjects, setSubjects, records, setRecords, examDate, setExamDate }) {
-      const [newMainSubject, setNewMainSubject] = useState("");
-
-      const addMainSubject = () => {
-        if (!newMainSubject.trim()) return;
-        setSubjects(prev => [
-          ...prev,
-          { id: "sub_" + Date.now(), name: newMainSubject.trim(), subSubjects: [] }
-        ]);
-        setNewMainSubject("");
-      };
-
-      // 대과목명 수정 시 records 자동 연동
-      const updateMainSubjectName = (subId, oldName, newName) => {
-        if (!newName.trim() || oldName === newName) return;
-        setSubjects(prev => prev.map(s => s.id === subId ? { ...s, name: newName } : s));
-        setRecords(prev => prev.map(r => r.subject === oldName ? { ...r, subject: newName } : r));
-      };
-
-      // 하위과목명 수정 시 records 자동 연동 (핵심 유실 방지)
-      const updateSubSubjectName = (mainId, subSubId, oldName, newName) => {
-        if (!newName.trim() || oldName === newName) return;
-        setSubjects(prev => prev.map(s => {
-          if (s.id === mainId) {
-            return {
-              ...s,
-              subSubjects: s.subSubjects.map(sub => sub.id === subSubId ? { ...sub, name: newName } : sub)
-            };
-          }
-          return s;
-        }));
-        setRecords(prev => prev.map(r => r.subSubject === oldName ? { ...r, subSubject: newName } : r));
-      };
-
-      // 교재명 수정 시 records 자동 연동
-      const updateTextbookName = (mainId, subSubId, tbId, oldName, newName) => {
-        if (!newName.trim() || oldName === newName) return;
-        setSubjects(prev => prev.map(s => {
-          if (s.id === mainId) {
-            return {
-              ...s,
-              subSubjects: s.subSubjects.map(sub => {
-                if (sub.id === subSubId) {
-                  return {
-                    ...sub,
-                    textbooks: sub.textbooks.map(tb => tb.id === tbId ? { ...tb, name: newName } : tb)
-                  };
-                }
-                return sub;
-              })
-            };
-          }
-          return s;
-        }));
-        setRecords(prev => prev.map(r => r.textbook === oldName ? { ...r, textbook: newName } : r));
-      };
-
-      const addSubSubject = (mainId) => {
-        const name = prompt("새 하위과목명 (예: 법인세법)");
-        if (!name) return;
-        setSubjects(prev => prev.map(s => {
-          if (s.id === mainId) {
-            return {
-              ...s,
-              subSubjects: [...s.subSubjects, { id: "subSub_" + Date.now(), name: name.trim(), textbooks: [] }]
-            };
-          }
-          return s;
-        }));
-      };
-
-      const addTextbook = (mainId, subSubId) => {
-        const name = prompt("새 교재명 (예: (객)강경태)");
-        if (!name) return;
-        setSubjects(prev => prev.map(s => {
-          if (s.id === mainId) {
-            return {
-              ...s,
-              subSubjects: s.subSubjects.map(sub => {
-                if (sub.id === subSubId) {
-                  return {
-                    ...sub,
-                    textbooks: [...sub.textbooks, { id: "tb_" + Date.now(), name: name.trim(), chapters: ["기본 단원"] }]
-                  };
-                }
-                return sub;
-              })
-            };
-          }
-          return s;
-        }));
-      };
-
-      const addChapter = (mainId, subSubId, tbId) => {
-        const chName = prompt("추가할 단원/챕터명");
-        if (!chName) return;
-        setSubjects(prev => prev.map(s => {
-          if (s.id === mainId) {
-            return {
-              ...s,
-              subSubjects: s.subSubjects.map(sub => {
-                if (sub.id === subSubId) {
-                  return {
-                    ...sub,
-                    textbooks: sub.textbooks.map(tb => tb.id === tbId ? { ...tb, chapters: [...tb.chapters, chName.trim()] } : tb)
-                  };
-                }
-                return sub;
-              })
-            };
-          }
-          return s;
-        }));
-      };
-
-      return (
-        <div className="space-y-6">
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-3">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <i data-lucide="calendar" className="w-5 h-5 text-amber-400"></i>
-              목표 시험일 설정
-            </h2>
-            <div className="flex items-center gap-4">
-              <input
-                type="date"
-                value={examDate}
-                onChange={e => setExamDate(e.target.value)}
-                className="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
-              />
-              <span className="text-xs text-slate-400">대시보드 상단에 D-Day 형식으로 표기됩니다.</span>
-            </div>
-          </div>
-
-          <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <i data-lucide="folder-tree" className="w-5 h-5 text-blue-400"></i>
-                과목 및 교재 체계 관리
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">과목/교재명을 수정하면 기존에 작성된 문제 풀이/회독 기록도 함께 연동 유지됩니다.</p>
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="새 대과목명 (예: 상법)"
-                value={newMainSubject}
-                onChange={e => setNewMainSubject(e.target.value)}
-                className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 w-64"
-              />
-              <button
-                onClick={addMainSubject}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-xl text-xs"
-              >
-                + 대과목 추가
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {subjects.map(main => (
-                <div key={main.id} className="bg-slate-900 p-4 rounded-xl border border-slate-700/80 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-blue-400 uppercase">대과목:</span>
-                    <input
-                      type="text"
-                      defaultValue={main.name}
-                      onBlur={(e) => updateMainSubjectName(main.id, main.name, e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm font-bold text-slate-100"
-                    />
-                    <button
-                      onClick={() => addSubSubject(main.id)}
-                      className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded border border-slate-600"
-                    >
-                      + 하위과목 추가
-                    </button>
-                  </div>
-
-                  <div className="pl-4 space-y-3 border-l-2 border-slate-800">
-                    {main.subSubjects.map(sub => (
-                      <div key={sub.id} className="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-emerald-400">하위과목:</span>
-                          <input
-                            type="text"
-                            defaultValue={sub.name}
-                            onBlur={(e) => updateSubSubjectName(main.id, sub.id, sub.name, e.target.value)}
-                            className="bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-xs font-bold text-slate-200"
-                          />
-                          <button
-                            onClick={() => addTextbook(main.id, sub.id)}
-                            className="text-xs bg-slate-900 hover:bg-slate-700 text-slate-400 px-2 py-0.5 rounded"
-                          >
-                            + 교재 추가
-                          </button>
-                        </div>
-
-                        <div className="pl-4 space-y-2 border-l border-slate-700">
-                          {sub.textbooks.map(tb => (
-                            <div key={tb.id} className="bg-slate-900/70 p-2 rounded border border-slate-800 space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-amber-400">교재:</span>
-                                <input
-                                  type="text"
-                                  defaultValue={tb.name}
-                                  onBlur={(e) => updateTextbookName(main.id, sub.id, tb.id, tb.name, e.target.value)}
-                                  className="bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-slate-200"
-                                />
-                                <button
-                                  onClick={() => addChapter(main.id, sub.id, tb.id)}
-                                  className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded"
-                                >
-                                  + 단원 추가
-                                </button>
-                              </div>
-                              <div className="flex flex-wrap gap-1 pt-1">
-                                {tb.chapters.map((ch, idx) => (
-                                  <span key={idx} className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">
-                                    {ch}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<MainApp />);
-  </script>
+renderDashboard();
+</script>
 </body>
 </html>
