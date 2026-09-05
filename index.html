@@ -20,23 +20,23 @@
     --radius-sm: 8px;
 
     /* 과목별 파스텔 색상 정의 */
-    --color-경영학-bg: rgba(34, 197, 94, 0.2);
+    --color-경영학-bg: rgba(34, 197, 94, 0.25);
     --color-경영학-border: #22c55e;
     --color-경영학-text: #86efac;
 
-    --color-경제학-bg: rgba(249, 115, 22, 0.2);
+    --color-경제학-bg: rgba(249, 115, 22, 0.25);
     --color-경제학-border: #f97316;
     --color-경제학-text: #fdba74;
 
-    --color-상법-bg: rgba(234, 179, 8, 0.2);
+    --color-상법-bg: rgba(234, 179, 8, 0.25);
     --color-상법-border: #eab308;
     --color-상법-text: #fef08a;
 
-    --color-세법-bg: rgba(14, 165, 233, 0.2);
+    --color-세법-bg: rgba(14, 165, 233, 0.25);
     --color-세법-border: #0ea5e9;
     --color-세법-text: #7dd3fc;
 
-    --color-회계학-bg: rgba(239, 68, 68, 0.2);
+    --color-회계학-bg: rgba(239, 68, 68, 0.25);
     --color-회계학-border: #ef4444;
     --color-회계학-text: #fca5a5;
   }
@@ -72,11 +72,6 @@
   .bc-current { font-size: 12px; color: var(--text); font-weight: 600; }
   .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
   .action-btns { display: flex; gap: 4px; }
-  .filter-bar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; background: var(--surface); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  .filter-label { font-size: 11px; color: var(--text2); font-weight: bold; width: 45px; }
-  .filter-chip { padding: 4px 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; color: var(--text2); cursor: pointer; }
-  .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
   .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
   .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .prob-num { font-size: 14px; font-weight: 700; }
@@ -86,19 +81,29 @@
   .sub-tab-btn { flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center; background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; }
   .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
   .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-  .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
-  .cal-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; min-height: 68px; padding: 4px 2px; font-size: 10px; display: flex; flex-direction: column; align-items: stretch; overflow: hidden; }
-  .cal-cell.today { border-color: var(--accent); background: rgba(91,127,255,0.08); }
-  .cal-cell .date-num { font-weight: bold; margin-bottom: 4px; text-align: center; }
   
-  /* 먼슬리 과목별 기간 막대 스타일 */
-  .gantt-bar { font-size: 8px; padding: 2px 4px; margin-bottom: 2px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; font-weight: 600; border-left: 3px solid transparent; }
-  .gantt-경영학 { background: var(--color-경영학-bg); border-color: var(--color-경영학-border); color: var(--color-경영학-text); }
-  .gantt-경제학 { background: var(--color-경제학-bg); border-color: var(--color-경제학-border); color: var(--color-경제학-text); }
-  .gantt-상법   { background: var(--color-상법-bg); border-color: var(--color-상법-border); color: var(--color-상법-text); }
-  .gantt-세법   { background: var(--color-세법-bg); border-color: var(--color-세법-border); color: var(--color-세법-text); }
-  .gantt-회계학 { background: var(--color-회계학-bg); border-color: var(--color-회계학-border); color: var(--color-회계학-text); }
+  /* 먼슬리 연결형 막대 달력 CSS 개편 */
+  .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
+  .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
+  .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
+  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 72px; }
+  .month-cell { position: relative; min-height: 72px; padding: 4px; cursor: pointer; transition: background 0.15s; }
+  .month-cell:hover { background: rgba(255, 255, 255, 0.03); }
+  .month-cell.today .date-num { color: var(--accent); font-weight: 800; }
+  .month-cell.other-month { opacity: 0.25; }
+  .date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 4px; pointer-events: none; }
+  
+  .gantt-bars-container { position: absolute; top: 22px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+  .gantt-bar-slot { height: 14px; position: relative; width: 100%; }
+  .gantt-bar { position: absolute; height: 14px; line-height: 14px; font-size: 8px; font-weight: 600; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10; box-sizing: border-border; }
+  .gantt-start { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
+  .gantt-end { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
+  
+  .gantt-경영학 { background: var(--color-경영학-bg); border: 1px solid var(--color-경영학-border); color: var(--color-경영학-text); }
+  .gantt-경제학 { background: var(--color-경제학-bg); border: 1px solid var(--color-경제학-border); color: var(--color-경제학-text); }
+  .gantt-상법   { background: var(--color-상법-bg); border: 1px solid var(--color-상법-border); color: var(--color-상법-text); }
+  .gantt-세법   { background: var(--color-세법-bg); border: 1px solid var(--color-세법-border); color: var(--color-세법-text); }
+  .gantt-회계학 { background: var(--color-회계학-bg); border: 1px solid var(--color-회계학-border); color: var(--color-회계학-text); }
 
   .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
@@ -167,8 +172,6 @@
 <div id="page-scheduler" class="page">
   <div class="card">
     <div style="font-weight:700;margin-bottom:12px;">📅 공부 목표 및 기간 배분기</div>
-    
-    <!-- 공부기록 연동 계층 선택기 -->
     <div class="form-group">
       <label class="form-label">1. 대과목 선택</label>
       <select class="form-input" id="schSubj" onchange="updateSubSelect()"></select>
@@ -306,6 +309,7 @@ function renderDashboard() {
   const exam = new Date('2027-02-28');
   const diff = Math.ceil((exam - new Date()) / 86400000);
   document.getElementById('ddayNum').textContent = diff;
+  document.getElementById('todayDate').textContent = new Date().toISOString().split('T')[0];
 
   const records = getData();
   let total = 0, solved = 0;
@@ -318,7 +322,6 @@ function renderDashboard() {
   document.getElementById('statSolved').textContent = solved;
 }
 
-// 스케줄러 계층 동적 선택기 초기화 및 연결
 function initSchedulerSelects() {
   const struct = getStructure();
   const subjSelect = document.getElementById('schSubj');
@@ -403,12 +406,10 @@ function generateSchedule() {
     return;
   }
 
-  // 1. 먼슬리 캘린더용 기간 스케줄 저장
   const schedules = getSchedules();
   schedules.push({ subj, title: `${task} (${ch})`, start: startStr, end: endStr });
   saveSchedules(schedules);
 
-  // 2. 선택한 공부기록 위치로 직접 문제 '미진행' 배분
   const records = getData();
   const perDay = Math.ceil(total / dates.length);
   let currentNum = 1;
@@ -574,6 +575,13 @@ function resetCalToToday() {
   renderCalendar();
 }
 
+/* 먼슬리 날짜 클릭 시 데일리로 이동 */
+function goToDailyView(dateStr) {
+  const parts = dateStr.split('-');
+  currentCalDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  setCalView('daily');
+}
+
 function getDailyEvents(targetDateStr) {
   const records = getData();
   const todayStr = new Date().toISOString().split('T')[0];
@@ -690,9 +698,37 @@ function renderCalendar() {
     const year = currentCalDate.getFullYear();
     const month = currentCalDate.getMonth();
     
-    const firstDay = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month + 1, 0).getDate();
+    const firstDate = new Date(year, month, 1);
+    const lastDate = new Date(year, month + 1, 0);
+    
+    // 달력 시작(일요일) 및 종료(토요일) 구하기
+    const startDate = new Date(firstDate);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+    
+    const endDate = new Date(lastDate);
+    endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+
     const schedules = getSchedules();
+
+    // 날짜별 셀 매핑 데이터 구조 생성
+    let calendarWeeks = [];
+    let curr = new Date(startDate);
+    
+    while (curr <= endDate) {
+      let week = [];
+      for (let i = 0; i < 7; i++) {
+        const dStr = curr.toISOString().split('T')[0];
+        week.push({
+          dateObj: new Date(curr),
+          dateStr: dStr,
+          dayNum: curr.getDate(),
+          isCurrentMonth: curr.getMonth() === month,
+          isToday: dStr === todayStr
+        });
+        curr.setDate(curr.getDate() + 1);
+      }
+      calendarWeeks.push(week);
+    }
 
     let html = `
     <div class="cal-header">
@@ -700,37 +736,68 @@ function renderCalendar() {
       <strong style="font-size:14px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">${year}년 ${month + 1}월</strong>
       <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음달 ▶</button>
     </div>
-    <div class="cal-grid">
-      <div class="cal-day-head" style="color:var(--red)">일</div>
-      <div class="cal-day-head">월</div>
-      <div class="cal-day-head">화</div>
-      <div class="cal-day-head">수</div>
-      <div class="cal-day-head">목</div>
-      <div class="cal-day-head">금</div>
-      <div class="cal-day-head" style="color:var(--accent)">토</div>
+    <div class="monthly-container">
+      <div class="cal-grid-header">
+        <div class="cal-day-head" style="color:var(--red)">일</div>
+        <div class="cal-day-head">월</div>
+        <div class="cal-day-head">화</div>
+        <div class="cal-day-head">수</div>
+        <div class="cal-day-head">목</div>
+        <div class="cal-day-head">금</div>
+        <div class="cal-day-head" style="color:var(--accent)">토</div>
+      </div>
     `;
 
-    for (let i = 0; i < firstDay; i++) {
-      html += `<div class="cal-cell" style="opacity:0.2"></div>`;
-    }
+    // 주(Week) 단위 연결 막대 렌더링
+    calendarWeeks.forEach(week => {
+      const weekStartStr = week[0].dateStr;
+      const weekEndStr = week[6].dateStr;
 
-    for (let date = 1; date <= lastDate; date++) {
-      const mStr = String(month + 1).padStart(2, '0');
-      const dStr = String(date).padStart(2, '0');
-      const fullDate = `${year}-${mStr}-${dStr}`;
-      const isToday = fullDate === todayStr;
+      // 해당 주에 걸쳐 있는 스케줄 필터링
+      const weekSchedules = schedules.filter(s => s.start <= weekEndStr && s.end >= weekStartStr);
 
-      const activeSchedules = schedules.filter(s => fullDate >= s.start && fullDate <= s.end);
+      html += `<div class="month-week-row">`;
 
-      html += `<div class="cal-cell ${isToday ? 'today' : ''}">
-        <div class="date-num">${date}</div>
-        ${activeSchedules.map(s => `
-          <div class="gantt-bar gantt-${s.subj}" title="${s.subj}: ${s.title}">
-            ${s.title}
+      // 7개 날짜 셀 생성 (클릭 시 데일리로 이동)
+      week.forEach((day) => {
+        html += `
+          <div class="month-cell ${day.isToday ? 'today' : ''} ${!day.isCurrentMonth ? 'other-month' : ''}" onclick="goToDailyView('${day.dateStr}')">
+            <div class="date-num">${day.dayNum}</div>
           </div>
-        `).join('')}
-      </div>`;
-    }
+        `;
+      });
+
+      // 막대 렌더링 오버레이
+      html += `<div class="gantt-bars-container">`;
+      weekSchedules.slice(0, 3).forEach((s) => {
+        let startCol = 0;
+        let endCol = 6;
+
+        for (let i = 0; i < 7; i++) {
+          if (week[i].dateStr === s.start) startCol = i;
+          if (week[i].dateStr === s.end) endCol = i;
+        }
+
+        if (s.start < weekStartStr) startCol = 0;
+        if (s.end > weekEndStr) endCol = 6;
+
+        const leftPercent = (startCol / 7) * 100;
+        const widthPercent = ((endCol - startCol + 1) / 7) * 100;
+        const isStart = s.start >= weekStartStr;
+        const isEnd = s.end <= weekEndStr;
+
+        html += `
+          <div class="gantt-bar-slot">
+            <div class="gantt-bar gantt-${s.subj} ${isStart ? 'gantt-start' : ''} ${isEnd ? 'gantt-end' : ''}" 
+                 style="left: ${leftPercent}%; width: ${widthPercent}%;" 
+                 title="${s.subj}: ${s.title}">
+                 ${isStart ? s.title : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += `</div></div>`;
+    });
 
     html += `</div>`;
     list.innerHTML = html;
