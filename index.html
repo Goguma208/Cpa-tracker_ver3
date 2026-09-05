@@ -70,7 +70,7 @@
   .cal-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; min-height: 52px; padding: 4px 2px; font-size: 10px; display: flex; flex-direction: column; align-items: center; }
   .cal-cell.today { border-color: var(--accent); background: rgba(91,127,255,0.1); }
   .cal-cell .date-num { font-weight: bold; margin-bottom: 2px; }
-  .cal-dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin-top: 2px; }
+  .cal-dot { width: 4px; height: 4px; background: var(--green); border-radius: 50%; margin-top: 2px; }
   .cal-task-text { font-size: 8px; color: var(--text2); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%; }
   .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
@@ -83,6 +83,8 @@
   .day-chk { display: none; }
   .day-lbl { padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; cursor: pointer; }
   .day-chk:checked + .day-lbl { background: var(--accent); color: white; border-color: var(--accent); }
+  .badge-study { background: rgba(62, 207, 142, 0.15); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+  .badge-sch { background: rgba(91, 127, 255, 0.15); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -712,15 +714,44 @@ function resetCalToToday() {
   renderCalendar();
 }
 
-function renderCalendar() {
+// 특정 날짜의 (1) 스케줄러 목표와 (2) 문제 풀이 기록을 모두 가져오는 함수
+function getMergedEvents(dateStr) {
   const todos = JSON.parse(localStorage.getItem('cpaSchedulerTodos') || '[]');
+  const records = getData();
+  
+  const schList = todos.filter(t => t.date === dateStr).map(t => ({
+    type: 'sch',
+    text: t.task
+  }));
+
+  const studyList = [];
+  Object.keys(records).forEach(pKey => {
+    const parts = pKey.split('|');
+    if (parts.length >= 5) {
+      const [subj, sub, task, ch, num] = parts;
+      const history = records[pKey].history || [];
+      history.forEach(h => {
+        if (h.date === dateStr) {
+          studyList.push({
+            type: 'study',
+            text: `[${subj} > ${sub} > ${task} > ${ch}] ${num}번 문제 (${h.round}회독 - ${h.status})${h.memo ? ' - ' + h.memo : ''}`
+          });
+        }
+      });
+    }
+  });
+
+  return [...schList, ...studyList];
+}
+
+function renderCalendar() {
   const list = document.getElementById('calList');
   const todayStr = new Date().toISOString().split('T')[0];
 
   if (calViewMode === 'daily') {
     const curStr = currentCalDate.toISOString().split('T')[0];
     const dayName = ['일','월','화','수','목','금','토'][currentCalDate.getDay()];
-    const dayTasks = todos.filter(t => t.date === curStr);
+    const events = getMergedEvents(curStr);
 
     let html = `
     <div class="cal-header">
@@ -731,12 +762,14 @@ function renderCalendar() {
       <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음날 ▶</button>
     </div>`;
 
-    if (dayTasks.length === 0) {
-      html += '<div style="text-align:center;padding:30px;color:var(--text2)">해당 날짜에 배분된 일정이 없습니다.</div>';
+    if (events.length === 0) {
+      html += '<div style="text-align:center;padding:30px;color:var(--text2)">해당 날짜에 일정이 없거나 풀이한 기록이 없습니다.</div>';
     } else {
-      html += dayTasks.map(t => `<div class="list-item">
-        <div><strong>일정</strong></div>
-        <div>${t.task}</div>
+      html += events.map(e => `<div class="list-item" style="align-items:flex-start;flex-direction:column;gap:4px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="${e.type === 'study' ? 'badge-study' : 'badge-sch'}">${e.type === 'study' ? '문제 풀이 완료' : '계획 일정'}</span>
+        </div>
+        <div style="font-size:13px;line-height:1.4;">${e.text}</div>
       </div>`).join('');
     }
     list.innerHTML = html;
@@ -767,15 +800,15 @@ function renderCalendar() {
       d.setDate(monday.getDate() + i);
       const dStr = d.toISOString().split('T')[0];
       const dayName = ['일','월','화','수','목','금','토'][d.getDay()];
-      const dayTasks = todos.filter(t => t.date === dStr);
+      const events = getMergedEvents(dStr);
 
       html += `<div class="weekly-card">
-        <div style="font-size:12px;font-weight:bold;color:${dStr===todayStr?'var(--accent)':'var(--text)'};margin-bottom:4px;">
+        <div style="font-size:12px;font-weight:bold;color:${dStr===todayStr?'var(--accent)':'var(--text)'};margin-bottom:6px;">
           ${dStr} (${dayName}) ${dStr===todayStr?'[오늘]':''}
         </div>
-        ${dayTasks.length > 0 
-          ? dayTasks.map(t => `<div style="font-size:12px;color:var(--text2);margin-top:2px;">• ${t.task}</div>`).join('') 
-          : '<div style="font-size:11px;color:var(--text3);">일정 없음</div>'}
+        ${events.length > 0 
+          ? events.map(e => `<div style="font-size:11px;color:${e.type==='study'?'var(--green)':'var(--text2)'};margin-top:2px;">• ${e.text}</div>`).join('') 
+          : '<div style="font-size:11px;color:var(--text3);">기록 없음</div>'}
       </div>`;
     }
     list.innerHTML = html;
@@ -812,12 +845,13 @@ function renderCalendar() {
       const dStr = String(date).padStart(2, '0');
       const fullDate = `${year}-${mStr}-${dStr}`;
       const isToday = fullDate === todayStr;
-      const dayTasks = todos.filter(t => t.date === fullDate);
+      const events = getMergedEvents(fullDate);
 
       html += `<div class="cal-cell ${isToday ? 'today' : ''}">
         <div class="date-num">${date}</div>
-        ${dayTasks.length > 0 ? '<div class="cal-dot"></div>' : ''}
-        ${dayTasks.map(t => `<div class="cal-task-text" title="${t.task}">${t.task}</div>`).join('')}
+        ${events.length > 0 ? '<div class="cal-dot"></div>' : ''}
+        ${events.slice(0, 2).map(e => `<div class="cal-task-text" title="${e.text}" style="color:${e.type==='study'?'var(--green)':'var(--text2)'}">${e.text}</div>`).join('')}
+        ${events.length > 2 ? `<div class="cal-task-text" style="color:var(--text3)">+${events.length - 2}개 더보기</div>` : ''}
       </div>`;
     }
 
