@@ -393,20 +393,54 @@ function resetToDefault() {
   }
 }
 
-function updateRecordKeys(oldPrefix, newPrefix) {
+/**
+ * 과목/교재/챕터 이름 변경 시 관련 회독 기록, 스케줄, 진도표 데이터를 일괄 업데이트
+ */
+function updateRecordKeys(oldPrefix, newPrefix, depth = 0, oldName = '', newName = '') {
+  // 1. 문제 풀이 회독 데이터 키 업데이트
   const records = getData();
   const updatedRecords = {};
+  const oldPrefixWithSep = oldPrefix + '|';
 
   Object.keys(records).forEach(key => {
-    if (key.startsWith(oldPrefix + '|')) {
-      const newKey = key.replace(oldPrefix + '|', newPrefix + '|');
+    if (key.startsWith(oldPrefixWithSep)) {
+      const newKey = newPrefix + key.slice(oldPrefix.length);
       updatedRecords[newKey] = records[key];
     } else {
       updatedRecords[key] = records[key];
     }
   });
-
   saveData(updatedRecords);
+
+  // 2. 대과목 이름 변경 시 (depth === 0) 스케줄 항목 데이터 연동 업데이트
+  if (depth === 0) {
+    const schedules = getSchedules();
+    let updatedSchedules = false;
+    schedules.forEach(s => {
+      if (s.subj === oldName) {
+        s.subj = newName;
+        updatedSchedules = true;
+      }
+    });
+    if (updatedSchedules) saveSchedules(schedules);
+  }
+
+  // 3. 하위과목 이름 변경 시 (depth === 1) 총괄 진도표 항목 데이터 연동 업데이트
+  if (depth === 1) {
+    const matrix = getProgressMatrix();
+    let updatedMatrix = false;
+    const newMatrix = {};
+    Object.keys(matrix).forEach(key => {
+      const parts = key.split('|');
+      if (parts[0] === oldName) {
+        newMatrix[`${newName}|${parts[1]}`] = matrix[key];
+        updatedMatrix = true;
+      } else {
+        newMatrix[key] = matrix[key];
+      }
+    });
+    if (updatedMatrix) saveProgressMatrix(newMatrix);
+  }
 }
 
 let studyPath = [];
@@ -448,7 +482,6 @@ function renderDashboard() {
     let rowHtml = `<tr><td class="sub-name">${sub}</td>`;
     MATRIX_COLS.forEach(col => {
       const key = `${sub}|${col}`;
-      // 기존 (해당없음) 데이터 호환 처리
       let val = matrixData[key] || '-';
       if (val === '(해당없음)') val = '-';
 
@@ -1353,7 +1386,9 @@ function editMainSubject(oldName) {
   const newStruct = {};
   Object.keys(struct).forEach(k => { newStruct[k === oldName ? newName : k] = struct[k]; });
   saveStructure(newStruct);
-  updateRecordKeys(oldName, newName);
+  
+  updateRecordKeys(oldName, newName, 0, oldName, newName);
+  if (studyPath[0] === oldName) studyPath[0] = newName;
   renderStudy();
 }
 
@@ -1381,7 +1416,9 @@ function editSubSubject(subj, oldName) {
   Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
   struct[subj] = newObj;
   saveStructure(struct);
-  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`);
+
+  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`, 1, oldName, newName);
+  if (studyPath[1] === oldName) studyPath[1] = newName;
   renderStudy();
 }
 
@@ -1409,7 +1446,9 @@ function editTask(subj, sub, oldName) {
   Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
   struct[subj][sub] = newObj;
   saveStructure(struct);
-  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`);
+
+  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`, 2, oldName, newName);
+  if (studyPath[2] === oldName) studyPath[2] = newName;
   renderStudy();
 }
 
@@ -1436,7 +1475,9 @@ function editChapter(subj, sub, task, oldName) {
   const idx = arr.indexOf(oldName);
   if (idx !== -1) arr[idx] = newName;
   saveStructure(struct);
-  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`);
+
+  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`, 3, oldName, newName);
+  if (studyPath[3] === oldName) studyPath[3] = newName;
   renderStudy();
 }
 
