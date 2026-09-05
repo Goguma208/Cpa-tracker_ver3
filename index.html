@@ -60,7 +60,10 @@
   .btn-danger { background: rgba(255,107,107,0.15); color: var(--red); }
   .btn-sm { padding: 4px 8px; font-size: 11px; }
   .dday-card { background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%); border: 1px solid #3d4a8a; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .dday-left { display: flex; flex-direction: column; gap: 4px; }
+  .dday-main { display: flex; align-items: baseline; gap: 8px; }
   .dday-num { font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .dday-target-date { font-size: 13px; font-weight: 600; color: #a5b4fc; }
   .dday-right { text-align: right; }
   
   .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -170,8 +173,11 @@
 <!-- 대시보드 -->
 <div id="page-dashboard" class="page active">
   <div class="dday-card">
-    <div>
-      <div class="dday-num" id="ddayNum">D-—</div>
+    <div class="dday-left">
+      <div class="dday-main">
+        <div class="dday-num" id="ddayNum">D-—</div>
+        <div class="dday-target-date">(27.02.28)</div>
+      </div>
     </div>
     <div class="dday-right">
       <div style="font-size:12px;color:var(--text2);" id="todayDate"></div>
@@ -184,7 +190,7 @@
     <table class="matrix-table">
       <thead>
         <tr>
-          <th style="min-width: 90px;">하위 과목</th>
+          <th style="min-width: 100px;">하위 과목</th>
           <th>연습서인강</th>
           <th>연습서문풀</th>
           <th>객관식</th>
@@ -344,14 +350,19 @@ const DEFAULT_STRUCTURE = {
   "경영학": { "일반경영": { "객관식 기출": ["기본"] }, "재무관리": { "연습서 문풀": ["기본"] } },
   "경제학": { "미시경제": { "객관식 기출": ["기본"] } },
   "상법": { "회사법": { "객관식 기출": ["기본"] } },
-  "세법": { "법인세": { "(객)강경태": ["CH.1 총설"] } },
+  "세법": { "법인세법": { "(객)강경태": ["CH.1 총설"] } },
   "회계학": { "중급회계": { "연습서 문풀": ["기본"] } }
 };
 
-/* 총괄 진도표 설정 */
-const MATRIX_SUB_LIST = ["중급회계", "고급회계", "원가관리", "정부회계", "법인세", "소득세", "부가가치세", "기타세법", "일반경영", "재무관리", "미시경제", "거시경제", "상법"];
+/* 새로 지정된 총괄 진도표 목록 및 옵션 설정 */
+const MATRIX_SUB_LIST = [
+  "일반경영", "재무관리", "미시경제", "거시경제", 
+  "회사법", "외감&공회법", "법인세법", "소득세법", 
+  "부가가치세법", "국기법", "상증&기타세법", 
+  "중급회계", "고급회계", "정부회계", "원가관리회계"
+];
 const MATRIX_COLS = ["연습서인강", "연습서문풀", "객관식", "객기출", "객모고", "기타"];
-const MATRIX_OPTIONS = ["(해당없음)", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
+const MATRIX_OPTIONS = ["-", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
 
 function getProgressMatrix() {
   return JSON.parse(localStorage.getItem('cpaProgressMatrix') || '{}');
@@ -437,7 +448,10 @@ function renderDashboard() {
     let rowHtml = `<tr><td class="sub-name">${sub}</td>`;
     MATRIX_COLS.forEach(col => {
       const key = `${sub}|${col}`;
-      const val = matrixData[key] || '(해당없음)';
+      // 기존 (해당없음) 데이터 호환 처리
+      let val = matrixData[key] || '-';
+      if (val === '(해당없음)') val = '-';
+
       const statusClass = getStatusClass(val);
 
       let optionsHtml = MATRIX_OPTIONS.map(opt => `
