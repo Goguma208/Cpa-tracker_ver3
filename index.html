@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -125,6 +122,10 @@
 
   .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
   .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+
+  /* 회독/기호 필터바 스타일 추가 */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); align-items: center; }
+  .filter-select { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 11px; padding: 6px; outline: none; }
 </style>
 </head>
 <body>
@@ -170,6 +171,27 @@
 <!-- 공부기록 트래커 -->
 <div id="page-study" class="page">
   <div class="breadcrumb" id="breadcrumb"></div>
+
+  <!-- 회독 및 기호 필터링 바 -->
+  <div class="filter-bar">
+    <select class="filter-select" id="filterRound" onchange="renderStudy()">
+      <option value="ALL">전체 회독</option>
+      <option value="1">1회독</option>
+      <option value="2">2회독</option>
+      <option value="3">3회독</option>
+      <option value="4">4회독</option>
+      <option value="5">5회독</option>
+    </select>
+    <select class="filter-select" id="filterStatus" onchange="renderStudy()">
+      <option value="ALL">전체 기호</option>
+      <option value="O">O (맞음)</option>
+      <option value="△">△ (실수)</option>
+      <option value="☆">☆ (오답)</option>
+      <option value="♥">♥ (다시풀기)</option>
+      <option value="미진행">미진행</option>
+    </select>
+  </div>
+
   <div id="studyList"></div>
 </div>
 
@@ -249,9 +271,9 @@
       <label class="form-label">상태 변경</label>
       <select class="form-input" id="probStatus">
         <option value="O">O (맞음)</option>
-        <option value="△">△ (실수)</option>
-        <option value="☆">☆ (오답)</option>
-        <option value="♥">♥ (다시풀기)</option>
+        <option value="△">△ (실수) - 14일 후 복습</option>
+        <option value="☆">☆ (오답) - 2일 후 복습</option>
+        <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
         <option value="미진행">미진행</option>
       </select>
     </div>
@@ -314,7 +336,6 @@ function resetToDefault() {
   }
 }
 
-// 이름 변경 시 cpaRecords의 저장된 키(Key) 값들을 일괄 수정해주는 함수
 function updateRecordKeys(oldPrefix, newPrefix) {
   const records = getData();
   const updatedRecords = {};
@@ -483,6 +504,10 @@ function renderStudy() {
   const bc = document.getElementById('breadcrumb');
   const list = document.getElementById('studyList');
 
+  const filterRound = document.getElementById('filterRound').value;
+  const filterStatus = document.getElementById('filterStatus').value;
+  const isFiltering = (filterRound !== 'ALL' || filterStatus !== 'ALL');
+
   let bcHtml = '<span class="bc-item" onclick="navTo([])">전체 과목</span>';
   studyPath.forEach((p, i) => {
     bcHtml += ' <span class="bc-sep">›</span> ';
@@ -492,6 +517,12 @@ function renderStudy() {
   });
   bc.innerHTML = bcHtml;
   list.innerHTML = '';
+
+  // 필터가 켜진 경우 모아보기 모드로 전환
+  if (isFiltering) {
+    renderFilteredProblems(filterRound, filterStatus);
+    return;
+  }
 
   const depth = studyPath.length;
 
@@ -614,6 +645,68 @@ function renderStudy() {
 
     list.innerHTML = html;
   }
+}
+
+// 회독 및 기호 필터링 모아보기 렌더링
+function renderFilteredProblems(fRound, fStatus) {
+  const list = document.getElementById('studyList');
+  const records = getData();
+  const currentPathPrefix = studyPath.join('|');
+
+  let filteredCards = [];
+
+  Object.keys(records).forEach(pKey => {
+    if (currentPathPrefix && !pKey.startsWith(currentPathPrefix)) return;
+
+    const parts = pKey.split('|');
+    if (parts.length < 5) return;
+    const [subj, sub, task, ch, num] = parts;
+    const history = records[pKey].history || [];
+
+    const matchedHistory = history.filter(h => {
+      const matchRound = (fRound === 'ALL' || String(h.round) === String(fRound));
+      const matchStatus = (fStatus === 'ALL' || h.status === fStatus);
+      return matchRound && matchStatus;
+    });
+
+    if (matchedHistory.length > 0) {
+      filteredCards.push({
+        pKey,
+        pathStr: `${subj} > ${sub} > ${task} > ${ch}`,
+        num,
+        history: matchedHistory
+      });
+    }
+  });
+
+  if (filteredCards.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">조건에 일치하는 문제가 없습니다.</div>';
+    return;
+  }
+
+  let html = `<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">🔍 필터 검색 결과: ${filteredCards.length}개 문제</div>`;
+
+  filteredCards.forEach(item => {
+    let historyHtml = item.history.map((h) => {
+      return `<div class="history-item">
+        <div>
+          <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
+          ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    html += `<div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-num">${item.num}번 문제</div>
+        <button class="btn btn-sm btn-primary" onclick="openProbModal('${item.pKey}')">+ 회독 추가</button>
+      </div>
+      <div style="font-size:11px;color:var(--accent);margin-bottom:6px;">${item.pathStr}</div>
+      <div class="history-list">${historyHtml}</div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
 }
 
 function navTo(path) { studyPath = path; renderStudy(); }
@@ -954,6 +1047,7 @@ function openProbModal(pKey, historyIndex = null) {
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+// 복습 자동 스케줄링이 통합된 기록 저장 함수
 function saveProbRecord() {
   if (!targetProbKey) return;
   const records = getData();
@@ -969,6 +1063,29 @@ function saveProbRecord() {
     records[targetProbKey].history[editingHistoryIndex] = { ...old, round, status, date, memo };
   } else {
     records[targetProbKey].history.push({ round, status, date, scheduledDate: date, memo });
+
+    // 기호별 복습 자동 스케줄링 (2일 / 7일 / 14일 후)
+    let reviewDays = 0;
+    if (status === '☆') reviewDays = 2;
+    else if (status === '♥') reviewDays = 7;
+    else if (status === '△') reviewDays = 14;
+
+    if (reviewDays > 0) {
+      const baseDate = new Date(date);
+      baseDate.setDate(baseDate.getDate() + reviewDays);
+      const reviewDateStr = baseDate.toISOString().split('T')[0];
+      const nextRound = String(Number(round) + 1);
+
+      records[targetProbKey].history.push({
+        round: nextRound,
+        status: '미진행',
+        date: reviewDateStr,
+        scheduledDate: reviewDateStr,
+        memo: `[자동 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
+      });
+
+      alert(`[오답 복습 스케줄 생성]\n${reviewDays}일 후인 ${reviewDateStr}에 ${nextRound}회독 복습 할 일이 자동으로 생성되었습니다.`);
+    }
   }
 
   saveData(records);
@@ -1062,7 +1179,7 @@ function editMainSubject(oldName) {
   const newStruct = {};
   Object.keys(struct).forEach(k => { newStruct[k === oldName ? newName : k] = struct[k]; });
   saveStructure(newStruct);
-  updateRecordKeys(oldName, newName); // 회독 데이터의 Key값 일괄 변경
+  updateRecordKeys(oldName, newName);
   renderStudy();
 }
 
@@ -1090,7 +1207,7 @@ function editSubSubject(subj, oldName) {
   Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
   struct[subj] = newObj;
   saveStructure(struct);
-  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`); // 회독 데이터의 Key값 일괄 변경
+  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`);
   renderStudy();
 }
 
@@ -1118,7 +1235,7 @@ function editTask(subj, sub, oldName) {
   Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
   struct[subj][sub] = newObj;
   saveStructure(struct);
-  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`); // 회독 데이터의 Key값 일괄 변경
+  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`);
   renderStudy();
 }
 
@@ -1145,7 +1262,7 @@ function editChapter(subj, sub, task, oldName) {
   const idx = arr.indexOf(oldName);
   if (idx !== -1) arr[idx] = newName;
   saveStructure(struct);
-  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`); // 회독 데이터의 Key값 일괄 변경
+  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`);
   renderStudy();
 }
 
