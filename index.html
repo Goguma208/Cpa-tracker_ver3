@@ -311,6 +311,23 @@ function resetToDefault() {
   }
 }
 
+// 이름 변경 시 cpaRecords의 저장된 키(Key) 값들을 일괄 수정해주는 함수
+function updateRecordKeys(oldPrefix, newPrefix) {
+  const records = getData();
+  const updatedRecords = {};
+
+  Object.keys(records).forEach(key => {
+    if (key.startsWith(oldPrefix + '|')) {
+      const newKey = key.replace(oldPrefix + '|', newPrefix + '|');
+      updatedRecords[newKey] = records[key];
+    } else {
+      updatedRecords[key] = records[key];
+    }
+  });
+
+  saveData(updatedRecords);
+}
+
 let studyPath = [];
 let calViewMode = 'daily';
 let currentCalDate = new Date();
@@ -1042,6 +1059,7 @@ function editMainSubject(oldName) {
   const newStruct = {};
   Object.keys(struct).forEach(k => { newStruct[k === oldName ? newName : k] = struct[k]; });
   saveStructure(newStruct);
+  updateRecordKeys(oldName, newName); // 회독 데이터의 Key값 일괄 변경
   renderStudy();
 }
 
@@ -1069,6 +1087,7 @@ function editSubSubject(subj, oldName) {
   Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
   struct[subj] = newObj;
   saveStructure(struct);
+  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`); // 회독 데이터의 Key값 일괄 변경
   renderStudy();
 }
 
@@ -1096,6 +1115,7 @@ function editTask(subj, sub, oldName) {
   Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
   struct[subj][sub] = newObj;
   saveStructure(struct);
+  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`); // 회독 데이터의 Key값 일괄 변경
   renderStudy();
 }
 
@@ -1122,6 +1142,7 @@ function editChapter(subj, sub, task, oldName) {
   const idx = arr.indexOf(oldName);
   if (idx !== -1) arr[idx] = newName;
   saveStructure(struct);
+  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`); // 회독 데이터의 Key값 일괄 변경
   renderStudy();
 }
 
