@@ -364,8 +364,8 @@ const MATRIX_SUB_LIST = [
   "부가가치세법", "국기법", "상증&기타세법", 
   "중급회계", "고급회계", "정부회계", "원가관리회계"
 ];
-const MATRIX_COLS = ["연습서인강", "연습서문풀", "객관식", "객기출", "객모고", "기타"];
-const MATRIX_OPTIONS = ["-", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
+const MATRIX_COLS = ["(연)인강", "(연)문풀", "(객)문풀", "(객)기출", "(객)모고", "기타"];
+const MATRIX_OPTIONS = ["-", "미진행", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
 
 function getProgressMatrix() {
   return JSON.parse(localStorage.getItem('cpaProgressMatrix') || '{}');
