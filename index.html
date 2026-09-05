@@ -74,7 +74,7 @@
   .action-btns { display: flex; gap: 4px; }
   .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
   .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .prob-num { font-size: 14px; font-weight: 700; }
+  .prob-num { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
   .history-list { font-size: 11px; color: var(--text2); border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
   .history-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 0; }
   .sub-tab-bar { display: flex; gap: 6px; margin-bottom: 12px; }
@@ -119,6 +119,9 @@
   .badge-pending { background: rgba(255, 255, 255, 0.1); color: #bbb; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
   .badge-rollover { background: rgba(249, 115, 22, 0.2); color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
   .badge-done { background: rgba(62, 207, 142, 0.15); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+
+  .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
+  .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -222,13 +225,10 @@
     <div class="sub-tab-btn" id="calTabWeekly" onclick="setCalView('weekly')">Weekly</div>
     <div class="sub-tab-btn" id="calTabMonthly" onclick="setCalView('monthly')">Monthly</div>
   </div>
-  <div style="margin-bottom:12px; display:flex; gap:6px;">
-    <button class="btn btn-sm btn-danger" style="flex:1;" onclick="cleanOldAccountingRecords()">🗑️ 회계학 고스트/구 기록 일괄 정리</button>
-  </div>
   <div id="calList"></div>
 </div>
 
-<!-- 풀이 기록 모달 -->
+<!-- 개별 풀이 기록 모달 -->
 <div class="modal-overlay" id="probModal">
   <div class="modal">
     <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">문제 기록 수정</div>
@@ -253,7 +253,7 @@
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">풀이 날짜</label>
+      <label class="form-label">풀이/예정 날짜</label>
       <input type="date" class="form-input" id="probDate">
     </div>
     <div class="form-group">
@@ -267,24 +267,20 @@
   </div>
 </div>
 
-<!-- 날짜 일괄 변경 모달 -->
+<!-- 일괄 날짜 변경 모달 -->
 <div class="modal-overlay" id="bulkDateModal">
   <div class="modal">
-    <div style="font-weight:700;margin-bottom:12px;">🗓️ 날짜 일괄 변경</div>
+    <div style="font-weight:700;margin-bottom:12px;">🗓️ 선택한 문제 날짜 일괄 변경</div>
     <div class="form-group">
-      <label class="form-label">기존 날짜</label>
-      <input type="date" class="form-input" id="bulkFromDate" readonly style="opacity:0.6;">
-    </div>
-    <div class="form-group">
-      <label class="form-label">이동할 변경 날짜</label>
-      <input type="date" class="form-input" id="bulkToDate">
+      <label class="form-label">변경할 지정 날짜</label>
+      <input type="date" class="form-input" id="bulkTargetDate">
     </div>
     <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">
-      * 해당 날짜의 [미진행] 처리된 할 일 문제 전체가 변경된 날짜로 이동됩니다.
+      * 체크 박스로 선택하신 모든 문제의 기록 날짜가 이 날짜로 일괄 변경됩니다.
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button class="btn btn-ghost" style="flex:1" onclick="closeModal('bulkDateModal')">취소</button>
-      <button class="btn btn-primary" style="flex:1" onclick="executeBulkDateMove()">일괄 이동 적용</button>
+      <button class="btn btn-primary" style="flex:1" onclick="executeSelectedBulkDateChange()">날짜 일괄 변경 실행</button>
     </div>
   </div>
 </div>
@@ -313,40 +309,6 @@ function resetToDefault() {
     localStorage.clear();
     location.reload();
   }
-}
-
-// 회계학 관련 구 데이터/유령 스케줄 정리 기능
-function cleanOldAccountingRecords() {
-  if (!confirm('9/7~9/11에 걸친 구 회계학 기록 및 스케줄 데이터를 정리하시겠습니까?')) return;
-  const records = getData();
-  let count = 0;
-
-  Object.keys(records).forEach(key => {
-    if (key.includes('회계학')) {
-      const history = records[key].history || [];
-      const filtered = history.filter(h => {
-        const d = h.date || h.scheduledDate;
-        return !(d >= '2026-09-07' && d <= '2026-09-11');
-      });
-      if (filtered.length !== history.length) {
-        count += (history.length - filtered.length);
-        records[key].history = filtered;
-      }
-      if (records[key].history.length === 0) delete records[key];
-    }
-  });
-
-  const schedules = getSchedules().filter(s => {
-    if (s.subj === '회계학') {
-      return !(s.start <= '2026-09-11' && s.end >= '2026-09-07');
-    }
-    return true;
-  });
-
-  saveData(records);
-  saveSchedules(schedules);
-  alert(`${count}개의 구 회계학 문제 기록이 성공적으로 삭제되었습니다.`);
-  renderCalendar();
 }
 
 let studyPath = [];
@@ -492,7 +454,7 @@ function generateSchedule() {
   });
 
   saveData(records);
-  alert('선택한 공부기록 탭 위치로 스케줄이 성공적으로 연동되었습니다!');
+  alert('선택한 공부기록 위치로 문제 생성이 완료되었습니다.');
   showPage('calendar');
 }
 
@@ -576,10 +538,27 @@ function renderStudy() {
     const [subj, sub, task, ch] = studyPath;
     const pathKey = `${subj}|${sub}|${task}|${ch}`;
     
-    list.innerHTML = `<button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>`;
-
     const records = getData();
     const probs = Object.keys(records).filter(k => k.startsWith(pathKey + '|'));
+
+    let html = `
+      <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>
+    `;
+
+    if (probs.length > 0) {
+      html += `
+        <div class="bulk-bar">
+          <label style="font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" class="chk-custom" id="selectAllProb" onchange="toggleSelectAllProbs(this)">
+            전체 선택
+          </label>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-ghost" onclick="openSelectedBulkDateModal()">📅 선택 날짜 일괄 변경</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteSelectedProblems()">🗑️ 선택 일괄 삭제</button>
+          </div>
+        </div>
+      `;
+    }
 
     probs.forEach(pKey => {
       const probNum = pKey.split('|')[4];
@@ -598,9 +577,12 @@ function renderStudy() {
         </div>`;
       }).join('');
 
-      list.innerHTML += `<div class="prob-card">
+      html += `<div class="prob-card">
         <div class="prob-header">
-          <div class="prob-num">${probNum}번 문제</div>
+          <div class="prob-num">
+            <input type="checkbox" class="chk-custom prob-chk" value="${pKey}">
+            ${probNum}번 문제
+          </div>
           <div>
             <button class="btn btn-sm btn-danger" style="margin-right:4px;" onclick="deleteProblem('${pKey}')">삭제</button>
             <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}')">+ 회독 기록</button>
@@ -609,10 +591,78 @@ function renderStudy() {
         <div class="history-list">${historyHtml || '기록 없음'}</div>
       </div>`;
     });
+
+    list.innerHTML = html;
   }
 }
 
 function navTo(path) { studyPath = path; renderStudy(); }
+
+function toggleSelectAllProbs(master) {
+  const chks = document.querySelectorAll('.prob-chk');
+  chks.forEach(c => c.checked = master.checked);
+}
+
+function getSelectedProbKeys() {
+  const chks = document.querySelectorAll('.prob-chk:checked');
+  return Array.from(chks).map(c => c.value);
+}
+
+function deleteSelectedProblems() {
+  const selectedKeys = getSelectedProbKeys();
+  if (selectedKeys.length === 0) {
+    alert('삭제할 문제를 체크박스로 하나 이상 선택해 주세요.');
+    return;
+  }
+
+  if (!confirm(`선택한 ${selectedKeys.length}개 문제 기록을 삭제하시겠습니까?`)) return;
+
+  const records = getData();
+  selectedKeys.forEach(k => {
+    delete records[k];
+  });
+
+  saveData(records);
+  alert(`${selectedKeys.length}개 문제가 성공적으로 삭제되었습니다.`);
+  renderStudy();
+}
+
+function openSelectedBulkDateModal() {
+  const selectedKeys = getSelectedProbKeys();
+  if (selectedKeys.length === 0) {
+    alert('날짜를 변경할 문제를 체크박스로 하나 이상 선택해 주세요.');
+    return;
+  }
+  document.getElementById('bulkTargetDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bulkDateModal').classList.add('open');
+}
+
+function executeSelectedBulkDateChange() {
+  const targetDate = document.getElementById('bulkTargetDate').value;
+  if (!targetDate) {
+    alert('날짜를 지정해 주세요.');
+    return;
+  }
+
+  const selectedKeys = getSelectedProbKeys();
+  const records = getData();
+  let updatedCount = 0;
+
+  selectedKeys.forEach(k => {
+    if (records[k] && records[k].history) {
+      records[k].history.forEach(h => {
+        h.date = targetDate;
+        h.scheduledDate = targetDate;
+        updatedCount++;
+      });
+    }
+  });
+
+  saveData(records);
+  alert(`선택된 문제들의 ${updatedCount}개 회독/예정 날짜가 [${targetDate}] 로 일괄 변경되었습니다.`);
+  closeModal('bulkDateModal');
+  renderStudy();
+}
 
 function setCalView(mode) {
   calViewMode = mode;
@@ -637,51 +687,6 @@ function goToDailyView(dateStr) {
   const parts = dateStr.split('-');
   currentCalDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
   setCalView('daily');
-}
-
-/* 날짜 일괄 이일/변경 모달 오픈 */
-function openBulkDateModal(currentDateStr) {
-  document.getElementById('bulkFromDate').value = currentDateStr;
-  document.getElementById('bulkToDate').value = currentDateStr;
-  document.getElementById('bulkDateModal').classList.add('open');
-}
-
-/* 선택 일자의 미진행 문제들을 다른 날짜로 일괄 변경 처리 */
-function executeBulkDateMove() {
-  const fromDate = document.getElementById('bulkFromDate').value;
-  const toDate = document.getElementById('bulkToDate').value;
-
-  if (!fromDate || !toDate) {
-    alert('날짜를 올바르게 선택해 주세요.');
-    return;
-  }
-  if (fromDate === toDate) {
-    alert('변경할 날짜가 동일합니다.');
-    return;
-  }
-
-  const records = getData();
-  let moveCount = 0;
-
-  Object.keys(records).forEach(pKey => {
-    const history = records[pKey].history || [];
-    history.forEach(h => {
-      if (h.date === fromDate && h.status === '미진행') {
-        h.date = toDate;
-        h.scheduledDate = toDate;
-        moveCount++;
-      }
-    });
-  });
-
-  if (moveCount === 0) {
-    alert('해당 날짜에 이동할 미진행 문제 기록이 없습니다.');
-  } else {
-    saveData(records);
-    alert(`${moveCount}개의 문제가 성공적으로 [${toDate}] 로 일괄 이동되었습니다.`);
-    closeModal('bulkDateModal');
-    renderCalendar();
-  }
 }
 
 function getDailyEvents(targetDateStr) {
@@ -741,9 +746,6 @@ function renderCalendar() {
         ${curStr} (${dayName}) ${curStr === todayStr ? '[오늘]' : ''}
       </strong>
       <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음날 ▶</button>
-    </div>
-    <div style="margin-bottom:12px; display:flex; justify-content:flex-end;">
-      <button class="btn btn-sm btn-primary" onclick="openBulkDateModal('${curStr}')">🚚 이 날짜 문제 전체 이동</button>
     </div>`;
 
     if (events.length === 0) {
@@ -806,7 +808,6 @@ function renderCalendar() {
     const firstDate = new Date(year, month, 1);
     const lastDate = new Date(year, month + 1, 0);
     
-    // 월요일 시작 기준으로 첫 날 구하기
     const startDate = new Date(firstDate);
     const firstDay = firstDate.getDay();
     const dayDiff = firstDay === 0 ? 6 : firstDay - 1;
