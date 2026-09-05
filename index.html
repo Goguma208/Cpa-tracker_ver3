@@ -93,18 +93,7 @@
   .cal-cell .date-num { font-weight: bold; margin-bottom: 4px; text-align: center; }
   
   /* 먼슬리 과목별 기간 막대 스타일 */
-  .gantt-bar {
-    font-size: 8px;
-    padding: 2px 4px;
-    margin-bottom: 2px;
-    border-radius: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left;
-    font-weight: 600;
-    border-left: 3px solid transparent;
-  }
+  .gantt-bar { font-size: 8px; padding: 2px 4px; margin-bottom: 2px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; font-weight: 600; border-left: 3px solid transparent; }
   .gantt-경영학 { background: var(--color-경영학-bg); border-color: var(--color-경영학-border); color: var(--color-경영학-text); }
   .gantt-경제학 { background: var(--color-경제학-bg); border-color: var(--color-경제학-border); color: var(--color-경제학-text); }
   .gantt-상법   { background: var(--color-상법-bg); border-color: var(--color-상법-border); color: var(--color-상법-text); }
@@ -126,7 +115,6 @@
   .badge-pending { background: rgba(255, 255, 255, 0.1); color: #bbb; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
   .badge-rollover { background: rgba(249, 115, 22, 0.2); color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
   .badge-done { background: rgba(62, 207, 142, 0.15); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-  .badge-sch { background: rgba(91, 127, 255, 0.15); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -179,22 +167,27 @@
 <div id="page-scheduler" class="page">
   <div class="card">
     <div style="font-weight:700;margin-bottom:12px;">📅 공부 목표 및 기간 배분기</div>
+    
+    <!-- 공부기록 연동 계층 선택기 -->
     <div class="form-group">
-      <label class="form-label">대과목 선택</label>
-      <select class="form-input" id="schSubj">
-        <option value="경영학">경영학 (초록)</option>
-        <option value="경제학">경제학 (주황)</option>
-        <option value="상법">상법 (노랑)</option>
-        <option value="세법">세법 (하늘)</option>
-        <option value="회계학">회계학 (빨강)</option>
-      </select>
+      <label class="form-label">1. 대과목 선택</label>
+      <select class="form-input" id="schSubj" onchange="updateSubSelect()"></select>
     </div>
     <div class="form-group">
-      <label class="form-label">목표/강좌/교재명</label>
-      <input type="text" class="form-input" id="schTitle" placeholder="예: (객)강경태 세법">
+      <label class="form-label">2. 하위 과목 선택</label>
+      <select class="form-input" id="schSub" onchange="updateTaskSelect()"></select>
     </div>
     <div class="form-group">
-      <label class="form-label">총 문제 수 / 강 수</label>
+      <label class="form-label">3. 교재 / 강좌 선택</label>
+      <select class="form-input" id="schTask" onchange="updateChSelect()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">4. 챕터 선택</label>
+      <select class="form-input" id="schCh"></select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">배분할 총 문제 수 (예: 50)</label>
       <input type="number" class="form-input" id="schTotal" placeholder="예: 50">
     </div>
     <div class="form-group">
@@ -296,8 +289,6 @@ function resetToDefault() {
 }
 
 let studyPath = [];
-let selectedRounds = [];
-let selectedStatuses = [];
 let calViewMode = 'daily';
 let currentCalDate = new Date();
 
@@ -307,6 +298,7 @@ function showPage(id) {
   document.getElementById('page-' + id).classList.add('active');
   if (id === 'dashboard') renderDashboard();
   if (id === 'study') renderStudy();
+  if (id === 'scheduler') initSchedulerSelects();
   if (id === 'calendar') renderCalendar();
 }
 
@@ -324,6 +316,125 @@ function renderDashboard() {
   });
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statSolved').textContent = solved;
+}
+
+// 스케줄러 계층 동적 선택기 초기화 및 연결
+function initSchedulerSelects() {
+  const struct = getStructure();
+  const subjSelect = document.getElementById('schSubj');
+  subjSelect.innerHTML = '';
+  
+  Object.keys(struct).forEach(s => {
+    subjSelect.innerHTML += `<option value="${s}">${s}</option>`;
+  });
+  updateSubSelect();
+}
+
+function updateSubSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const subSelect = document.getElementById('schSub');
+  subSelect.innerHTML = '';
+
+  if (struct[subj]) {
+    Object.keys(struct[subj]).forEach(s => {
+      subSelect.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+  }
+  updateTaskSelect();
+}
+
+function updateTaskSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const taskSelect = document.getElementById('schTask');
+  taskSelect.innerHTML = '';
+
+  if (struct[subj] && struct[subj][sub]) {
+    Object.keys(struct[subj][sub]).forEach(t => {
+      taskSelect.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+  }
+  updateChSelect();
+}
+
+function updateChSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const task = document.getElementById('schTask').value;
+  const chSelect = document.getElementById('schCh');
+  chSelect.innerHTML = '';
+
+  if (struct[subj] && struct[subj][sub] && struct[subj][sub][task]) {
+    struct[subj][sub][task].forEach(ch => {
+      chSelect.innerHTML += `<option value="${ch}">${ch}</option>`;
+    });
+  }
+}
+
+function generateSchedule() {
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const task = document.getElementById('schTask').value;
+  const ch = document.getElementById('schCh').value;
+  const total = Number(document.getElementById('schTotal').value);
+  const startStr = document.getElementById('schStart').value;
+  const endStr = document.getElementById('schEnd').value;
+  const selectedDays = Array.from(document.querySelectorAll('.day-chk:checked')).map(cb => Number(cb.value));
+
+  if (!subj || !sub || !task || !ch || !total || !startStr || !endStr || selectedDays.length === 0) {
+    alert('모든 단계를 정확히 선택/입력해 주세요.');
+    return;
+  }
+
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  let dates = [];
+  let curr = new Date(start);
+  while (curr <= end) {
+    if (selectedDays.includes(curr.getDay())) dates.push(new Date(curr));
+    curr.setDate(curr.getDate() + 1);
+  }
+
+  if (dates.length === 0) {
+    alert('선택한 기간 내에 지정한 공부 요일이 없습니다.');
+    return;
+  }
+
+  // 1. 먼슬리 캘린더용 기간 스케줄 저장
+  const schedules = getSchedules();
+  schedules.push({ subj, title: `${task} (${ch})`, start: startStr, end: endStr });
+  saveSchedules(schedules);
+
+  // 2. 선택한 공부기록 위치로 직접 문제 '미진행' 배분
+  const records = getData();
+  const perDay = Math.ceil(total / dates.length);
+  let currentNum = 1;
+
+  dates.forEach(d => {
+    if (currentNum > total) return;
+    const endNum = Math.min(currentNum + perDay - 1, total);
+    const dateFormatted = d.toISOString().split('T')[0];
+
+    for (let i = currentNum; i <= endNum; i++) {
+      const pKey = `${subj}|${sub}|${task}|${ch}|${i}`;
+      if (!records[pKey]) records[pKey] = { history: [] };
+      records[pKey].history.push({
+        round: '1',
+        status: '미진행',
+        date: dateFormatted,
+        scheduledDate: dateFormatted,
+        memo: '스케줄 자동 배분'
+      });
+    }
+    currentNum = endNum + 1;
+  });
+
+  saveData(records);
+  alert('선택한 공부기록 탭 위치로 스케줄이 성공적으로 연동되었습니다!');
+  showPage('calendar');
 }
 
 function renderStudy() {
@@ -406,18 +517,7 @@ function renderStudy() {
     const [subj, sub, task, ch] = studyPath;
     const pathKey = `${subj}|${sub}|${task}|${ch}`;
     
-    list.innerHTML = `
-    <div class="filter-bar">
-      <div class="filter-group">
-        <span class="filter-label">회독:</span>
-        ${['1','2','3','4','5'].map(r => `<div class="filter-chip ${selectedRounds.includes(r)?'active':''}" onclick="toggleFilterRound('${r}')">${r}회독</div>`).join('')}
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">상태:</span>
-        ${['☆','♥','△','O','미진행'].map(s => `<div class="filter-chip ${selectedStatuses.includes(s)?'active':''}" onclick="toggleFilterStatus('${s}')">${s}</div>`).join('')}
-      </div>
-    </div>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>`;
+    list.innerHTML = `<button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>`;
 
     const records = getData();
     const probs = Object.keys(records).filter(k => k.startsWith(pathKey + '|'));
@@ -427,7 +527,6 @@ function renderStudy() {
       const history = records[pKey].history || [];
 
       let historyHtml = history.map((h, idx) => {
-        const isPending = h.status === '미진행';
         return `<div class="history-item">
           <div>
             <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
@@ -456,82 +555,6 @@ function renderStudy() {
 
 function navTo(path) { studyPath = path; renderStudy(); }
 
-function toggleFilterRound(r) {
-  selectedRounds = selectedRounds.includes(r) ? selectedRounds.filter(x => x !== r) : [...selectedRounds, r];
-  renderStudy();
-}
-function toggleFilterStatus(s) {
-  selectedStatuses = selectedStatuses.includes(s) ? selectedStatuses.filter(x => x !== s) : [...selectedStatuses, s];
-  renderStudy();
-}
-
-function generateSchedule() {
-  const subj = document.getElementById('schSubj').value;
-  const title = document.getElementById('schTitle').value;
-  const total = Number(document.getElementById('schTotal').value);
-  const startStr = document.getElementById('schStart').value;
-  const endStr = document.getElementById('schEnd').value;
-  const selectedDays = Array.from(document.querySelectorAll('.day-chk:checked')).map(cb => Number(cb.value));
-
-  if (!title || !total || !startStr || !endStr || selectedDays.length === 0) {
-    alert('모든 단계를 정확히 입력해 주세요.');
-    return;
-  }
-
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  let dates = [];
-  let curr = new Date(start);
-  while (curr <= end) {
-    if (selectedDays.includes(curr.getDay())) dates.push(new Date(curr));
-    curr.setDate(curr.getDate() + 1);
-  }
-
-  if (dates.length === 0) {
-    alert('선택한 기간 내에 해당하는 공부 요일이 없습니다.');
-    return;
-  }
-
-  // 1. 먼슬리용 기간 스케줄 저장
-  const schedules = getSchedules();
-  schedules.push({ subj, title, start: startStr, end: endStr });
-  saveSchedules(schedules);
-
-  // 2. 공부기록 계층 자동 생성 및 문제 '미진행' 배분
-  const struct = getStructure();
-  if (!struct[subj]) struct[subj] = {};
-  if (!struct[subj]['스케줄 배분']) struct[subj]['스케줄 배분'] = {};
-  if (!struct[subj]['스케줄 배분'][title]) struct[subj]['스케줄 배분'][title] = ['기본 챕터'];
-  saveStructure(struct);
-
-  const records = getData();
-  const perDay = Math.ceil(total / dates.length);
-  let currentNum = 1;
-
-  dates.forEach(d => {
-    if (currentNum > total) return;
-    const endNum = Math.min(currentNum + perDay - 1, total);
-    const dateFormatted = d.toISOString().split('T')[0];
-
-    for (let i = currentNum; i <= endNum; i++) {
-      const pKey = `${subj}|스케줄 배분|${title}|기본 챕터|${i}`;
-      if (!records[pKey]) records[pKey] = { history: [] };
-      records[pKey].history.push({
-        round: '1',
-        status: '미진행',
-        date: dateFormatted,
-        scheduledDate: dateFormatted,
-        memo: '스케줄 자동 배분'
-      });
-    }
-    currentNum = endNum + 1;
-  });
-
-  saveData(records);
-  alert('스케줄 및 공부기록이 성공적으로 생성 및 연동되었습니다!');
-  showPage('calendar');
-}
-
 function setCalView(mode) {
   calViewMode = mode;
   document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
@@ -551,7 +574,6 @@ function resetCalToToday() {
   renderCalendar();
 }
 
-// 특정 날짜의 문제 및 이월 내역 계산
 function getDailyEvents(targetDateStr) {
   const records = getData();
   const todayStr = new Date().toISOString().split('T')[0];
@@ -567,10 +589,8 @@ function getDailyEvents(targetDateStr) {
         const isPast = h.scheduledDate < todayStr;
         const isUnfinished = h.status === '미진행';
 
-        // 1. 배분된 당일 표시
         if (h.date === targetDateStr) {
           if (isUnfinished && isPast && targetDateStr < todayStr) {
-            // 지나간 날짜에 못 푼 경우 -> 화살표(➡️) 이월 표시
             events.push({
               type: 'rollover-past',
               text: `➡️ [이월됨] ${subj} > ${task} : ${num}번 문제 (${h.status})`
@@ -578,11 +598,10 @@ function getDailyEvents(targetDateStr) {
           } else {
             events.push({
               type: isUnfinished ? 'pending' : 'done',
-              text: `[${subj} > ${task}] ${num}번 문제 (${h.status})`
+              text: `[${subj} > ${task} > ${ch}] ${num}번 문제 (${h.status})`
             });
           }
         }
-        // 2. 미달성 문제가 오늘 날짜로 자동 이월되어 나타남
         else if (targetDateStr === todayStr && isPast && isUnfinished) {
           events.push({
             type: 'rollover-today',
@@ -701,7 +720,6 @@ function renderCalendar() {
       const fullDate = `${year}-${mStr}-${dStr}`;
       const isToday = fullDate === todayStr;
 
-      // 해당 날짜에 걸쳐 있는 기간 스케줄 막대 검색
       const activeSchedules = schedules.filter(s => fullDate >= s.start && fullDate <= s.end);
 
       html += `<div class="cal-cell ${isToday ? 'today' : ''}">
@@ -719,7 +737,6 @@ function renderCalendar() {
   }
 }
 
-// 모달 및 데이터 제어 함수
 let targetProbKey = null;
 let editingHistoryIndex = null;
 
@@ -757,13 +774,7 @@ function saveProbRecord() {
 
   if (editingHistoryIndex !== null) {
     const old = records[targetProbKey].history[editingHistoryIndex];
-    records[targetProbKey].history[editingHistoryIndex] = {
-      ...old,
-      round,
-      status,
-      date,
-      memo
-    };
+    records[targetProbKey].history[editingHistoryIndex] = { ...old, round, status, date, memo };
   } else {
     records[targetProbKey].history.push({ round, status, date, scheduledDate: date, memo });
   }
@@ -805,7 +816,6 @@ function deleteProblem(pKey) {
   renderStudy();
 }
 
-// 보조 구조 편집 함수들
 function moveItem(depth, path, index, direction) {
   const struct = getStructure();
   let target;
