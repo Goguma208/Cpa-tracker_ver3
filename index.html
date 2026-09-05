@@ -60,12 +60,9 @@
   .btn-danger { background: rgba(255,107,107,0.15); color: var(--red); }
   .btn-sm { padding: 4px 8px; font-size: 11px; }
   .dday-card { background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%); border: 1px solid #3d4a8a; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-  .dday-num { font-size: 36px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .dday-num { font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
   .dday-right { text-align: right; }
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .stat-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
-  .stat-num { font-size: 20px; font-weight: 800; }
-  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  
   .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
   .bc-item { font-size: 12px; color: var(--text2); cursor: pointer; padding: 3px 6px; border-radius: 4px; background: var(--surface2); }
   .bc-sep { font-size: 10px; color: var(--text3); }
@@ -129,6 +126,24 @@
   .filter-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
   .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
   .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; background: var(--surface2); padding: 8px 10px; border-radius: 6px; }
+
+  /* 총괄 진도표 전용 CSS */
+  .matrix-wrapper { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; margin-top: 8px; }
+  .matrix-table { width: 100%; border-collapse: collapse; min-width: 520px; font-size: 11px; }
+  .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 4px; text-align: center; vertical-align: middle; }
+  .matrix-table th { background: var(--surface2); color: var(--text2); font-weight: 600; white-space: nowrap; }
+  .matrix-table td.sub-name { background: var(--surface2); font-weight: 700; color: var(--text); white-space: nowrap; position: sticky; left: 0; z-index: 5; text-align: left; padding-left: 8px; }
+  .matrix-select { background: transparent; color: var(--text); border: none; font-size: 11px; font-weight: 600; cursor: pointer; text-align-last: center; outline: none; width: 100%; }
+  
+  /* 진도 시각화 배지 스타일 */
+  .badge-matrix { display: inline-block; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; width: 100%; text-align: center; }
+  .status-none { background: rgba(255,255,255,0.05); color: var(--text3); }
+  .status-done { background: rgba(62, 207, 142, 0.2); color: var(--green); border: 1px solid var(--green); }
+  .status-1r   { background: rgba(91, 127, 255, 0.2); color: var(--accent); border: 1px solid var(--accent); }
+  .status-2r   { background: rgba(14, 165, 233, 0.2); color: #7dd3fc; border: 1px solid #0ea5e9; }
+  .status-3r   { background: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid #eab308; }
+  .status-4r   { background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid #f97316; }
+  .status-5r   { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
 </style>
 </head>
 <body>
@@ -156,18 +171,30 @@
 <div id="page-dashboard" class="page active">
   <div class="dday-card">
     <div>
-      <div class="dday-num" id="ddayNum">—</div>
-      <div class="dday-label">일 남음</div>
+      <div class="dday-num" id="ddayNum">D-—</div>
     </div>
     <div class="dday-right">
       <div style="font-size:12px;color:var(--text2);" id="todayDate"></div>
       <div style="font-size:14px;font-weight:700;">CPA 1차 시험</div>
     </div>
   </div>
-  <div class="section-title">전체 공부 현황</div>
-  <div class="stat-grid">
-    <div class="stat-item"><div class="stat-num" id="statTotal">0</div><div class="stat-label">등록된 문제</div></div>
-    <div class="stat-item"><div class="stat-num" id="statSolved" style="color:var(--green)">0</div><div class="stat-label">풀이 완료 문제</div></div>
+  
+  <div class="section-title">📊 과목별 총괄 진도표</div>
+  <div class="matrix-wrapper">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th style="min-width: 90px;">하위 과목</th>
+          <th>연습서인강</th>
+          <th>연습서문풀</th>
+          <th>객관식</th>
+          <th>객기출</th>
+          <th>객모고</th>
+          <th>기타</th>
+        </tr>
+      </thead>
+      <tbody id="matrixTableBody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -321,6 +348,18 @@ const DEFAULT_STRUCTURE = {
   "회계학": { "중급회계": { "연습서 문풀": ["기본"] } }
 };
 
+/* 총괄 진도표 설정 */
+const MATRIX_SUB_LIST = ["중급회계", "고급회계", "원가관리", "정부회계", "법인세", "소득세", "부가가치세", "기타세법", "일반경영", "재무관리", "미시경제", "거시경제", "상법"];
+const MATRIX_COLS = ["연습서인강", "연습서문풀", "객관식", "객기출", "객모고", "기타"];
+const MATRIX_OPTIONS = ["(해당없음)", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
+
+function getProgressMatrix() {
+  return JSON.parse(localStorage.getItem('cpaProgressMatrix') || '{}');
+}
+function saveProgressMatrix(data) {
+  localStorage.setItem('cpaProgressMatrix', JSON.stringify(data));
+}
+
 /* 다중 선택 필터 데이터 구조 */
 let selectedFilterRounds = [];
 let selectedFilterStatuses = [];
@@ -373,21 +412,58 @@ function showPage(id) {
   if (id === 'calendar') renderCalendar();
 }
 
+function getStatusClass(val) {
+  if (val === '완료') return 'status-done';
+  if (val === '1회독') return 'status-1r';
+  if (val === '2회독') return 'status-2r';
+  if (val === '3회독') return 'status-3r';
+  if (val === '4회독') return 'status-4r';
+  if (val === '5회독') return 'status-5r';
+  return 'status-none';
+}
+
 function renderDashboard() {
   const exam = new Date('2027-02-28');
   const diff = Math.ceil((exam - new Date()) / 86400000);
-  document.getElementById('ddayNum').textContent = diff;
+  document.getElementById('ddayNum').textContent = diff >= 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
   document.getElementById('todayDate').textContent = new Date().toISOString().split('T')[0];
 
-  const records = getData();
-  let total = 0, solved = 0;
-  Object.values(records).forEach(item => {
-    total++;
-    const hasDone = (item.history || []).some(h => h.status !== '미진행');
-    if (hasDone) solved++;
+  /* 총괄 진도표 매트릭스 랜더링 */
+  const matrixData = getProgressMatrix();
+  const tbody = document.getElementById('matrixTableBody');
+  tbody.innerHTML = '';
+
+  MATRIX_SUB_LIST.forEach(sub => {
+    let rowHtml = `<tr><td class="sub-name">${sub}</td>`;
+    MATRIX_COLS.forEach(col => {
+      const key = `${sub}|${col}`;
+      const val = matrixData[key] || '(해당없음)';
+      const statusClass = getStatusClass(val);
+
+      let optionsHtml = MATRIX_OPTIONS.map(opt => `
+        <option value="${opt}" ${opt === val ? 'selected' : ''}>${opt}</option>
+      `).join('');
+
+      rowHtml += `
+        <td>
+          <div class="badge-matrix ${statusClass}">
+            <select class="matrix-select" onchange="updateMatrixStatus('${sub}', '${col}', this.value)">
+              ${optionsHtml}
+            </select>
+          </div>
+        </td>
+      `;
+    });
+    rowHtml += `</tr>`;
+    tbody.innerHTML += rowHtml;
   });
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statSolved').textContent = solved;
+}
+
+function updateMatrixStatus(sub, col, value) {
+  const matrixData = getProgressMatrix();
+  matrixData[`${sub}|${col}`] = value;
+  saveProgressMatrix(matrixData);
+  renderDashboard();
 }
 
 function initSchedulerSelects() {
@@ -1354,7 +1430,8 @@ function exportData() {
   const data = {
     struct: getStructure(),
     records: getData(),
-    schedules: getSchedules()
+    schedules: getSchedules(),
+    matrix: getProgressMatrix()
   };
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -1375,6 +1452,7 @@ function importData() {
         if (parsed.struct) saveStructure(parsed.struct);
         if (parsed.records) saveData(parsed.records);
         if (parsed.schedules) saveSchedules(parsed.schedules);
+        if (parsed.matrix) saveProgressMatrix(parsed.matrix);
         alert('복구가 완료되었습니다!');
         location.reload();
       } catch (err) { alert('백업 파일 형식이 올바르지 않습니다.'); }
