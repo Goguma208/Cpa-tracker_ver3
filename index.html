@@ -123,9 +123,12 @@
   .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
   .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
 
-  /* 회독/기호 필터바 스타일 */
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); align-items: center; }
-  .filter-select { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 11px; padding: 6px; outline: none; }
+  /* 다중 필터바 스타일 */
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 12px; background: var(--surface2); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); align-items: center; flex-wrap: wrap; }
+  .filter-btn { flex: 1; min-width: 90px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 11px; padding: 6px 8px; text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
+  .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; background: var(--surface2); padding: 8px 10px; border-radius: 6px; }
 </style>
 </head>
 <body>
@@ -172,24 +175,11 @@
 <div id="page-study" class="page">
   <div class="breadcrumb" id="breadcrumb"></div>
 
-  <!-- 회독 및 기호 필터링 바 -->
+  <!-- 다중 중복 선택 필터 바 -->
   <div class="filter-bar">
-    <select class="filter-select" id="filterRound" onchange="renderStudy()">
-      <option value="ALL">전체 회독</option>
-      <option value="1">1회독</option>
-      <option value="2">2회독</option>
-      <option value="3">3회독</option>
-      <option value="4">4회독</option>
-      <option value="5">5회독</option>
-    </select>
-    <select class="filter-select" id="filterStatus" onchange="renderStudy()">
-      <option value="ALL">전체 기호</option>
-      <option value="O">O (맞음)</option>
-      <option value="△">△ (실수)</option>
-      <option value="☆">☆ (오답)</option>
-      <option value="♥">♥ (다시풀기)</option>
-      <option value="미진행">미진행</option>
-    </select>
+    <button class="filter-btn" id="filterRoundBtn" onclick="openFilterModal('round')">회독 중복 선택</button>
+    <button class="filter-btn" id="filterStatusBtn" onclick="openFilterModal('status')">기호 중복 선택</button>
+    <button class="btn btn-sm btn-ghost" onclick="resetFilters()">🔄 초기화</button>
   </div>
 
   <div id="studyList"></div>
@@ -251,6 +241,18 @@
     <div class="sub-tab-btn" id="calTabMonthly" onclick="setCalView('monthly')">Monthly</div>
   </div>
   <div id="calList"></div>
+</div>
+
+<!-- 다중 선택 필터 모달 -->
+<div class="modal-overlay" id="filterModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;" id="filterModalTitle">필터 선택</div>
+    <div class="checkbox-group" id="filterCheckboxList"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('filterModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="applyMultiFilter()">필터 적용하기</button>
+    </div>
+  </div>
 </div>
 
 <!-- 개별 풀이 기록 모달 -->
@@ -318,6 +320,11 @@ const DEFAULT_STRUCTURE = {
   "세법": { "법인세": { "(객)강경태": ["CH.1 총설"] } },
   "회계학": { "중급회계": { "연습서 문풀": ["기본"] } }
 };
+
+/* 다중 선택 필터 데이터 구조 */
+let selectedFilterRounds = [];
+let selectedFilterStatuses = [];
+let currentFilterTarget = null; // 'round' or 'status'
 
 function getStructure() {
   const data = localStorage.getItem('cpaStructure');
@@ -499,14 +506,94 @@ function generateSchedule() {
   showPage('calendar');
 }
 
+/* 필터 UI 업데이트 및 모달 제어 */
+function openFilterModal(target) {
+  currentFilterTarget = target;
+  const list = document.getElementById('filterCheckboxList');
+  const title = document.getElementById('filterModalTitle');
+  list.innerHTML = '';
+
+  if (target === 'round') {
+    title.textContent = '회독 선택 (중복 가능)';
+    ['1', '2', '3', '4', '5'].forEach(r => {
+      const isChecked = selectedFilterRounds.includes(r) ? 'checked' : '';
+      list.innerHTML += `
+        <label class="checkbox-item">
+          <input type="checkbox" class="chk-custom filter-chk" value="${r}" ${isChecked}>
+          ${r}회독
+        </label>
+      `;
+    });
+  } else {
+    title.textContent = '기호 선택 (중복 가능)';
+    [
+      { val: 'O', label: 'O (맞음)' },
+      { val: '△', label: '△ (실수)' },
+      { val: '☆', label: '☆ (오답)' },
+      { val: '♥', label: '♥ (다시풀기)' },
+      { val: '미진행', label: '미진행' }
+    ].forEach(item => {
+      const isChecked = selectedFilterStatuses.includes(item.val) ? 'checked' : '';
+      list.innerHTML += `
+        <label class="checkbox-item">
+          <input type="checkbox" class="chk-custom filter-chk" value="${item.val}" ${isChecked}>
+          ${item.label}
+        </label>
+      `;
+    });
+  }
+  document.getElementById('filterModal').classList.add('open');
+}
+
+function applyMultiFilter() {
+  const chks = document.querySelectorAll('.filter-chk:checked');
+  const values = Array.from(chks).map(c => c.value);
+
+  if (currentFilterTarget === 'round') {
+    selectedFilterRounds = values;
+  } else {
+    selectedFilterStatuses = values;
+  }
+
+  closeModal('filterModal');
+  updateFilterBarUI();
+  renderStudy();
+}
+
+function resetFilters() {
+  selectedFilterRounds = [];
+  selectedFilterStatuses = [];
+  updateFilterBarUI();
+  renderStudy();
+}
+
+function updateFilterBarUI() {
+  const roundBtn = document.getElementById('filterRoundBtn');
+  const statusBtn = document.getElementById('filterStatusBtn');
+
+  if (selectedFilterRounds.length > 0) {
+    roundBtn.classList.add('active');
+    roundBtn.textContent = `회독: ${selectedFilterRounds.join(', ')}회`;
+  } else {
+    roundBtn.classList.remove('active');
+    roundBtn.textContent = '회독 중복 선택';
+  }
+
+  if (selectedFilterStatuses.length > 0) {
+    statusBtn.classList.add('active');
+    statusBtn.textContent = `기호: ${selectedFilterStatuses.join(', ')}`;
+  } else {
+    statusBtn.classList.remove('active');
+    statusBtn.textContent = '기호 중복 선택';
+  }
+}
+
 function renderStudy() {
   const struct = getStructure();
   const bc = document.getElementById('breadcrumb');
   const list = document.getElementById('studyList');
 
-  const filterRound = document.getElementById('filterRound').value;
-  const filterStatus = document.getElementById('filterStatus').value;
-  const isFiltering = (filterRound !== 'ALL' || filterStatus !== 'ALL');
+  const isFiltering = (selectedFilterRounds.length > 0 || selectedFilterStatuses.length > 0);
 
   let bcHtml = '<span class="bc-item" onclick="navTo([])">전체 과목</span>';
   studyPath.forEach((p, i) => {
@@ -519,7 +606,7 @@ function renderStudy() {
   list.innerHTML = '';
 
   if (isFiltering) {
-    renderFilteredProblems(filterRound, filterStatus);
+    renderFilteredProblems();
     return;
   }
 
@@ -646,7 +733,8 @@ function renderStudy() {
   }
 }
 
-function renderFilteredProblems(fRound, fStatus) {
+/* 중복 선택 필터 적용 실행 함수 */
+function renderFilteredProblems() {
   const list = document.getElementById('studyList');
   const records = getData();
   const currentPathPrefix = studyPath.join('|');
@@ -662,8 +750,8 @@ function renderFilteredProblems(fRound, fStatus) {
     const history = records[pKey].history || [];
 
     const matchedHistory = history.filter(h => {
-      const matchRound = (fRound === 'ALL' || String(h.round) === String(fRound));
-      const matchStatus = (fStatus === 'ALL' || h.status === fStatus);
+      const matchRound = (selectedFilterRounds.length === 0 || selectedFilterRounds.includes(String(h.round)));
+      const matchStatus = (selectedFilterStatuses.length === 0 || selectedFilterStatuses.includes(h.status));
       return matchRound && matchStatus;
     });
 
@@ -678,11 +766,11 @@ function renderFilteredProblems(fRound, fStatus) {
   });
 
   if (filteredCards.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">조건에 일치하는 문제가 없습니다.</div>';
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">선택하신 중복 조건에 일치하는 문제가 없습니다.</div>';
     return;
   }
 
-  let html = `<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">🔍 필터 검색 결과: ${filteredCards.length}개 문제</div>`;
+  let html = `<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">🔍 중복 필터 검색 결과: ${filteredCards.length}개 문제</div>`;
 
   filteredCards.forEach(item => {
     let historyHtml = item.history.map((h) => {
@@ -1045,7 +1133,6 @@ function openProbModal(pKey, historyIndex = null) {
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-/* 수정 완료된 복습 자동 스케줄링 저장 함수 */
 function saveProbRecord() {
   if (!targetProbKey) return;
   const records = getData();
@@ -1063,7 +1150,6 @@ function saveProbRecord() {
     records[targetProbKey].history.push({ round, status, date, scheduledDate: date, memo });
   }
 
-  // 기호별 복습 일수 계산 (☆: 2일, ♥: 7일, △: 14일)
   let reviewDays = 0;
   if (status.includes('☆') || status.includes('★')) reviewDays = 2;
   else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
