@@ -1161,7 +1161,7 @@ function importData() {
   input.click();
 }
 
-/* 이전 백업에서 강경태 기록만 부분 병합하는 함수 */
+/* 개선된 강경태 데이터 부분 병합 함수 */
 function mergeKangData() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -1171,24 +1171,30 @@ function mergeKangData() {
     reader.onload = event => {
       try {
         const parsed = JSON.parse(event.target.result);
-        const oldRecords = parsed.records || {};
+        // 옛날 버전 및 신버전 JSON 구조 모두 지원
+        const oldRecords = parsed.records || parsed;
         const currentRecords = getData();
 
         let restoredCount = 0;
 
-        // 예전 백업 파일에서 '강경태'가 들어간 키의 데이터만 현재 데이터로 가져옴
         Object.keys(oldRecords).forEach(key => {
+          // 키 명칭 조건 완화 ('강경태' 세 글자가 들어가기만 하면 모두 가져옴)
           if (key.includes('강경태')) {
             currentRecords[key] = oldRecords[key];
             restoredCount++;
           }
         });
 
+        if (restoredCount === 0) {
+          alert('선택하신 백업 파일 내부에서 "강경태" 관련 회독 기록 키를 찾지 못했습니다. 백업 파일이 맞는지 확인해 주세요.');
+          return;
+        }
+
         saveData(currentRecords);
-        alert(`성공! 다른 과목 기록은 유지하고 (객)강경태 항목 ${restoredCount}개의 데이터만 성공적으로 복구했습니다.`);
+        alert(`성공! 기존 다른 과목 데이터는 유지하고 (객)강경태 문제 ${restoredCount}개의 데이터만 정상 병합했습니다.`);
         location.reload();
       } catch (err) {
-        alert('파일을 읽는 중 오류가 발생했습니다. 올바른 백업 .json 파일을 선택했는지 확인해 주세요.');
+        alert('파일을 읽는 중 오류가 발생했습니다. 올바른 .json 백업 파일인지 확인해 주세요.');
       }
     };
     reader.readAsText(event.target.files[0]);
