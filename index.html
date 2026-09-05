@@ -45,6 +45,7 @@
   .top-bar { padding: 20px 20px 16px; background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
   .top-bar h1 { font-size: 18px; font-weight: 700; }
   .top-bar .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .top-btns { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
   .tab-bar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
   .tab-bar::-webkit-scrollbar { display: none; }
   .tab-btn { flex: 1; min-width: 60px; padding: 12px 6px; font-size: 12px; font-weight: 600; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; }
@@ -131,10 +132,11 @@
     <h1>📚 CPA 트래커 Pro</h1>
     <div class="sub">2027년 1차 합격 목표</div>
   </div>
-  <div>
+  <div class="top-btns">
     <button class="btn btn-sm btn-ghost" onclick="resetToDefault()">🔄 초기화</button>
     <button class="btn btn-sm btn-ghost" onclick="exportData()">💾 백업</button>
-    <button class="btn btn-sm btn-ghost" onclick="importData()">📂 복구</button>
+    <button class="btn btn-sm btn-ghost" onclick="importData()">📂 전체복구</button>
+    <button class="btn btn-sm btn-primary" onclick="mergeKangData()">🧩 백업병합</button>
   </div>
 </div>
 
@@ -1150,9 +1152,44 @@ function importData() {
         if (parsed.struct) saveStructure(parsed.struct);
         if (parsed.records) saveData(parsed.records);
         if (parsed.schedules) saveSchedules(parsed.schedules);
-        alert('복구가 완료되었습니다!');
+        alert('전체 복구가 완료되었습니다!');
         location.reload();
       } catch (err) { alert('백업 파일 형식이 올바르지 않습니다.'); }
+    };
+    reader.readAsText(event.target.files[0]);
+  };
+  input.click();
+}
+
+/* 이전 백업에서 강경태 기록만 부분 병합하는 함수 */
+function mergeKangData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = event => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        const oldRecords = parsed.records || {};
+        const currentRecords = getData();
+
+        let restoredCount = 0;
+
+        // 예전 백업 파일에서 '강경태'가 들어간 키의 데이터만 현재 데이터로 가져옴
+        Object.keys(oldRecords).forEach(key => {
+          if (key.includes('강경태')) {
+            currentRecords[key] = oldRecords[key];
+            restoredCount++;
+          }
+        });
+
+        saveData(currentRecords);
+        alert(`성공! 다른 과목 기록은 유지하고 (객)강경태 항목 ${restoredCount}개의 데이터만 성공적으로 복구했습니다.`);
+        location.reload();
+      } catch (err) {
+        alert('파일을 읽는 중 오류가 발생했습니다. 올바른 백업 .json 파일을 선택했는지 확인해 주세요.');
+      }
     };
     reader.readAsText(event.target.files[0]);
   };
