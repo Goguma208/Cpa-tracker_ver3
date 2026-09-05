@@ -13,6 +13,29 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --color-경영학-bg: rgba(34, 197, 94, 0.2);
+      --color-경영학-border: #22c55e;
+      --color-경영학-text: #86efac;
+
+      --color-경제학-bg: rgba(249, 115, 22, 0.2);
+      --color-경제학-border: #f97316;
+      --color-경제학-text: #fdba74;
+
+      --color-상법-bg: rgba(234, 179, 8, 0.2);
+      --color-상법-border: #eab308;
+      --color-상법-text: #fef08a;
+
+      --color-세법-bg: rgba(14, 165, 233, 0.2);
+      --color-세법-border: #0ea5e9;
+      --color-세법-text: #7dd3fc;
+
+      --color-회계학-bg: rgba(239, 68, 68, 0.2);
+      --color-회계학-border: #ef4444;
+      --color-회계학-text: #fca5a5;
+    }
+  </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
   <div id="root"></div>
@@ -20,13 +43,12 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
-    // --- 기본 초기 데이터 ---
     const INITIAL_EXAM_DATE = "2027-02-28";
 
-    const INITIAL_SUBJECTS = [
+    const INITIAL_STRUCTURE = [
       {
         id: "sub_1",
-        name: "재무회계",
+        name: "회계학",
         subSubjects: [
           {
             id: "sub_1_1",
@@ -39,7 +61,7 @@
             id: "sub_1_2",
             name: "고급회계",
             textbooks: [
-              { id: "tb_1_2_1", name: "(객)김기동", chapters: ["사업결합", "연결재무제표", "관계기업", "환율변동효과"] }
+              { id: "tb_1_2_1", name: "(객)김기동", chapters: ["사업결합", "연결재무제표", "관계기업"] }
             ]
           }
         ]
@@ -52,7 +74,7 @@
             id: "sub_2_1",
             name: "원가관리회계",
             textbooks: [
-              { id: "tb_2_1_1", name: "(객)임세진", chapters: ["개별원가계산", "활동기준원가계산", "CVP분석", "관련원가분석"] }
+              { id: "tb_2_1_1", name: "(객)임세진", chapters: ["개별원가계산", "활동기준원가계산", "CVP분석"] }
             ]
           }
         ]
@@ -65,14 +87,14 @@
             id: "sub_3_1",
             name: "법인세법",
             textbooks: [
-              { id: "tb_3_1_1", name: "(객)강경태", chapters: ["익금/손금", "감가상각비", "충당금/준비금", "합병/분할"] }
+              { id: "tb_3_1_1", name: "(객)강경태", chapters: ["익금/손금", "감가상각비", "충당금/준비금"] }
             ]
           },
           {
             id: "sub_3_2",
             name: "소득세법",
             textbooks: [
-              { id: "tb_3_2_1", name: "(객)강경태", chapters: ["이자/배당소득", "사업소득", "근로/연금/기타소득", "종합소득공제"] }
+              { id: "tb_3_2_1", name: "(객)강경태", chapters: ["이자/배당소득", "사업소득", "종합소득공제"] }
             ]
           }
         ]
@@ -83,27 +105,23 @@
     const PROGRESS_STATUSES = ["(해당없음)", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
 
     const SYMBOL_DAYS = {
-      "★": 2,
-      "☆": 2,
-      "▲": 14,
-      "△": 14,
-      "♥": 7,
-      "♡": 7
+      "★": 2, "☆": 2,
+      "♥": 7, "♡": 7,
+      "▲": 14, "△": 14
     };
 
     function MainApp() {
-      // LocalStorage 상태 초기화
       const [examDate, setExamDate] = useState(() => localStorage.getItem("cpa_examDate") || INITIAL_EXAM_DATE);
       const [subjects, setSubjects] = useState(() => {
-        const saved = localStorage.getItem("cpa_subjects");
-        return saved ? JSON.parse(saved) : INITIAL_SUBJECTS;
+        const saved = localStorage.getItem("cpaStructure");
+        return saved ? JSON.parse(saved) : INITIAL_STRUCTURE;
       });
       const [records, setRecords] = useState(() => {
-        const saved = localStorage.getItem("cpa_records");
+        const saved = localStorage.getItem("cpaRecords");
         return saved ? JSON.parse(saved) : [];
       });
       const [schedules, setSchedules] = useState(() => {
-        const saved = localStorage.getItem("cpa_schedules");
+        const saved = localStorage.getItem("cpaSchedules");
         return saved ? JSON.parse(saved) : [];
       });
       const [matrixProgress, setMatrixProgress] = useState(() => {
@@ -111,20 +129,19 @@
         return saved ? JSON.parse(saved) : {};
       });
 
-      const [activeTab, setActiveTab] = useState("dashboard"); // dashboard, records, settings, schedules
+      const [activeTab, setActiveTab] = useState("dashboard");
 
-      // LocalStorage 동기화
       useEffect(() => { localStorage.setItem("cpa_examDate", examDate); }, [examDate]);
-      useEffect(() => { localStorage.setItem("cpa_subjects", JSON.stringify(subjects)); }, [subjects]);
-      useEffect(() => { localStorage.setItem("cpa_records", JSON.stringify(records)); }, [records]);
-      useEffect(() => { localStorage.setItem("cpa_schedules", JSON.stringify(schedules)); }, [schedules]);
+      useEffect(() => { localStorage.setItem("cpaStructure", JSON.stringify(subjects)); }, [subjects]);
+      useEffect(() => { localStorage.setItem("cpaRecords", JSON.stringify(records)); }, [records]);
+      useEffect(() => { localStorage.setItem("cpaSchedules", JSON.stringify(schedules)); }, [schedules]);
       useEffect(() => { localStorage.setItem("cpa_matrixProgress", JSON.stringify(matrixProgress)); }, [matrixProgress]);
 
       useEffect(() => {
         if (window.lucide) window.lucide.createIcons();
       }, [activeTab, subjects, records, schedules]);
 
-      // D-Day 계산
+      // 3. 대시보드 D-Day 포맷 변경 (D-nn 형식)
       const dDayStr = useMemo(() => {
         if (!examDate) return "D-Day 미설정";
         const target = new Date(examDate);
@@ -136,7 +153,6 @@
         return diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`;
       }, [examDate]);
 
-      // 하위 과목 전체 리스트 추출
       const allSubSubjects = useMemo(() => {
         const list = [];
         subjects.forEach(s => {
@@ -147,7 +163,7 @@
         return list;
       }, [subjects]);
 
-      // 오답 자동 스케줄 생성 함수
+      // 2. 기호별 오답 복습 자동 스케줄링
       const addAutoSchedule = (symbol, problemInfo) => {
         const addDays = SYMBOL_DAYS[symbol];
         if (!addDays) return;
@@ -159,7 +175,7 @@
         const newTodo = {
           id: "sch_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
           date: dateStr,
-          text: `[자동복습: ${symbol}] ${problemInfo}`,
+          text: `[오답복습: ${symbol}] ${problemInfo}`,
           completed: false,
           autoGenerated: true
         };
@@ -167,7 +183,6 @@
         setSchedules(prev => [...prev, newTodo]);
       };
 
-      // 기호 변경 시 기록 업데이트 및 자동 스케줄링
       const handleAddRecord = (newRecord) => {
         setRecords(prev => [newRecord, ...prev]);
         if (newRecord.symbol && SYMBOL_DAYS[newRecord.symbol]) {
@@ -183,9 +198,9 @@
             <div>
               <h1 className="text-2xl font-extrabold text-blue-400 tracking-tight flex items-center gap-2">
                 <i data-lucide="book-open-check" className="w-7 h-7"></i>
-                CPA 수험 진도 & 회독 관리
+                CPA 수험 진도 & 회독 관리 Pro
               </h1>
-              <p className="text-slate-400 text-sm mt-1">회독 기호 기반 자동 오답 스케줄링 및 과목별 총괄 진도 매트릭스</p>
+              <p className="text-slate-400 text-sm mt-1">회독 기호 기반 자동 복습 스케줄링 & 과목별 총괄 진도 매트릭스</p>
             </div>
             <div className="bg-slate-900/80 px-6 py-3 rounded-xl border border-blue-500/30 flex items-center gap-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">목표 시험</span>
@@ -193,7 +208,7 @@
             </div>
           </header>
 
-          {/* Navigation Bar */}
+          {/* Nav */}
           <nav className="flex gap-2 border-b border-slate-700/60 pb-2 overflow-x-auto">
             <button
               onClick={() => setActiveTab("dashboard")}
@@ -209,7 +224,7 @@
                 activeTab === "records" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
               }`}
             >
-              <i data-lucide="filter" className="w-4 h-4"></i> 회독 기록 & 필터 모아보기
+              <i data-lucide="filter" className="w-4 h-4"></i> 공부기록 & 회독 필터
             </button>
             <button
               onClick={() => setActiveTab("schedules")}
@@ -217,7 +232,7 @@
                 activeTab === "schedules" ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
               }`}
             >
-              <i data-lucide="calendar-check" className="w-4 h-4"></i> 복습 스케줄 (할 일)
+              <i data-lucide="calendar-check" className="w-4 h-4"></i> 복습 스케줄
             </button>
             <button
               onClick={() => setActiveTab("settings")}
@@ -229,7 +244,7 @@
             </button>
           </nav>
 
-          {/* Tab Content */}
+          {/* Main Content */}
           <main>
             {activeTab === "dashboard" && (
               <DashboardView
@@ -269,7 +284,7 @@
       );
     }
 
-    // --- 1. 대시보드 뷰 (총괄 진도표 + 오늘/예정 할 일) ---
+    // 4. 대시보드 : 총괄 진도표 매트릭스 반영
     function DashboardView({ allSubSubjects, matrixProgress, setMatrixProgress, schedules, setSchedules }) {
       const handleMatrixChange = (subName, col, value) => {
         setMatrixProgress(prev => ({
@@ -299,7 +314,7 @@
 
       return (
         <div className="space-y-6">
-          {/* 오늘 복습할 일 요약 카드 */}
+          {/* 오늘 복습할 일 */}
           <div className="bg-slate-800/90 p-5 rounded-2xl border border-slate-700/60 shadow-lg">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
@@ -309,7 +324,7 @@
               <span className="text-xs text-slate-400">{todayStr} 기준</span>
             </div>
             {todaySchedules.length === 0 ? (
-              <p className="text-sm text-slate-400 py-2">오늘 예정된 오답 복습 할 일이 없습니다. 깔끔하네요!</p>
+              <p className="text-sm text-slate-400 py-2">오늘 예정된 오답 복습 할 일이 없습니다.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {todaySchedules.map(item => (
@@ -328,16 +343,14 @@
             )}
           </div>
 
-          {/* 총괄 진도표 (행: 하위과목, 열: 연습서/객관식 등) */}
+          {/* 총괄 진도표 */}
           <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <i data-lucide="table" className="w-5 h-5 text-blue-400"></i>
-                  과목별 총괄 진도표
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">각 하위과목 과정별 회독 및 이수 현황을 매트릭스로 관리하세요.</p>
-              </div>
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="table" className="w-5 h-5 text-blue-400"></i>
+                과목별 총괄 진도표
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">하위과목별/과정별 회독 및 진도 상태를 매트릭스로 바로 관리하세요.</p>
             </div>
 
             <div className="overflow-x-auto rounded-xl border border-slate-700/80">
@@ -384,9 +397,8 @@
       );
     }
 
-    // --- 2. 회독 기록 & 필터 모아보기 뷰 ---
+    // 1. 공부기록 탭 : 회독 및 기호 필터링 지원
     function RecordsView({ subjects, records, onAddRecord, onDeleteRecord }) {
-      // 기록 입력 form 상태
       const [selSubject, setSelSubject] = useState(subjects[0]?.name || "");
       const [selSubSubject, setSelSubSubject] = useState("");
       const [selTextbook, setSelTextbook] = useState("");
@@ -396,13 +408,12 @@
       const [symbol, setSymbol] = useState("★");
       const [memo, setMemo] = useState("");
 
-      // 필터링 상태 (회독 수, 기호, 과목별)
+      // 필터
       const [filterSubject, setFilterSubject] = useState("ALL");
       const [filterSubSubject, setFilterSubSubject] = useState("ALL");
       const [filterRound, setFilterRound] = useState("ALL");
       const [filterSymbol, setFilterSymbol] = useState("ALL");
 
-      // 드롭다운 캐스케이딩 처리
       const currentSubSubjectList = useMemo(() => {
         const sub = subjects.find(s => s.name === selSubject);
         return sub ? sub.subSubjects : [];
@@ -435,7 +446,7 @@
 
       const handleSubmit = (e) => {
         e.preventDefault();
-        if (!problemNo.trim()) return alert("문제 번호를 입력해주세요.");
+        if (!problemNo.trim()) return alert("문제 번호를 입력하세요.");
 
         const record = {
           id: "rec_" + Date.now(),
@@ -453,10 +464,8 @@
         onAddRecord(record);
         setProblemNo("");
         setMemo("");
-        alert(`기록이 완료되었습니다. (${symbol} 기호로 복습 할 일이 자동 반영됨)`);
       };
 
-      // 필터링 적용된 기록 목록
       const filteredRecords = useMemo(() => {
         return records.filter(r => {
           if (filterSubject !== "ALL" && r.subject !== filterSubject) return false;
@@ -555,8 +564,8 @@
                   <option value="♡">♡ 빈하트 (7일 후 복습)</option>
                   <option value="▲">▲ 세모 (14일 후 복습)</option>
                   <option value="△">△ 빈세모 (14일 후 복습)</option>
-                  <option value="O">O 정답 (복습 없음)</option>
-                  <option value="X">X 오답 (기본)</option>
+                  <option value="O">O 정답</option>
+                  <option value="X">X 오답</option>
                 </select>
               </div>
 
@@ -564,7 +573,7 @@
                 <label className="block text-xs font-semibold text-slate-400 mb-1">메모 (선택)</label>
                 <input
                   type="text"
-                  placeholder="핵심 요약 및 오답 원인"
+                  placeholder="오답 원인 요약"
                   value={memo}
                   onChange={e => setMemo(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
@@ -582,15 +591,15 @@
             </form>
           </div>
 
-          {/* 회독 및 기호 조건 모아보기 필터 영역 */}
+          {/* 조건 필터링 모아보기 */}
           <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700/80 pb-4">
               <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <i data-lucide="search-code" className="w-5 h-5 text-emerald-400"></i>
-                  회독 & 기호 필터 모아보기
+                  회독 수 & 기호 필터 모아보기
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">원하는 회독 수와 표시 기호별로 반복 틀린 문제를 모아서 점검하세요.</p>
+                <p className="text-xs text-slate-400 mt-1">원하는 회독 수와 표시 기호별로 모아서 반복 틀린 문제만 정밀 복습하세요.</p>
               </div>
               <span className="text-xs font-bold text-slate-300 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
                 검색결과: {filteredRecords.length}건
@@ -656,10 +665,10 @@
               </div>
             </div>
 
-            {/* 필터링된 기록 리스트 */}
+            {/* 필터링 목록 */}
             {filteredRecords.length === 0 ? (
               <div className="text-center py-12 text-slate-500 text-sm bg-slate-900/30 rounded-xl border border-dashed border-slate-800">
-                선택한 필터 조건에 부합하는 문제 풀이 기록이 없습니다.
+                선택한 필터 조건에 해당하는 회독/오답 기록이 없습니다.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -680,7 +689,6 @@
                     <button
                       onClick={() => onDeleteRecord(rec.id)}
                       className="text-slate-500 hover:text-red-400 p-1 transition-colors"
-                      title="기록 삭제"
                     >
                       <i data-lucide="trash-2" className="w-4 h-4"></i>
                     </button>
@@ -693,7 +701,7 @@
       );
     }
 
-    // --- 3. 복습 스케줄 (할 일) 뷰 ---
+    // 복습 스케줄 뷰
     function SchedulesView({ schedules, setSchedules }) {
       const [newTodo, setNewTodo] = useState("");
       const [targetDate, setTargetDate] = useState(new Date().toISOString().split("T")[0]);
@@ -720,7 +728,6 @@
         setSchedules(prev => prev.filter(s => s.id !== id));
       };
 
-      // 날짜별 그룹핑
       const groupedSchedules = useMemo(() => {
         const map = {};
         schedules.forEach(s => {
@@ -738,7 +745,7 @@
           <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <i data-lucide="calendar-plus" className="w-5 h-5 text-blue-400"></i>
-              직접 복습 및 공부 할 일 추가
+              직접 복습/공부 할 일 등록
             </h2>
             <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
               <input
@@ -749,7 +756,7 @@
               />
               <input
                 type="text"
-                placeholder="할 일을 입력하세요 (예: 법인세 문제 10개 오답 재풀이)"
+                placeholder="할 일을 입력하세요"
                 value={newTodo}
                 onChange={e => setNewTodo(e.target.value)}
                 className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
@@ -806,11 +813,10 @@
       );
     }
 
-    // --- 4. 과목 & 시험일 설정 뷰 (이름 변경 시 연동 유지 및 백업병합 버튼 제거됨) ---
+    // 5. 과목 설정 : 이름 수정 시 cpaRecords 데이터 연동 자동 업데이트 처리
     function SettingsView({ subjects, setSubjects, records, setRecords, examDate, setExamDate }) {
       const [newMainSubject, setNewMainSubject] = useState("");
 
-      // 대과목 추가
       const addMainSubject = () => {
         if (!newMainSubject.trim()) return;
         setSubjects(prev => [
@@ -820,29 +826,14 @@
         setNewMainSubject("");
       };
 
-      // 대과목 이름 변경 (기록 연동 유지)
+      // 대과목명 수정 시 records 자동 연동
       const updateMainSubjectName = (subId, oldName, newName) => {
         if (!newName.trim() || oldName === newName) return;
         setSubjects(prev => prev.map(s => s.id === subId ? { ...s, name: newName } : s));
         setRecords(prev => prev.map(r => r.subject === oldName ? { ...r, subject: newName } : r));
       };
 
-      // 하위과목 추가
-      const addSubSubject = (mainId) => {
-        const name = prompt("새 하위과목명을 입력하세요 (예: 법인세법)");
-        if (!name) return;
-        setSubjects(prev => prev.map(s => {
-          if (s.id === mainId) {
-            return {
-              ...s,
-              subSubjects: [...s.subSubjects, { id: "subSub_" + Date.now(), name: name.trim(), textbooks: [] }]
-            };
-          }
-          return s;
-        }));
-      };
-
-      // 하위과목 이름 변경 (기록 연동 유지)
+      // 하위과목명 수정 시 records 자동 연동 (핵심 유실 방지)
       const updateSubSubjectName = (mainId, subSubId, oldName, newName) => {
         if (!newName.trim() || oldName === newName) return;
         setSubjects(prev => prev.map(s => {
@@ -857,30 +848,7 @@
         setRecords(prev => prev.map(r => r.subSubject === oldName ? { ...r, subSubject: newName } : r));
       };
 
-      // 교재 추가
-      const addTextbook = (mainId, subSubId) => {
-        const name = prompt("새 교재명을 입력하세요 (예: (객)강경태)");
-        if (!name) return;
-        setSubjects(prev => prev.map(s => {
-          if (s.id === mainId) {
-            return {
-              ...s,
-              subSubjects: s.subSubjects.map(sub => {
-                if (sub.id === subSubId) {
-                  return {
-                    ...sub,
-                    textbooks: [...sub.textbooks, { id: "tb_" + Date.now(), name: name.trim(), chapters: ["기본 단원"] }]
-                  };
-                }
-                return sub;
-              })
-            };
-          }
-          return s;
-        }));
-      };
-
-      // 교재 이름 변경 (기록 연동 유지)
+      // 교재명 수정 시 records 자동 연동
       const updateTextbookName = (mainId, subSubId, tbId, oldName, newName) => {
         if (!newName.trim() || oldName === newName) return;
         setSubjects(prev => prev.map(s => {
@@ -903,9 +871,44 @@
         setRecords(prev => prev.map(r => r.textbook === oldName ? { ...r, textbook: newName } : r));
       };
 
-      // 단원/챕터 추가
+      const addSubSubject = (mainId) => {
+        const name = prompt("새 하위과목명 (예: 법인세법)");
+        if (!name) return;
+        setSubjects(prev => prev.map(s => {
+          if (s.id === mainId) {
+            return {
+              ...s,
+              subSubjects: [...s.subSubjects, { id: "subSub_" + Date.now(), name: name.trim(), textbooks: [] }]
+            };
+          }
+          return s;
+        }));
+      };
+
+      const addTextbook = (mainId, subSubId) => {
+        const name = prompt("새 교재명 (예: (객)강경태)");
+        if (!name) return;
+        setSubjects(prev => prev.map(s => {
+          if (s.id === mainId) {
+            return {
+              ...s,
+              subSubjects: s.subSubjects.map(sub => {
+                if (sub.id === subSubId) {
+                  return {
+                    ...sub,
+                    textbooks: [...sub.textbooks, { id: "tb_" + Date.now(), name: name.trim(), chapters: ["기본 단원"] }]
+                  };
+                }
+                return sub;
+              })
+            };
+          }
+          return s;
+        }));
+      };
+
       const addChapter = (mainId, subSubId, tbId) => {
-        const chName = prompt("추가할 단원/챕터명을 입력하세요 (예: 감가상각비)");
+        const chName = prompt("추가할 단원/챕터명");
         if (!chName) return;
         setSubjects(prev => prev.map(s => {
           if (s.id === mainId) {
@@ -928,7 +931,6 @@
 
       return (
         <div className="space-y-6">
-          {/* 시험 목표일 설정 */}
           <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-3">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <i data-lucide="calendar" className="w-5 h-5 text-amber-400"></i>
@@ -941,27 +943,23 @@
                 onChange={e => setExamDate(e.target.value)}
                 className="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-slate-200"
               />
-              <span className="text-xs text-slate-400">대시보드 상단에 D-Day 형식으로 표시됩니다.</span>
+              <span className="text-xs text-slate-400">대시보드 상단에 D-Day 형식으로 표기됩니다.</span>
             </div>
           </div>
 
-          {/* 과목 계층 구조 관리 */}
           <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700/60 shadow-xl space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <i data-lucide="folder-tree" className="w-5 h-5 text-blue-400"></i>
-                  과목 및 교재 체계 관리
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">이름 수정 시 기존에 입력된 공부 기록 데이터도 자동으로 연동 유지됩니다.</p>
-              </div>
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <i data-lucide="folder-tree" className="w-5 h-5 text-blue-400"></i>
+                과목 및 교재 체계 관리
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">과목/교재명을 수정하면 기존에 작성된 문제 풀이/회독 기록도 함께 연동 유지됩니다.</p>
             </div>
 
-            {/* 대과목 추가 입력 */}
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="새 대과목명 (예: 상법, 경영학)"
+                placeholder="새 대과목명 (예: 상법)"
                 value={newMainSubject}
                 onChange={e => setNewMainSubject(e.target.value)}
                 className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 w-64"
@@ -974,7 +972,6 @@
               </button>
             </div>
 
-            {/* 과목 트리 */}
             <div className="space-y-4">
               {subjects.map(main => (
                 <div key={main.id} className="bg-slate-900 p-4 rounded-xl border border-slate-700/80 space-y-3">
@@ -994,7 +991,6 @@
                     </button>
                   </div>
 
-                  {/* 하위 과목 목록 */}
                   <div className="pl-4 space-y-3 border-l-2 border-slate-800">
                     {main.subSubjects.map(sub => (
                       <div key={sub.id} className="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50 space-y-2">
@@ -1014,7 +1010,6 @@
                           </button>
                         </div>
 
-                        {/* 교재 목록 */}
                         <div className="pl-4 space-y-2 border-l border-slate-700">
                           {sub.textbooks.map(tb => (
                             <div key={tb.id} className="bg-slate-900/70 p-2 rounded border border-slate-800 space-y-1">
