@@ -1,1544 +1,894 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>CPA 트래커 Pro</title>
-<style>
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #222636;
-    --border: #2e3348;
-    --text: #e8eaf0;
-    --text2: #8b90a7;
-    --text3: #4a4f6a;
-    --accent: #5b7fff;
-    --green: #3ecf8e;
-    --red: #ff6b6b;
-    --radius: 12px;
-    --radius-sm: 8px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPA 수험생 스터디 플래너 & 트래커 Pro</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-dark: #385682;
+            --primary-light: #eef3f9;
+            --accent: #ff6b6b;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --radius: 8px;
+        }
 
-    /* 과목별 파스텔 색상 정의 */
-    --color-경영학-bg: rgba(34, 197, 94, 0.25);
-    --color-경영학-border: #22c55e;
-    --color-경영학-text: #86efac;
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 60px; }
+        
+        /* Header & Nav */
+        header { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.25rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+        nav { display: flex; gap: 0.5rem; }
+        .nav-btn { padding: 0.5rem 1rem; border: none; background: none; border-radius: var(--radius); cursor: pointer; font-weight: 600; color: var(--text-muted); transition: all 0.2s; }
+        .nav-btn.active { background: var(--primary-light); color: var(--primary); }
+        .header-actions { display: flex; gap: 0.5rem; }
+        
+        /* Layout */
+        container { max-width: 1200px; margin: 1.5rem auto; padding: 0 1rem; display: block; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-    --color-경제학-bg: rgba(249, 115, 22, 0.25);
-    --color-경제학-border: #f97316;
-    --color-경제학-text: #fdba74;
+        /* UI Elements */
+        .card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--primary-dark); display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn { padding: 0.5rem 1rem; border-radius: var(--radius); border: 1px solid transparent; cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { border-color: var(--border); background: white; color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-danger { background: var(--accent); color: white; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-muted); }
+        .form-control { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.9rem; outline: none; }
+        .form-control:focus { border-color: var(--primary); }
+        select.form-control { background-color: white; }
 
-    --color-상법-bg: rgba(234, 179, 8, 0.25);
-    --color-상법-border: #eab308;
-    --color-상법-text: #fef08a;
+        /* Tables & Matrix */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        th, td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+        th { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
+        
+        /* Grid Layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        
+        /* Modals */
+        .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: var(--radius); width: 90%; max-width: 500px; padding: 1.5rem; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
 
-    --color-세법-bg: rgba(14, 165, 233, 0.25);
-    --color-세법-border: #0ea5e9;
-    --color-세법-text: #7dd3fc;
+        /* Study Records Specific */
+        .problem-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; background: var(--primary-light); padding: 0.75rem 1rem; border-radius: var(--radius); flex-wrap: wrap; gap: 0.5rem; }
+        .problem-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .problem-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: white; border: 1px solid var(--border); border-radius: var(--radius); }
+        .problem-item.selected { border-color: var(--primary); background: #f0f4f9; }
+        .problem-info { display: flex; align-items: center; gap: 1rem; }
+        .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .badge-turn { background: #e2e8f0; color: #475569; }
+        .badge-status { background: #dbeafe; color: #1e40af; }
 
-    --color-회계학-bg: rgba(239, 68, 68, 0.25);
-    --color-회계학-border: #ef4444;
-    --color-회계학-text: #fca5a5;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { font-family: -apple-system, 'Pretendard', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; padding-bottom: 80px; }
-  .top-bar { padding: 20px 20px 16px; background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .top-bar h1 { font-size: 18px; font-weight: 700; }
-  .top-bar .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .tab-bar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
-  .tab-bar::-webkit-scrollbar { display: none; }
-  .tab-btn { flex: 1; min-width: 60px; padding: 12px 6px; font-size: 12px; font-weight: 600; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .page { display: none; padding: 16px 20px; }
-  .page.active { display: block; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
-  .section-title { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.8px; text-transform: uppercase; margin: 16px 0 8px; }
-  .btn { padding: 8px 12px; border-radius: var(--radius-sm); border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .btn:active { opacity: 0.75; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-ghost { background: var(--surface2); color: var(--text); }
-  .btn-danger { background: rgba(255,107,107,0.15); color: var(--red); }
-  .btn-sm { padding: 4px 8px; font-size: 11px; }
-  .dday-card { background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%); border: 1px solid #3d4a8a; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-  .dday-left { display: flex; flex-direction: column; gap: 4px; }
-  .dday-main { display: flex; align-items: baseline; gap: 8px; }
-  .dday-num { font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
-  .dday-target-date { font-size: 13px; font-weight: 600; color: #a5b4fc; }
-  .dday-right { text-align: right; }
-  
-  .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
-  .bc-item { font-size: 12px; color: var(--text2); cursor: pointer; padding: 3px 6px; border-radius: 4px; background: var(--surface2); }
-  .bc-sep { font-size: 10px; color: var(--text3); }
-  .bc-current { font-size: 12px; color: var(--text); font-weight: 600; }
-  .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
-  .action-btns { display: flex; gap: 4px; }
-  .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
-  .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .prob-num { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-  .history-list { font-size: 11px; color: var(--text2); border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
-  .history-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 0; }
-  .sub-tab-bar { display: flex; gap: 6px; margin-bottom: 12px; }
-  .sub-tab-btn { flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center; background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; }
-  .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-  
-  .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
-  .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
-  .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
-  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 72px; }
-  .month-cell { position: relative; min-height: 72px; padding: 4px; cursor: pointer; transition: background 0.15s; }
-  .month-cell:hover { background: rgba(255, 255, 255, 0.03); }
-  .month-cell.today .date-num { color: var(--accent); font-weight: 800; }
-  .month-cell.other-month { opacity: 0.25; }
-  .date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 4px; pointer-events: none; }
-  
-  .gantt-bars-container { position: absolute; top: 22px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
-  .gantt-bar-slot { height: 14px; position: relative; width: 100%; }
-  .gantt-bar { position: absolute; height: 14px; line-height: 14px; font-size: 8px; font-weight: 600; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10; box-sizing: border-box; }
-  .gantt-start { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
-  .gantt-end { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
-  
-  .gantt-경영학 { background: var(--color-경영학-bg); border: 1px solid var(--color-경영학-border); color: var(--color-경영학-text); }
-  .gantt-경제학 { background: var(--color-경제학-bg); border: 1px solid var(--color-경제학-border); color: var(--color-경제학-text); }
-  .gantt-상법   { background: var(--color-상법-bg); border: 1px solid var(--color-상법-border); color: var(--color-상법-text); }
-  .gantt-세법   { background: var(--color-세법-bg); border: 1px solid var(--color-세법-border); color: var(--color-세법-text); }
-  .gantt-회계학 { background: var(--color-회계학-bg); border: 1px solid var(--color-회계학-border); color: var(--color-회계학-text); }
+        /* Calendar Matrix Styling */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .calendar-day-header { background: var(--primary-light); padding: 0.5rem; text-align: center; font-weight: 600; font-size: 0.85rem; color: var(--primary-dark); }
+        .calendar-day { background: white; min-height: 100px; padding: 0.4rem; font-size: 0.8rem; }
+        .calendar-day .date-num { font-weight: 600; margin-bottom: 0.3rem; color: var(--text-muted); }
+        .calendar-event { font-size: 0.75rem; padding: 2px 4px; background: var(--primary-light); color: var(--primary-dark); border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
-  .form-group { margin-bottom: 12px; }
-  .form-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; display: block; }
-  .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; color: var(--text); outline: none; }
-  .days-checkboxes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-  .day-chk { display: none; }
-  .day-lbl { padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; cursor: pointer; }
-  .day-chk:checked + .day-lbl { background: var(--accent); color: white; border-color: var(--accent); }
-  
-  .badge-pending { background: rgba(255, 255, 255, 0.1); color: #bbb; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-  .badge-rollover { background: rgba(249, 115, 22, 0.2); color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-  .badge-done { background: rgba(62, 207, 142, 0.15); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-
-  .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
-  .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
-
-  /* 다중 필터바 스타일 */
-  .filter-bar { display: flex; gap: 6px; margin-bottom: 12px; background: var(--surface2); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); align-items: center; flex-wrap: wrap; }
-  .filter-btn { flex: 1; min-width: 90px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 11px; padding: 6px 8px; text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .filter-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
-  .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-  .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; background: var(--surface2); padding: 8px 10px; border-radius: 6px; }
-
-  /* 총괄 진도표 전용 CSS */
-  .matrix-wrapper { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; margin-top: 8px; }
-  .matrix-table { width: 100%; border-collapse: collapse; min-width: 520px; font-size: 11px; }
-  .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 4px; text-align: center; vertical-align: middle; }
-  .matrix-table th { background: var(--surface2); color: var(--text2); font-weight: 600; white-space: nowrap; }
-  .matrix-table td.sub-name { background: var(--surface2); font-weight: 700; color: var(--text); white-space: nowrap; position: sticky; left: 0; z-index: 5; text-align: left; padding-left: 8px; }
-  .matrix-select { background: transparent; color: var(--text); border: none; font-size: 11px; font-weight: 600; cursor: pointer; text-align-last: center; outline: none; width: 100%; }
-  
-  /* 진도 시각화 배지 스타일 */
-  .badge-matrix { display: inline-block; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; width: 100%; text-align: center; }
-  .status-none { background: rgba(255,255,255,0.05); color: var(--text3); }
-  .status-done { background: rgba(62, 207, 142, 0.2); color: var(--green); border: 1px solid var(--green); }
-  .status-1r   { background: rgba(91, 127, 255, 0.2); color: var(--accent); border: 1px solid var(--accent); }
-  .status-2r   { background: rgba(14, 165, 233, 0.2); color: #7dd3fc; border: 1px solid #0ea5e9; }
-  .status-3r   { background: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid #eab308; }
-  .status-4r   { background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid #f97316; }
-  .status-5r   { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
-</style>
+        /* Checkbox styling */
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    </style>
 </head>
 <body>
 
-<div class="top-bar">
-  <div>
-    <h1>📚 CPA Tracker Pro</h1>
-    <div class="sub">2027년 동차 합격 목표</div>
-  </div>
-  <div>
-    <button class="btn btn-sm btn-ghost" onclick="resetToDefault()">🔄 초기화</button>
-    <button class="btn btn-sm btn-ghost" onclick="exportData()">💾 백업</button>
-    <button class="btn btn-sm btn-ghost" onclick="importData()">📂 복구</button>
-  </div>
-</div>
+    <header>
+        <div class="logo">
+            <span>📚</span> CPA 트래커 Pro
+        </div>
+        <nav>
+            <button class="nav-btn active" onclick="switchTab('dashboard')">대시보드</button>
+            <button class="nav-btn" onclick="switchTab('records')">공부기록</button>
+            <button class="nav-btn" onclick="switchTab('calendar')">캘린더/스케줄</button>
+            <button class="nav-btn" onclick="switchTab('manage')">과목 관리</button>
+        </nav>
+        <div class="header-actions">
+            <button class="btn btn-outline btn-sm" onclick="exportData()">💾 백업</button>
+            <button class="btn btn-outline btn-sm" onclick="triggerImport()">📂 복구</button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        </div>
+    </header>
 
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="showPage('dashboard')">대시보드</button>
-  <button class="tab-btn" onclick="showPage('study')">공부기록</button>
-  <button class="tab-btn" onclick="showPage('scheduler')">스케줄러</button>
-  <button class="tab-btn" onclick="showPage('calendar')">캘린더</button>
-</div>
+    <container>
+        <!-- 1. 대시보드 탭 -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="grid-2" style="margin-bottom: 1.5rem;">
+                <div class="card" style="margin:0;">
+                    <div class="card-title">🎯 시험 D-Day</div>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);" id="ddayDisplay">D-178</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;" id="ddaySub">CPA 1차 시험까지 힘내세요!</div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <div class="card-title">⚡ 빠른 상태 정보</div>
+                    <div style="margin-top:0.5rem; font-size: 0.95rem;" id="quickStatsInfo">
+                        등록된 데이터 로딩 중...
+                    </div>
+                </div>
+            </div>
 
-<!-- 대시보드 -->
-<div id="page-dashboard" class="page active">
-  <div class="dday-card">
-    <div class="dday-left">
-      <div class="dday-main">
-        <div class="dday-num" id="ddayNum">D-—</div>
-        <div class="dday-target-date" style="font-size:12px; color:var(--text2);">2027-02-28</div>
-      </div>
-    </div>
-    <div class="dday-right">
-      <div style="font-size:12px;color:var(--text2);" id="todayDate"></div>
-      <div style="font-size:14px;font-weight:700;">CPA 1차 시험</div>
-    </div>
-  </div>
-  
-  <div class="section-title">📊 과목별 총괄 진도표</div>
-  <div class="matrix-wrapper">
-    <table class="matrix-table">
-      <thead>
-        <tr>
-          <th style="min-width: 100px;">하위 과목</th>
-          <th>(연)인강</th>
-          <th>(연)문풀</th>
-          <th>(객)문풀</th>
-          <th>(객)기출</th>
-          <th>(객)모고</th>
-          <th>기타</th>
-        </tr>
-      </thead>
-      <tbody id="matrixTableBody"></tbody>
-    </table>
-  </div>
-</div>
+            <div class="card">
+                <div class="card-title">📊 과목별 총괄 진도표</div>
+                <div class="table-responsive">
+                    <table id="matrixTable">
+                        <thead>
+                            <tr>
+                                <th>하위과목</th>
+                                <th>연습서인강</th>
+                                <th>연습서문풀</th>
+                                <th>객관식</th>
+                                <th>객기출</th>
+                                <th>객모고</th>
+                                <th>기타</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTbody">
+                            <!-- JS 매트릭스 렌더링 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-<!-- 공부기록 트래커 -->
-<div id="page-study" class="page">
-  <div class="breadcrumb" id="breadcrumb"></div>
+        <!-- 2. 공부기록 탭 -->
+        <div id="tab-records" class="tab-content">
+            <div class="card">
+                <div class="card-title">📝 문제 풀이 기록 및 관리</div>
+                <div class="grid-4" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="form-group">대과목</label>
+                        <select id="recMainSub" class="form-control" onchange="onRecMainSubChange()"></select>
+                    </div>
+                    <div>
+                        <label class="form-group">하위과목</label>
+                        <select id="recSubSub" class="form-control" onchange="onRecSubSubChange()"></select>
+                    </div>
+                    <div>
+                        <label class="form-group">교재(Task)</label>
+                        <select id="recTask" class="form-control" onchange="onRecTaskChange()"></select>
+                    </div>
+                    <div>
+                        <label class="form-group">챕터</label>
+                        <select id="recChapter" class="form-control" onchange="renderProblemList()"></select>
+                    </div>
+                </div>
 
-  <!-- 다중 중복 선택 필터 바 -->
-  <div class="filter-bar">
-    <button class="filter-btn" id="filterRoundBtn" onclick="openFilterModal('round')">회독 중복 선택</button>
-    <button class="filter-btn" id="filterStatusBtn" onclick="openFilterModal('status')">기호 중복 선택</button>
-    <button class="btn btn-sm btn-ghost" onclick="resetFilters()">🔄 초기화</button>
-  </div>
+                <div class="grid-2" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="form-group">회독 수 필터</label>
+                        <select id="filterTurn" class="form-control" onchange="renderProblemList()">
+                            <option value="">전체 회독</option>
+                            <option value="1">1회독</option>
+                            <option value="2">2회독</option>
+                            <option value="3">3회독</option>
+                            <option value="4">4회독</option>
+                            <option value="5">5회독 이상</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-group">기호/상태 필터</label>
+                        <select id="filterStatus" class="form-control" onchange="renderProblemList()">
+                            <option value="">전체 상태</option>
+                            <option value="O">O (완벽)</option>
+                            <option value="★">★ (별표/오답)</option>
+                            <option value="☆">☆ (중요)</option>
+                            <option value="♥">♥ (하트)</option>
+                            <option value="△">△ (세모/애매)</option>
+                            <option value="X">X (모름)</option>
+                        </select>
+                    </div>
+                </div>
 
-  <div id="studyList"></div>
-</div>
+                <!-- 툴바 (일괄 변경/삭제) -->
+                <div class="problem-toolbar">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="selectAllProb" onchange="toggleSelectAll(this)">
+                        <label for="selectAllProb" style="font-weight: 600; cursor: pointer;">전체 선택</label>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-outline btn-sm" onclick="openBatchModal()">✏️ 선택항목 일괄 상태/날짜 변경</button>
+                        <button class="btn btn-danger btn-sm" onclick="batchDelete()">🗑️ 선택항목 삭제</button>
+                        <button class="btn btn-primary btn-sm" onclick="openAddProblemModal()">➕ 문제 신규 일괄 추가</button>
+                    </div>
+                </div>
 
-<!-- 스케줄러 -->
-<div id="page-scheduler" class="page">
-  <div class="card">
-    <div style="font-weight:700;margin-bottom:12px;">📅 공부 목표 및 기간 배분기</div>
-    <div class="form-group">
-      <label class="form-label">1. 대과목 선택</label>
-      <select class="form-input" id="schSubj" onchange="updateSubSelect()"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">2. 하위 과목 선택</label>
-      <select class="form-input" id="schSub" onchange="updateTaskSelect()"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">3. 교재 / 강좌 선택</label>
-      <select class="form-input" id="schTask" onchange="updateChSelect()"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">4. 챕터 선택</label>
-      <select class="form-input" id="schCh"></select>
+                <!-- 문제 목록 리스트 -->
+                <div id="problemList" class="problem-list">
+                    <!-- JS 생성 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 캘린더 탭 (월요일 시작) -->
+        <div id="tab-calendar" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span id="calMonthTitle">2026년 9월</span>
+                    <div>
+                        <button class="btn btn-outline btn-sm" onclick="moveMonth(-1)">◀ 이전달</button>
+                        <button class="btn btn-outline btn-sm" onclick="moveMonth(1)">다음달 ▶</button>
+                    </div>
+                </div>
+                
+                <div class="problem-toolbar" style="margin-bottom: 1rem;">
+                    <span>📅 스케줄 자동배분 및 이월 관리</span>
+                    <button class="btn btn-outline btn-sm" onclick="openBatchDateMoveModal()">🚚 미진행 일정 일괄 날짜 이동</button>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- 월요일 시작 7열 헤더 + 일자 셀 JS 구성 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 과목 관리 탭 -->
+        <div id="tab-manage" class="tab-content">
+            <div class="card">
+                <div class="card-title">⚙️ 과목 및 교재 구조 관리</div>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 1rem;">
+                    ※ 과목/교재/챕터 이름을 수정하더라도 기존 문제 회독 데이터 및 스케줄 데이터 키가 일괄 갱신되어 유실되지 않습니다.
+                </p>
+                <div id="structureTree"></div>
+            </div>
+        </div>
+    </container>
+
+    <!-- 모달 1: 단일/신규 문제 기록 수정 -->
+    <div class="modal-overlay" id="recordModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="recordModalTitle">문제 기록 수정</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeModal('recordModal')">X</button>
+            </div>
+            <div class="form-group">
+                <label>문제 번호 (예: 1, 2, 3)</label>
+                <input type="text" id="modalProbNum" class="form-control" placeholder="1-5 또는 1">
+            </div>
+            <div class="form-group">
+                <label>풀이 날짜</label>
+                <input type="date" id="modalProbDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>문제 상태 / 기호</label>
+                <select id="modalProbStatus" class="form-control">
+                    <option value="O">O (완벽)</option>
+                    <option value="★">★ (별/오답 - +2일 뒤 복습)</option>
+                    <option value="☆">☆ (중요 - +2일 뒤 복습)</option>
+                    <option value="♥">♥ (하트 - +7일 뒤 복습)</option>
+                    <option value="△">△ (세모 - +14일 뒤 복습)</option>
+                    <option value="X">X (틀림)</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('recordModal')">취소</button>
+                <button class="btn btn-primary" onclick="saveProbRecord()">저장하기</button>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">배분할 총 문제 수 (예: 50)</label>
-      <input type="number" class="form-input" id="schTotal" placeholder="예: 50">
+    <!-- 모달 2: 선택 문제 일괄 변경 모달 (핵심 수정 반영 위치) -->
+    <div class="modal-overlay" id="batchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>선택 문제 일괄 상태/날짜 수정</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeModal('batchModal')">X</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                선택한 문제들의 **동일 회독** 상태를 새로운 회독 추가 없이 덮어씌워 수정합니다.
+            </p>
+            <div class="form-group">
+                <label>변경할 날짜</label>
+                <input type="date" id="batchDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>변경할 상태 / 기호</label>
+                <select id="batchStatus" class="form-control">
+                    <option value="O">O (완벽)</option>
+                    <option value="★">★ (별/오답 - +2일 뒤 복습)</option>
+                    <option value="☆">☆ (중요 - +2일 뒤 복습)</option>
+                    <option value="♥">♥ (하트 - +7일 뒤 복습)</option>
+                    <option value="△">△ (세모 - +14일 뒤 복습)</option>
+                    <option value="X">X (틀림)</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('batchModal')">취소</button>
+                <button class="btn btn-primary" onclick="applyBatchUpdate()">일괄 수정 적용</button>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">시작일 ~ 종료일</label>
-      <div style="display:flex;gap:6px;">
-        <input type="date" class="form-input" id="schStart">
-        <input type="date" class="form-input" id="schEnd">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">공부 요일 지정</label>
-      <div class="days-checkboxes">
-        <input type="checkbox" id="d1" class="day-chk" value="1" checked><label for="d1" class="day-lbl">월</label>
-        <input type="checkbox" id="d2" class="day-chk" value="2" checked><label for="d2" class="day-lbl">화</label>
-        <input type="checkbox" id="d3" class="day-chk" value="3" checked><label for="d3" class="day-lbl">수</label>
-        <input type="checkbox" id="d4" class="day-chk" value="4" checked><label for="d4" class="day-lbl">목</label>
-        <input type="checkbox" id="d5" class="day-chk" value="5" checked><label for="d5" class="day-lbl">금</label>
-        <input type="checkbox" id="d6" class="day-chk" value="6"><label for="d6" class="day-lbl">토</label>
-        <input type="checkbox" id="d0" class="day-chk" value="0"><label for="d0" class="day-lbl">일</label>
-      </div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="generateSchedule()">배분 실행 & 공부기록 자동 연동</button>
-  </div>
-</div>
 
-<!-- 캘린더 -->
-<div id="page-calendar" class="page">
-  <div class="sub-tab-bar">
-    <div class="sub-tab-btn active" id="calTabDaily" onclick="setCalView('daily')">Daily</div>
-    <div class="sub-tab-btn" id="calTabWeekly" onclick="setCalView('weekly')">Weekly</div>
-    <div class="sub-tab-btn" id="calTabMonthly" onclick="setCalView('monthly')">Monthly</div>
-  </div>
-  <div id="calList"></div>
-</div>
-
-<!-- 다중 선택 필터 모달 -->
-<div class="modal-overlay" id="filterModal">
-  <div class="modal">
-    <div style="font-weight:700;margin-bottom:12px;" id="filterModalTitle">필터 선택</div>
-    <div class="checkbox-group" id="filterCheckboxList"></div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('filterModal')">취소</button>
-      <button class="btn btn-primary" style="flex:1" onclick="applyMultiFilter()">필터 적용하기</button>
+    <!-- 모달 3: 미진행 날짜 이동 모달 -->
+    <div class="modal-overlay" id="batchDateMoveModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>미진행 일정 날짜 이동</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeModal('batchDateMoveModal')">X</button>
+            </div>
+            <div class="form-group">
+                <label>기존 날짜</label>
+                <input type="date" id="moveFromDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>이동할 날짜</label>
+                <input type="date" id="moveToDate" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('batchDateMoveModal')">취소</button>
+                <button class="btn btn-primary" onclick="executeBatchDateMove()">날짜 이동 실행</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-
-<!-- 개별 풀이 기록 모달 -->
-<div class="modal-overlay" id="probModal">
-  <div class="modal">
-    <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">문제 기록 수정</div>
-    <div class="form-group">
-      <label class="form-label">회독 선택</label>
-      <select class="form-input" id="probRound">
-        <option value="1">1회독</option>
-        <option value="2">2회독</option>
-        <option value="3">3회독</option>
-        <option value="4">4회독</option>
-        <option value="5">5회독</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">상태 변경</label>
-      <select class="form-input" id="probStatus">
-        <option value="O">O (맞음)</option>
-        <option value="△">△ (실수) - 14일 후 복습</option>
-        <option value="☆">☆ (오답) - 2일 후 복습</option>
-        <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
-        <option value="미진행">미진행</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">풀이/예정 날짜</label>
-      <input type="date" class="form-input" id="probDate">
-    </div>
-    <div class="form-group">
-      <label class="form-label">메모</label>
-      <input type="text" class="form-input" id="probMemo" placeholder="오답 이유 등">
-    </div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('probModal')">취소</button>
-      <button class="btn btn-primary" style="flex:1" onclick="saveProbRecord()">저장하기</button>
-    </div>
-  </div>
-</div>
-
-<!-- 일괄 기록 수정 모달 -->
-<div class="modal-overlay" id="bulkDateModal">
-  <div class="modal">
-    <div style="font-weight:700;margin-bottom:12px;">📝 선택한 문제 일괄 수정</div>
-    <div class="form-group">
-      <label class="form-label">적용할 회독</label>
-      <select class="form-input" id="bulkRound">
-        <option value="1">1회독</option>
-        <option value="2">2회독</option>
-        <option value="3">3회독</option>
-        <option value="4">4회독</option>
-        <option value="5">5회독</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">일괄 적용할 상태(기호)</label>
-      <select class="form-input" id="bulkStatus">
-        <option value="O">O (맞음)</option>
-        <option value="△">△ (실수) - 14일 후 복습</option>
-        <option value="☆">☆ (오답) - 2일 후 복습</option>
-        <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
-        <option value="미진행">미진행</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">변경할 지정 날짜</label>
-      <input type="date" class="form-input" id="bulkTargetDate">
-    </div>
-    <div class="form-group">
-      <label class="form-label">메모 (선택사항)</label>
-      <input type="text" class="form-input" id="bulkMemo" placeholder="예: 1회차 전체채점 일괄입력">
-    </div>
-    <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">
-      * 체크 박스로 선택하신 모든 문제의 풀이 기록이 지정한 정보로 일괄 저장 및 추가됩니다.
-    </div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('bulkDateModal')">취소</button>
-      <button class="btn btn-primary" style="flex:1" onclick="executeSelectedBulkDateChange()">일괄 수정 실행</button>
-    </div>
-  </div>
-</div>
 
 <script>
-const DEFAULT_STRUCTURE = {
-  "경영학": { "일반경영": { "객관식 기출": ["기본"] }, "재무관리": { "연습서 문풀": ["기본"] } },
-  "경제학": { "미시경제": { "객관식 기출": ["기본"] } },
-  "상법": { "회사법": { "객관식 기출": ["기본"] } },
-  "세법": { "법인세법": { "(객)강경태": ["CH.1 총설"] } },
-  "회계학": { "중급회계": { "연습서 문풀": ["기본"] } }
+/**
+ * CPA Tracker Core JavaScript
+ * Storage Keys: cpaStructure, cpaRecords, cpaSchedules, cpaProgressMatrix
+ */
+
+// Initial Default Structure if empty
+const defaultStructure = {
+    "세법": {
+        "법인세법": {
+            "(객)강경태": ["기본 챕터", "1장 총칙", "2장 익금"],
+            "(연)강경태": ["1장 총칙"]
+        }
+    },
+    "회계학": {
+        "재무회계": {
+            "(객)기출": ["기본 챕터"]
+        }
+    }
 };
 
-/* 새로 지정된 총괄 진도표 목록 및 옵션 설정 */
-const MATRIX_SUB_LIST = [
-  "일반경영", "재무관리", "미시경제", "거시경제", 
-  "회사법", "외감&공회법", "법인세법", "소득세법", 
-  "부가가치세법", "국기법", "상증&기타세법", 
-  "중급회계", "고급회계", "정부회계", "원가관리회계"
-];
-const MATRIX_COLS = ["(연)인강", "(연)문풀", "(객)문풀", "(객)기출", "(객)모고", "기타"];
-const MATRIX_OPTIONS = ["-", "미진행", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
+let cpaStructure = JSON.parse(localStorage.getItem('cpaStructure')) || defaultStructure;
+let cpaRecords = JSON.parse(localStorage.getItem('cpaRecords')) || {};
+let cpaSchedules = JSON.parse(localStorage.getItem('cpaSchedules')) || {};
+let cpaProgressMatrix = JSON.parse(localStorage.getItem('cpaProgressMatrix')) || {};
 
-function getProgressMatrix() {
-  return JSON.parse(localStorage.getItem('cpaProgressMatrix') || '{}');
-}
-function saveProgressMatrix(data) {
-  localStorage.setItem('cpaProgressMatrix', JSON.stringify(data));
-}
+let currentCalDate = new Date(2026, 8, 1); // 2026년 9월 기본
 
-/* 다중 선택 필터 데이터 구조 */
-let selectedFilterRounds = [];
-let selectedFilterStatuses = [];
-let currentFilterTarget = null; // 'round' or 'status'
+// Initialize Page
+window.onload = function() {
+    saveAllData();
+    initSelects();
+    renderMatrix();
+    renderProblemList();
+    renderCalendar();
+    renderStructureTree();
+};
 
-function getStructure() {
-  const data = localStorage.getItem('cpaStructure');
-  return data ? JSON.parse(data) : DEFAULT_STRUCTURE;
-}
-function saveStructure(struct) { localStorage.setItem('cpaStructure', JSON.stringify(struct)); }
-function getData() { return JSON.parse(localStorage.getItem('cpaRecords') || '{}'); }
-function saveData(data) { localStorage.setItem('cpaRecords', JSON.stringify(data)); }
-function getSchedules() { return JSON.parse(localStorage.getItem('cpaSchedules') || '[]'); }
-function saveSchedules(schs) { localStorage.setItem('cpaSchedules', JSON.stringify(schs)); }
-
-function resetToDefault() {
-  if (confirm('초기화하시겠습니까? 데이터가 전부 삭제됩니다.')) {
-    localStorage.clear();
-    location.reload();
-  }
+function saveAllData() {
+    localStorage.setItem('cpaStructure', JSON.stringify(cpaStructure));
+    localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
+    localStorage.setItem('cpaSchedules', JSON.stringify(cpaSchedules));
+    localStorage.setItem('cpaProgressMatrix', JSON.stringify(cpaProgressMatrix));
 }
 
-function updateRecordKeys(oldPrefix, newPrefix) {
-  const records = getData();
-  const updatedRecords = {};
+// Navigation Tab Switch
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById('tab-' + tabId).classList.add('active');
+    event.target.classList.add('active');
 
-  Object.keys(records).forEach(key => {
-    if (key.startsWith(oldPrefix + '|')) {
-      const newKey = key.replace(oldPrefix + '|', newPrefix + '|');
-      updatedRecords[newKey] = records[key];
+    if(tabId === 'dashboard') renderMatrix();
+    if(tabId === 'records') renderProblemList();
+    if(tabId === 'calendar') renderCalendar();
+    if(tabId === 'manage') renderStructureTree();
+}
+
+/* -------------------------------------------------------------------------- */
+/* SELECT BOX & CASCADE LOGIC                                                 */
+/* -------------------------------------------------------------------------- */
+function initSelects() {
+    const mainSel = document.getElementById('recMainSub');
+    mainSel.innerHTML = '';
+    Object.keys(cpaStructure).forEach(m => {
+        mainSel.innerHTML += `<option value="${m}">${m}</option>`;
+    });
+    onRecMainSubChange();
+}
+
+function onRecMainSubChange() {
+    const mainVal = document.getElementById('recMainSub').value;
+    const subSel = document.getElementById('recSubSub');
+    subSel.innerHTML = '';
+    if(cpaStructure[mainVal]) {
+        Object.keys(cpaStructure[mainVal]).forEach(s => {
+            subSel.innerHTML += `<option value="${s}">${s}</option>`;
+        });
+    }
+    onRecSubSubChange();
+}
+
+function onRecSubSubChange() {
+    const mainVal = document.getElementById('recMainSub').value;
+    const subVal = document.getElementById('recSubSub').value;
+    const taskSel = document.getElementById('recTask');
+    taskSel.innerHTML = '';
+    if(cpaStructure[mainVal] && cpaStructure[mainVal][subVal]) {
+        Object.keys(cpaStructure[mainVal][subVal]).forEach(t => {
+            taskSel.innerHTML += `<option value="${t}">${t}</option>`;
+        });
+    }
+    onRecTaskChange();
+}
+
+function onRecTaskChange() {
+    const mainVal = document.getElementById('recMainSub').value;
+    const subVal = document.getElementById('recSubSub').value;
+    const taskVal = document.getElementById('recTask').value;
+    const chpSel = document.getElementById('recChapter');
+    chpSel.innerHTML = '';
+    if(cpaStructure[mainVal] && cpaStructure[mainVal][subVal] && cpaStructure[mainVal][subVal][taskVal]) {
+        cpaStructure[mainVal][subVal][taskVal].forEach(ch => {
+            chpSel.innerHTML += `<option value="${ch}">${ch}</option>`;
+        });
+    }
+    renderProblemList();
+}
+
+function getCurrentPathKey() {
+    const m = document.getElementById('recMainSub').value;
+    const s = document.getElementById('recSubSub').value;
+    const t = document.getElementById('recTask').value;
+    const c = document.getElementById('recChapter').value;
+    return `${m}|${s}|${t}|${c}`;
+}
+
+/* -------------------------------------------------------------------------- */
+/* PROBLEM RECORDS & BATCH UPDATES (CORE TROUBLESHOOTING FIX)                 */
+/* -------------------------------------------------------------------------- */
+function renderProblemList() {
+    const pathKey = getCurrentPathKey();
+    const listEl = document.getElementById('problemList');
+    listEl.innerHTML = '';
+
+    const filterT = document.getElementById('filterTurn').value;
+    const filterS = document.getElementById('filterStatus').value;
+
+    const matchedKeys = Object.keys(cpaRecords).filter(k => k.startsWith(pathKey + '|'));
+
+    // Sort by problem number numerically if possible
+    matchedKeys.sort((a,b) => {
+        const pA = parseInt(a.split('|').pop()) || 0;
+        const pB = parseInt(b.split('|').pop()) || 0;
+        return pA - pB;
+    });
+
+    if(matchedKeys.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-muted);">등록된 문제 풀이 기록이 없습니다.</div>';
+        return;
+    }
+
+    matchedKeys.forEach(fullKey => {
+        const probNum = fullKey.split('|').pop();
+        const history = cpaRecords[fullKey] || [];
+        if(history.length === 0) return;
+
+        const lastRec = history[history.length - 1]; // Latest Turn Record
+
+        // Apply Filters
+        if(filterT && lastRec.turn != filterT) return;
+        if(filterS && lastRec.status !== filterS) return;
+
+        const item = document.createElement('div');
+        item.className = 'problem-item';
+        item.dataset.key = fullKey;
+        item.innerHTML = `
+            <div class="problem-info">
+                <input type="checkbox" class="prob-checkbox" value="${fullKey}" onchange="updateItemSelection(this)">
+                <span style="font-weight:700; width:60px;">문제 ${probNum}</span>
+                <span class="badge badge-turn">${lastRec.turn}회독</span>
+                <span class="badge badge-status">${lastRec.status}</span>
+                <span style="font-size:0.85rem; color:var(--text-muted);">${lastRec.date}</span>
+            </div>
+            <div>
+                <button class="btn btn-outline btn-sm" onclick="openSingleEditModal('${fullKey}')">수정</button>
+            </div>
+        `;
+        listEl.appendChild(item);
+    });
+}
+
+function toggleSelectAll(master) {
+    const checkboxes = document.querySelectorAll('.prob-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = master.checked;
+        const parent = cb.closest('.problem-item');
+        if(parent) {
+            if(master.checked) parent.classList.add('selected');
+            else parent.classList.remove('selected');
+        }
+    });
+}
+
+function updateItemSelection(cb) {
+    const parent = cb.closest('.problem-item');
+    if(cb.checked) parent.classList.add('selected');
+    else parent.classList.remove('selected');
+}
+
+function openAddProblemModal() {
+    document.getElementById('recordModalTitle').innerText = "문제 신규 추가";
+    document.getElementById('modalProbNum').value = "1-5";
+    document.getElementById('modalProbDate').value = new Date().toISOString().substring(0,10);
+    document.getElementById('modalProbStatus').value = "O";
+    document.getElementById('recordModal').dataset.mode = "add";
+    document.getElementById('recordModal').classList.add('active');
+}
+
+function openSingleEditModal(fullKey) {
+    const probNum = fullKey.split('|').pop();
+    const history = cpaRecords[fullKey] || [];
+    const lastRec = history[history.length - 1] || { date: new Date().toISOString().substring(0,10), status: 'O' };
+
+    document.getElementById('recordModalTitle').innerText = `문제 ${probNum} 기록 수정`;
+    document.getElementById('modalProbNum').value = probNum;
+    document.getElementById('modalProbDate').value = lastRec.date;
+    document.getElementById('modalProbStatus').value = lastRec.status;
+    
+    document.getElementById('recordModal').dataset.mode = "edit";
+    document.getElementById('recordModal').dataset.targetKey = fullKey;
+    document.getElementById('recordModal').classList.add('active');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+// Single Save or Range Add
+function saveProbRecord() {
+    const mode = document.getElementById('recordModal').dataset.mode;
+    const pathKey = getCurrentPathKey();
+    const rawNum = document.getElementById('modalProbNum').value.trim();
+    const dateVal = document.getElementById('modalProbDate').value;
+    const statusVal = document.getElementById('modalProbStatus').value;
+
+    if(!rawNum || !dateVal) { alert("문제 번호와 날짜를 입력하세요."); return; }
+
+    let probList = [];
+    if(rawNum.includes('-')) {
+        const [start, end] = rawNum.split('-').map(n => parseInt(n.trim()));
+        for(let i = start; i <= end; i++) probList.push(i);
     } else {
-      updatedRecords[key] = records[key];
-    }
-  });
-
-  saveData(updatedRecords);
-}
-
-let studyPath = [];
-let calViewMode = 'daily';
-let currentCalDate = new Date();
-
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  if (id === 'dashboard') renderDashboard();
-  if (id === 'study') renderStudy();
-  if (id === 'scheduler') initSchedulerSelects();
-  if (id === 'calendar') renderCalendar();
-}
-
-function getStatusClass(val) {
-  if (val === '완료') return 'status-done';
-  if (val === '1회독') return 'status-1r';
-  if (val === '2회독') return 'status-2r';
-  if (val === '3회독') return 'status-3r';
-  if (val === '4회독') return 'status-4r';
-  if (val === '5회독') return 'status-5r';
-  return 'status-none';
-}
-
-function renderDashboard() {
-  const exam = new Date('2027-02-28');
-  const diff = Math.ceil((exam - new Date()) / 86400000);
-  document.getElementById('ddayNum').textContent = diff >= 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
-  document.getElementById('todayDate').textContent = new Date().toISOString().split('T')[0];
-
-  /* 총괄 진도표 매트릭스 랜더링 */
-  const matrixData = getProgressMatrix();
-  const tbody = document.getElementById('matrixTableBody');
-  tbody.innerHTML = '';
-
-  MATRIX_SUB_LIST.forEach(sub => {
-    let rowHtml = `<tr><td class="sub-name">${sub}</td>`;
-    MATRIX_COLS.forEach(col => {
-      const key = `${sub}|${col}`;
-      // 기존 (해당없음) 데이터 호환 처리
-      let val = matrixData[key] || '-';
-      if (val === '(해당없음)') val = '-';
-
-      const statusClass = getStatusClass(val);
-
-      let optionsHtml = MATRIX_OPTIONS.map(opt => `
-        <option value="${opt}" ${opt === val ? 'selected' : ''}>${opt}</option>
-      `).join('');
-
-      rowHtml += `
-        <td>
-          <div class="badge-matrix ${statusClass}">
-            <select class="matrix-select" onchange="updateMatrixStatus('${sub}', '${col}', this.value)">
-              ${optionsHtml}
-            </select>
-          </div>
-        </td>
-      `;
-    });
-    rowHtml += `</tr>`;
-    tbody.innerHTML += rowHtml;
-  });
-}
-
-function updateMatrixStatus(sub, col, value) {
-  const matrixData = getProgressMatrix();
-  matrixData[`${sub}|${col}`] = value;
-  saveProgressMatrix(matrixData);
-  renderDashboard();
-}
-
-function initSchedulerSelects() {
-  const struct = getStructure();
-  const subjSelect = document.getElementById('schSubj');
-  subjSelect.innerHTML = '';
-  
-  Object.keys(struct).forEach(s => {
-    subjSelect.innerHTML += `<option value="${s}">${s}</option>`;
-  });
-  updateSubSelect();
-}
-
-function updateSubSelect() {
-  const struct = getStructure();
-  const subj = document.getElementById('schSubj').value;
-  const subSelect = document.getElementById('schSub');
-  subSelect.innerHTML = '';
-
-  if (struct[subj]) {
-    Object.keys(struct[subj]).forEach(s => {
-      subSelect.innerHTML += `<option value="${s}">${s}</option>`;
-    });
-  }
-  updateTaskSelect();
-}
-
-function updateTaskSelect() {
-  const struct = getStructure();
-  const subj = document.getElementById('schSubj').value;
-  const sub = document.getElementById('schSub').value;
-  const taskSelect = document.getElementById('schTask');
-  taskSelect.innerHTML = '';
-
-  if (struct[subj] && struct[subj][sub]) {
-    Object.keys(struct[subj][sub]).forEach(t => {
-      taskSelect.innerHTML += `<option value="${t}">${t}</option>`;
-    });
-  }
-  updateChSelect();
-}
-
-function updateChSelect() {
-  const struct = getStructure();
-  const subj = document.getElementById('schSubj').value;
-  const sub = document.getElementById('schSub').value;
-  const task = document.getElementById('schTask').value;
-  const chSelect = document.getElementById('schCh');
-  chSelect.innerHTML = '';
-
-  if (struct[subj] && struct[subj][sub] && struct[subj][sub][task]) {
-    struct[subj][sub][task].forEach(ch => {
-      chSelect.innerHTML += `<option value="${ch}">${ch}</option>`;
-    });
-  }
-}
-
-function generateSchedule() {
-  const subj = document.getElementById('schSubj').value;
-  const sub = document.getElementById('schSub').value;
-  const task = document.getElementById('schTask').value;
-  const ch = document.getElementById('schCh').value;
-  const total = Number(document.getElementById('schTotal').value);
-  const startStr = document.getElementById('schStart').value;
-  const endStr = document.getElementById('schEnd').value;
-  const selectedDays = Array.from(document.querySelectorAll('.day-chk:checked')).map(cb => Number(cb.value));
-
-  if (!subj || !sub || !task || !ch || !total || !startStr || !endStr || selectedDays.length === 0) {
-    alert('모든 단계를 정확히 선택/입력해 주세요.');
-    return;
-  }
-
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  let dates = [];
-  let curr = new Date(start);
-  while (curr <= end) {
-    if (selectedDays.includes(curr.getDay())) dates.push(new Date(curr));
-    curr.setDate(curr.getDate() + 1);
-  }
-
-  if (dates.length === 0) {
-    alert('선택한 기간 내에 지정한 공부 요일이 없습니다.');
-    return;
-  }
-
-  const schedules = getSchedules();
-  schedules.push({ subj, title: `${task} (${ch})`, start: startStr, end: endStr });
-  saveSchedules(schedules);
-
-  const records = getData();
-  const perDay = Math.ceil(total / dates.length);
-  let currentNum = 1;
-
-  dates.forEach(d => {
-    if (currentNum > total) return;
-    const endNum = Math.min(currentNum + perDay - 1, total);
-    const dateFormatted = d.toISOString().split('T')[0];
-
-    for (let i = currentNum; i <= endNum; i++) {
-      const pKey = `${subj}|${sub}|${task}|${ch}|${i}`;
-      if (!records[pKey]) records[pKey] = { history: [] };
-      records[pKey].history.push({
-        round: '1',
-        status: '미진행',
-        date: dateFormatted,
-        scheduledDate: dateFormatted,
-        memo: '스케줄 자동 배분'
-      });
-    }
-    currentNum = endNum + 1;
-  });
-
-  saveData(records);
-  alert('선택한 공부기록 위치로 문제 생성이 완료되었습니다.');
-  showPage('calendar');
-}
-
-/* 필터 UI 업데이트 및 모달 제어 */
-function openFilterModal(target) {
-  currentFilterTarget = target;
-  const list = document.getElementById('filterCheckboxList');
-  const title = document.getElementById('filterModalTitle');
-  list.innerHTML = '';
-
-  if (target === 'round') {
-    title.textContent = '회독 선택 (중복 가능)';
-    ['1', '2', '3', '4', '5'].forEach(r => {
-      const isChecked = selectedFilterRounds.includes(r) ? 'checked' : '';
-      list.innerHTML += `
-        <label class="checkbox-item">
-          <input type="checkbox" class="chk-custom filter-chk" value="${r}" ${isChecked}>
-          ${r}회독
-        </label>
-      `;
-    });
-  } else {
-    title.textContent = '기호 선택 (중복 가능)';
-    [
-      { val: 'O', label: 'O (맞음)' },
-      { val: '△', label: '△ (실수)' },
-      { val: '☆', label: '☆ (오답)' },
-      { val: '♥', label: '♥ (다시풀기)' },
-      { val: '미진행', label: '미진행' }
-    ].forEach(item => {
-      const isChecked = selectedFilterStatuses.includes(item.val) ? 'checked' : '';
-      list.innerHTML += `
-        <label class="checkbox-item">
-          <input type="checkbox" class="chk-custom filter-chk" value="${item.val}" ${isChecked}>
-          ${item.label}
-        </label>
-      `;
-    });
-  }
-  document.getElementById('filterModal').classList.add('open');
-}
-
-function applyMultiFilter() {
-  const chks = document.querySelectorAll('.filter-chk:checked');
-  const values = Array.from(chks).map(c => c.value);
-
-  if (currentFilterTarget === 'round') {
-    selectedFilterRounds = values;
-  } else {
-    selectedFilterStatuses = values;
-  }
-
-  closeModal('filterModal');
-  updateFilterBarUI();
-  renderStudy();
-}
-
-function resetFilters() {
-  selectedFilterRounds = [];
-  selectedFilterStatuses = [];
-  updateFilterBarUI();
-  renderStudy();
-}
-
-function updateFilterBarUI() {
-  const roundBtn = document.getElementById('filterRoundBtn');
-  const statusBtn = document.getElementById('filterStatusBtn');
-
-  if (selectedFilterRounds.length > 0) {
-    roundBtn.classList.add('active');
-    roundBtn.textContent = `회독: ${selectedFilterRounds.join(', ')}회`;
-  } else {
-    roundBtn.classList.remove('active');
-    roundBtn.textContent = '회독 중복 선택';
-  }
-
-  if (selectedFilterStatuses.length > 0) {
-    statusBtn.classList.add('active');
-    statusBtn.textContent = `기호: ${selectedFilterStatuses.join(', ')}`;
-  } else {
-    statusBtn.classList.remove('active');
-    statusBtn.textContent = '기호 중복 선택';
-  }
-}
-
-function renderStudy() {
-  const struct = getStructure();
-  const bc = document.getElementById('breadcrumb');
-  const list = document.getElementById('studyList');
-
-  const isFiltering = (selectedFilterRounds.length > 0 || selectedFilterStatuses.length > 0);
-
-  let bcHtml = '<span class="bc-item" onclick="navTo([])">전체 과목</span>';
-  studyPath.forEach((p, i) => {
-    bcHtml += ' <span class="bc-sep">›</span> ';
-    bcHtml += i < studyPath.length - 1 
-      ? `<span class="bc-item" onclick="navTo(studyPath.slice(0,${i+1}))">${p}</span>`
-      : `<span class="bc-current">${p}</span>`;
-  });
-  bc.innerHTML = bcHtml;
-  list.innerHTML = '';
-
-  if (isFiltering) {
-    renderFilteredProblems();
-    return;
-  }
-
-  const depth = studyPath.length;
-
-  if (depth === 0) {
-    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addMainSubject()">+ 대과목 추가</button>`;
-    Object.keys(struct).forEach((subj, idx) => {
-      list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}'])" style="flex:1;cursor:pointer"><strong>${subj}</strong></div>
-        <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(0, [], ${idx}, -1)">▲</button>
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(0, [], ${idx}, 1)">▼</button>
-          <button class="btn btn-sm btn-ghost" onclick="editMainSubject('${subj}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteMainSubject('${subj}')">삭제</button>
-        </div>
-      </div>`;
-    });
-  } 
-  else if (depth === 1) {
-    const subj = studyPath[0];
-    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addSubSubject('${subj}')">+ 하위 과목 추가</button>`;
-    Object.keys(struct[subj] || {}).forEach((sub, idx) => {
-      list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}','${sub}'])" style="flex:1;cursor:pointer"><strong>${sub}</strong></div>
-        <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(1, ['${subj}'], ${idx}, -1)">▲</button>
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(1, ['${subj}'], ${idx}, 1)">▼</button>
-          <button class="btn btn-sm btn-ghost" onclick="editSubSubject('${subj}','${sub}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteSubSubject('${subj}','${sub}')">삭제</button>
-        </div>
-      </div>`;
-    });
-  } 
-  else if (depth === 2) {
-    const [subj, sub] = studyPath;
-    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 문제집/강좌 추가</button>`;
-    Object.keys(struct[subj][sub] || {}).forEach((task, idx) => {
-      list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}','${sub}','${task}'])" style="flex:1;cursor:pointer"><strong>${task}</strong></div>
-        <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, -1)">▲</button>
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, 1)">▼</button>
-          <button class="btn btn-sm btn-ghost" onclick="editTask('${subj}','${sub}','${task}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteTask('${subj}','${sub}','${task}')">삭제</button>
-        </div>
-      </div>`;
-    });
-  }
-  else if (depth === 3) {
-    const [subj, sub, task] = studyPath;
-    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addChapter('${subj}','${sub}','${task}')">+ 챕터 추가</button>`;
-    (struct[subj][sub][task] || []).forEach((ch, idx) => {
-      list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}','${sub}','${task}','${ch}'])" style="flex:1;cursor:pointer"><strong>${ch}</strong></div>
-        <div class="action-btns">
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(3, ['${subj}','${sub}','${task}'], ${idx}, -1)">▲</button>
-          <button class="btn btn-sm btn-ghost" onclick="moveItem(3, ['${subj}','${sub}','${task}'], ${idx}, 1)">▼</button>
-          <button class="btn btn-sm btn-ghost" onclick="editChapter('${subj}','${sub}','${task}','${ch}')">수정</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteChapter('${subj}','${sub}','${task}','${ch}')">삭제</button>
-        </div>
-      </div>`;
-    });
-  }
-  else if (depth === 4) {
-    const [subj, sub, task, ch] = studyPath;
-    const pathKey = `${subj}|${sub}|${task}|${ch}`;
-    
-    const records = getData();
-    const probs = Object.keys(records).filter(k => k.startsWith(pathKey + '|'));
-
-    let html = `
-      <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>
-    `;
-
-    if (probs.length > 0) {
-      html += `
-        <div class="bulk-bar">
-          <label style="font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" class="chk-custom" id="selectAllProb" onchange="toggleSelectAllProbs(this)">
-            전체 선택
-          </label>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-sm btn-ghost" onclick="openSelectedBulkDateModal()">📝 선택 항목 일괄 수정</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteSelectedProblems()">🗑️ 선택 일괄 삭제</button>
-          </div>
-        </div>
-      `;
+        probList.push(parseInt(rawNum));
     }
 
-    probs.forEach(pKey => {
-      const probNum = pKey.split('|')[4];
-      const history = records[pKey].history || [];
+    probList.forEach(num => {
+        const fullKey = `${pathKey}|${num}`;
+        if(!cpaRecords[fullKey]) cpaRecords[fullKey] = [];
 
-      let historyHtml = history.map((h, idx) => {
-        return `<div class="history-item">
-          <div>
-            <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
-            ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
-          </div>
-          <div>
-            <button class="btn btn-sm btn-ghost" onclick="openProbModal('${pKey}', ${idx})">수정</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteProbRecord('${pKey}', ${idx})">삭제</button>
-          </div>
-        </div>`;
-      }).join('');
-
-      html += `<div class="prob-card">
-        <div class="prob-header">
-          <div class="prob-num">
-            <input type="checkbox" class="chk-custom prob-chk" value="${pKey}">
-            ${probNum}번 문제
-          </div>
-          <div>
-            <button class="btn btn-sm btn-danger" style="margin-right:4px;" onclick="deleteProblem('${pKey}')">삭제</button>
-            <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}')">+ 회독 기록</button>
-          </div>
-        </div>
-        <div class="history-list">${historyHtml || '기록 없음'}</div>
-      </div>`;
-    });
-
-    list.innerHTML = html;
-  }
-}
-
-/* 중복 선택 필터 적용 실행 함수 */
-function renderFilteredProblems() {
-  const list = document.getElementById('studyList');
-  const records = getData();
-  const currentPathPrefix = studyPath.join('|');
-
-  let filteredCards = [];
-
-  Object.keys(records).forEach(pKey => {
-    if (currentPathPrefix && !pKey.startsWith(currentPathPrefix)) return;
-
-    const parts = pKey.split('|');
-    if (parts.length < 5) return;
-    const [subj, sub, task, ch, num] = parts;
-    const history = records[pKey].history || [];
-
-    const matchedHistory = history.filter(h => {
-      const matchRound = (selectedFilterRounds.length === 0 || selectedFilterRounds.includes(String(h.round)));
-      const matchStatus = (selectedFilterStatuses.length === 0 || selectedFilterStatuses.includes(h.status));
-      return matchRound && matchStatus;
-    });
-
-    if (matchedHistory.length > 0) {
-      filteredCards.push({
-        pKey,
-        pathStr: `${subj} > ${sub} > ${task} > ${ch}`,
-        num,
-        history: matchedHistory
-      });
-    }
-  });
-
-  if (filteredCards.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">선택하신 중복 조건에 일치하는 문제가 없습니다.</div>';
-    return;
-  }
-
-  let html = `<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">🔍 중복 필터 검색 결과: ${filteredCards.length}개 문제</div>`;
-
-  filteredCards.forEach(item => {
-    let historyHtml = item.history.map((h) => {
-      return `<div class="history-item">
-        <div>
-          <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
-          ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-
-    html += `<div class="prob-card">
-      <div class="prob-header">
-        <div class="prob-num">${item.num}번 문제</div>
-        <button class="btn btn-sm btn-primary" onclick="openProbModal('${item.pKey}')">+ 회독 추가</button>
-      </div>
-      <div style="font-size:11px;color:var(--accent);margin-bottom:6px;">${item.pathStr}</div>
-      <div class="history-list">${historyHtml}</div>
-    </div>`;
-  });
-
-  list.innerHTML = html;
-}
-
-function navTo(path) { studyPath = path; renderStudy(); }
-
-function toggleSelectAllProbs(master) {
-  const chks = document.querySelectorAll('.prob-chk');
-  chks.forEach(c => c.checked = master.checked);
-}
-
-function getSelectedProbKeys() {
-  const chks = document.querySelectorAll('.prob-chk:checked');
-  return Array.from(chks).map(c => c.value);
-}
-
-function deleteSelectedProblems() {
-  const selectedKeys = getSelectedProbKeys();
-  if (selectedKeys.length === 0) {
-    alert('삭제할 문제를 체크박스로 하나 이상 선택해 주세요.');
-    return;
-  }
-
-  if (!confirm(`선택한 ${selectedKeys.length}개 문제 기록을 삭제하시겠습니까?`)) return;
-
-  const records = getData();
-  selectedKeys.forEach(k => {
-    delete records[k];
-  });
-
-  saveData(records);
-  alert(`${selectedKeys.length}개 문제가 성공적으로 삭제되었습니다.`);
-  renderStudy();
-}
-
-function openSelectedBulkDateModal() {
-  const selectedKeys = getSelectedProbKeys();
-  if (selectedKeys.length === 0) {
-    alert('수정할 문제를 체크박스로 하나 이상 선택해 주세요.');
-    return;
-  }
-  document.getElementById('bulkTargetDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('bulkMemo').value = '';
-  document.getElementById('bulkDateModal').classList.add('open');
-}
-
-function executeSelectedBulkDateChange() {
-  const round = document.getElementById('bulkRound').value;
-  const status = document.getElementById('bulkStatus').value;
-  const targetDate = document.getElementById('bulkTargetDate').value;
-  const memo = document.getElementById('bulkMemo').value;
-
-  if (!targetDate) {
-    alert('날짜를 지정해 주세요.');
-    return;
-  }
-
-  const selectedKeys = getSelectedProbKeys();
-  const records = getData();
-  let updatedCount = 0;
-  let reviewCreatedCount = 0;
-
-  let reviewDays = 0;
-  if (status.includes('☆') || status.includes('★')) reviewDays = 2;
-  else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
-  else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
-
-  selectedKeys.forEach(k => {
-    if (!records[k]) records[k] = { history: [] };
-    
-    // 선택한 정보로 일괄 회독 기록 추가
-    records[k].history.push({
-      round: round,
-      status: status,
-      date: targetDate,
-      scheduledDate: targetDate,
-      memo: memo
-    });
-    updatedCount++;
-
-    // 오답 상태일 경우 2일/7일/14일 후 복습 예정 할일 자동 생성
-    if (reviewDays > 0) {
-      const baseDate = new Date(targetDate);
-      baseDate.setDate(baseDate.getDate() + reviewDays);
-      const reviewDateStr = baseDate.toISOString().split('T')[0];
-      const nextRound = String(Number(round) + 1);
-
-      records[k].history.push({
-        round: nextRound,
-        status: '미진행',
-        date: reviewDateStr,
-        scheduledDate: reviewDateStr,
-        memo: `[일괄 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
-      });
-      reviewCreatedCount++;
-    }
-  });
-
-  saveData(records);
-
-  let msg = `선택된 ${selectedKeys.length}개 문제에 [${round}회독 / ${status} / ${targetDate}] 정보가 일괄 반영되었습니다.`;
-  if (reviewCreatedCount > 0) {
-    msg += `\n* 오답 복습 할 일 ${reviewCreatedCount}개가 자동으로 생성되었습니다.`;
-  }
-  alert(msg);
-
-  closeModal('bulkDateModal');
-  renderStudy();
-}
-
-function setCalView(mode) {
-  calViewMode = mode;
-  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('calTab' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
-  renderCalendar();
-}
-
-function navigateCal(offset) {
-  if (calViewMode === 'daily') currentCalDate.setDate(currentCalDate.getDate() + offset);
-  else if (calViewMode === 'weekly') currentCalDate.setDate(currentCalDate.getDate() + (offset * 7));
-  else if (calViewMode === 'monthly') currentCalDate.setMonth(currentCalDate.getMonth() + offset);
-  renderCalendar();
-}
-
-function resetCalToToday() {
-  currentCalDate = new Date();
-  renderCalendar();
-}
-
-function goToDailyView(dateStr) {
-  const parts = dateStr.split('-');
-  currentCalDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-  setCalView('daily');
-}
-
-function getDailyEvents(targetDateStr) {
-  const records = getData();
-  const todayStr = new Date().toISOString().split('T')[0];
-  const events = [];
-
-  Object.keys(records).forEach(pKey => {
-    const parts = pKey.split('|');
-    if (parts.length >= 5) {
-      const [subj, sub, task, ch, num] = parts;
-      const history = records[pKey].history || [];
-
-      history.forEach(h => {
-        const isPast = h.scheduledDate < todayStr;
-        const isUnfinished = h.status === '미진행';
-
-        if (h.date === targetDateStr) {
-          if (isUnfinished && isPast && targetDateStr < todayStr) {
-            events.push({
-              type: 'rollover-past',
-              text: `➡️ [이월됨] ${subj} > ${task} : ${num}번 문제 (${h.status})`
-            });
-          } else {
-            events.push({
-              type: isUnfinished ? 'pending' : 'done',
-              text: `[${subj} > ${task} > ${ch}] ${num}번 문제 (${h.status})`
-            });
-          }
+        if(mode === 'edit') {
+            // Override Last Record
+            const history = cpaRecords[fullKey];
+            if(history.length > 0) {
+                history[history.length - 1].date = dateVal;
+                history[history.length - 1].status = statusVal;
+            } else {
+                history.push({ turn: 1, date: dateVal, status: statusVal });
+            }
+        } else {
+            // New Addition -> Create or Append
+            const history = cpaRecords[fullKey];
+            if(history.length === 0) {
+                history.push({ turn: 1, date: dateVal, status: statusVal });
+            } else {
+                // Same date & same turn update vs Next turn push
+                const last = history[history.length - 1];
+                if(last.date === dateVal) {
+                    last.status = statusVal; // OVERWRITE SAME TURN
+                } else {
+                    history.push({ turn: last.turn + 1, date: dateVal, status: statusVal });
+                }
+            }
         }
-        else if (targetDateStr === todayStr && isPast && isUnfinished) {
-          events.push({
-            type: 'rollover-today',
-            text: `↪️ [이월 할일] ${subj} > ${task} : ${num}번 문제 (원래:${h.scheduledDate})`
-          });
-        }
-      });
-    }
-  });
 
-  return events;
+        // Schedule auto creation for symbols
+        triggerAutoSchedule(fullKey, dateVal, statusVal);
+    });
+
+    saveAllData();
+    closeModal('recordModal');
+    renderProblemList();
 }
 
+// Trigger Auto Scheduling based on Status Icon
+function triggerAutoSchedule(fullKey, baseDate, status) {
+    let offsetDays = 0;
+    if(status === '★' || status === '☆') offsetDays = 2;
+    else if(status === '♥') offsetDays = 7;
+    else if(status === '△') offsetDays = 14;
+
+    if(offsetDays > 0) {
+        const d = new Date(baseDate);
+        d.setDate(d.getDate() + offsetDays);
+        const targetDateStr = d.toISOString().substring(0,10);
+
+        if(!cpaSchedules[targetDateStr]) cpaSchedules[targetDateStr] = [];
+        const probNum = fullKey.split('|').pop();
+        const subName = fullKey.split('|')[1];
+        const taskName = fullKey.split('|')[2];
+        const entry = `[복습] ${subName} ${taskName} p.${probNum} (${status})`;
+
+        if(!cpaSchedules[targetDateStr].includes(entry)) {
+            cpaSchedules[targetDateStr].push(entry);
+        }
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* BATCH MODAL ACTION (SOLVES USER'S SPECIFIC COMPLAINT)                      */
+/* -------------------------------------------------------------------------- */
+function openBatchModal() {
+    const selectedCbs = document.querySelectorAll('.prob-checkbox:checked');
+    if(selectedCbs.length === 0) {
+        alert("수정할 문제 항목을 선택하세요.");
+        return;
+    }
+    document.getElementById('batchDate').value = new Date().toISOString().substring(0,10);
+    document.getElementById('batchModal').classList.add('active');
+}
+
+/**
+ * FIX IMPLEMENTATION:
+ * Modifies the latest turn record IN-PLACE instead of pushing a new history item.
+ */
+function applyBatchUpdate() {
+    const selectedCbs = document.querySelectorAll('.prob-checkbox:checked');
+    const newDate = document.getElementById('batchDate').value;
+    const newStatus = document.getElementById('batchStatus').value;
+
+    if(!newDate) { alert("날짜를 선택해 주세요."); return; }
+
+    selectedCbs.forEach(cb => {
+        const fullKey = cb.value;
+        const history = cpaRecords[fullKey];
+
+        if(history && history.length > 0) {
+            // Overwrite the LATEST history entry directly (Same turn modification)
+            const lastIndex = history.length - 1;
+            history[lastIndex].date = newDate;
+            history[lastIndex].status = newStatus;
+            
+            // Re-trigger review scheduling if applicable
+            triggerAutoSchedule(fullKey, newDate, newStatus);
+        }
+    });
+
+    saveAllData();
+    closeModal('batchModal');
+    renderProblemList();
+    alert(`선택한 ${selectedCbs.length}개 문제의 회독 상태 및 날짜가 수정되었습니다.`);
+}
+
+function batchDelete() {
+    const selectedCbs = document.querySelectorAll('.prob-checkbox:checked');
+    if(selectedCbs.length === 0) {
+        alert("삭제할 항목을 선택하세요.");
+        return;
+    }
+
+    if(confirm(`선택한 ${selectedCbs.length}개 문제 기록을 삭제하시겠습니까?`)) {
+        selectedCbs.forEach(cb => {
+            delete cpaRecords[cb.value];
+        });
+        saveAllData();
+        renderProblemList();
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* CALENDAR MATRIX & DATE MOVE (MONDAY START)                                 */
+/* -------------------------------------------------------------------------- */
 function renderCalendar() {
-  const list = document.getElementById('calList');
-  const todayStr = new Date().toISOString().split('T')[0];
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
 
-  if (calViewMode === 'daily') {
-    const curStr = currentCalDate.toISOString().split('T')[0];
-    const dayName = ['일','월','화','수','목','금','토'][currentCalDate.getDay()];
-    const events = getDailyEvents(curStr);
-
-    let html = `
-    <div class="cal-header">
-      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전날</button>
-      <strong style="font-size:14px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">
-        ${curStr} (${dayName}) ${curStr === todayStr ? '[오늘]' : ''}
-      </strong>
-      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음날 ▶</button>
-    </div>`;
-
-    if (events.length === 0) {
-      html += '<div style="text-align:center;padding:30px;color:var(--text2)">해당 날짜에 일정이 없거나 완료한 기록이 없습니다.</div>';
-    } else {
-      html += events.map(e => `
-        <div class="list-item" style="align-items:flex-start;flex-direction:column;gap:4px;">
-          <span class="${e.type.includes('rollover') ? 'badge-rollover' : (e.type === 'done' ? 'badge-done' : 'badge-pending')}">
-            ${e.type === 'done' ? '완료' : (e.type.includes('rollover') ? '미달성 이월' : '할 일')}
-          </span>
-          <div style="font-size:13px;line-height:1.4;">${e.text}</div>
-        </div>
-      `).join('');
-    }
-    list.innerHTML = html;
-  } 
-  else if (calViewMode === 'weekly') {
-    const curr = new Date(currentCalDate);
-    const dayOfWeek = curr.getDay();
-    const first = curr.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
-    
-    const monday = new Date(curr.setDate(first));
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-
-    const monStr = monday.toISOString().split('T')[0];
-    const sunStr = sunday.toISOString().split('T')[0];
-
-    let html = `
-    <div class="cal-header">
-      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전주</button>
-      <strong style="font-size:13px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">
-        ${monStr} ~ ${sunStr}
-      </strong>
-      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음주 ▶</button>
-    </div>`;
-
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      const dStr = d.toISOString().split('T')[0];
-      const dayName = ['일','월','화','수','목','금','토'][d.getDay()];
-      const events = getDailyEvents(dStr);
-
-      html += `<div class="weekly-card">
-        <div style="font-size:12px;font-weight:bold;color:${dStr===todayStr?'var(--accent)':'var(--text)'};margin-bottom:6px;">
-          ${dStr} (${dayName}) ${dStr===todayStr?'[오늘]':''}
-        </div>
-        ${events.length > 0 
-          ? events.map(e => `<div style="font-size:11px;color:${e.type==='done'?'var(--green)':'var(--text2)'};margin-top:2px;">• ${e.text}</div>`).join('') 
-          : '<div style="font-size:11px;color:var(--text3);">기록 없음</div>'}
-      </div>`;
-    }
-    list.innerHTML = html;
-  } 
-  else if (calViewMode === 'monthly') {
     const year = currentCalDate.getFullYear();
     const month = currentCalDate.getMonth();
-    
-    const firstDate = new Date(year, month, 1);
-    const lastDate = new Date(year, month + 1, 0);
-    
-    const startDate = new Date(firstDate);
-    const firstDay = firstDate.getDay();
-    const dayDiff = firstDay === 0 ? 6 : firstDay - 1;
-    startDate.setDate(startDate.getDate() - dayDiff);
-    
-    const endDate = new Date(lastDate);
-    const lastDay = lastDate.getDay();
-    const endDiff = lastDay === 0 ? 0 : 7 - lastDay;
-    endDate.setDate(endDate.getDate() + endDiff);
 
-    const schedules = getSchedules();
+    document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
 
-    let calendarWeeks = [];
-    let curr = new Date(startDate);
-    
-    while (curr <= endDate) {
-      let week = [];
-      for (let i = 0; i < 7; i++) {
-        const dStr = curr.toISOString().split('T')[0];
-        week.push({
-          dateObj: new Date(curr),
-          dateStr: dStr,
-          dayNum: curr.getDate(),
-          isCurrentMonth: curr.getMonth() === month,
-          isToday: dStr === todayStr
+    // Monday Header Row
+    const daysOfWeek = ['월', '화', '수', '목', '금', '토', '일'];
+    daysOfWeek.forEach(d => {
+        grid.innerHTML += `<div class="calendar-day-header">${d}</div>`;
+    });
+
+    // First day of month
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Compute Monday offset (0=Mon, 1=Tue, ..., 6=Sun)
+    let firstDayIndex = firstDay.getDay() - 1;
+    if(firstDayIndex === -1) firstDayIndex = 6; // Sunday becomes index 6
+
+    // Empty prev month cells
+    for(let i = 0; i < firstDayIndex; i++) {
+        grid.innerHTML += `<div class="calendar-day" style="background:#f1f5f9;"></div>`;
+    }
+
+    // Days of current month
+    for(let day = 1; day <= lastDay.getDate(); day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const dayEvents = cpaSchedules[dateStr] || [];
+
+        let eventsHtml = '';
+        dayEvents.forEach(ev => {
+            eventsHtml += `<div class="calendar-event" title="${ev}">${ev}</div>`;
         });
-        curr.setDate(curr.getDate() + 1);
-      }
-      calendarWeeks.push(week);
-    }
 
-    let html = `
-    <div class="cal-header">
-      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전달</button>
-      <strong style="font-size:14px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">${year}년 ${month + 1}월</strong>
-      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음달 ▶</button>
-    </div>
-    <div class="monthly-container">
-      <div class="cal-grid-header">
-        <div class="cal-day-head">월</div>
-        <div class="cal-day-head">화</div>
-        <div class="cal-day-head">수</div>
-        <div class="cal-day-head">목</div>
-        <div class="cal-day-head">금</div>
-        <div class="cal-day-head" style="color:var(--accent)">토</div>
-        <div class="cal-day-head" style="color:var(--red)">일</div>
-      </div>
-    `;
-
-    calendarWeeks.forEach(week => {
-      const weekStartStr = week[0].dateStr;
-      const weekEndStr = week[6].dateStr;
-
-      const weekSchedules = schedules.filter(s => s.start <= weekEndStr && s.end >= weekStartStr);
-
-      html += `<div class="month-week-row">`;
-
-      week.forEach((day) => {
-        html += `
-          <div class="month-cell ${day.isToday ? 'today' : ''} ${!day.isCurrentMonth ? 'other-month' : ''}" onclick="goToDailyView('${day.dateStr}')">
-            <div class="date-num">${day.dayNum}</div>
-          </div>
-        `;
-      });
-
-      html += `<div class="gantt-bars-container">`;
-      weekSchedules.slice(0, 3).forEach((s) => {
-        let startCol = 0;
-        let endCol = 6;
-
-        for (let i = 0; i < 7; i++) {
-          if (week[i].dateStr === s.start) startCol = i;
-          if (week[i].dateStr === s.end) endCol = i;
-        }
-
-        if (s.start < weekStartStr) startCol = 0;
-        if (s.end > weekEndStr) endCol = 6;
-
-        const leftPercent = (startCol / 7) * 100;
-        const widthPercent = ((endCol - startCol + 1) / 7) * 100;
-        const isStart = s.start >= weekStartStr;
-        const isEnd = s.end <= weekEndStr;
-
-        html += `
-          <div class="gantt-bar-slot">
-            <div class="gantt-bar gantt-${s.subj} ${isStart ? 'gantt-start' : ''} ${isEnd ? 'gantt-end' : ''}" 
-                 style="left: ${leftPercent}%; width: ${widthPercent}%;" 
-                 title="${s.subj}: ${s.title}">
-                 ${isStart ? s.title : ''}
+        grid.innerHTML += `
+            <div class="calendar-day">
+                <div class="date-num">${day}</div>
+                ${eventsHtml}
             </div>
-          </div>
         `;
-      });
-      html += `</div></div>`;
-    });
-
-    html += `</div>`;
-    list.innerHTML = html;
-  }
-}
-
-let targetProbKey = null;
-let editingHistoryIndex = null;
-
-function openProbModal(pKey, historyIndex = null) {
-  targetProbKey = pKey;
-  editingHistoryIndex = historyIndex;
-  
-  if (historyIndex !== null) {
-    const records = getData();
-    const item = records[pKey].history[historyIndex];
-    document.getElementById('probModalTitle').textContent = '문제 기록 수정';
-    document.getElementById('probRound').value = item.round || '1';
-    document.getElementById('probStatus').value = item.status || 'O';
-    document.getElementById('probDate').value = item.date || new Date().toISOString().split('T')[0];
-    document.getElementById('probMemo').value = item.memo || '';
-  } else {
-    document.getElementById('probModalTitle').textContent = '문제 기록 추가';
-    document.getElementById('probDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('probMemo').value = '';
-  }
-  document.getElementById('probModal').classList.add('open');
-}
-
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-function saveProbRecord() {
-  if (!targetProbKey) return;
-  const records = getData();
-  const round = document.getElementById('probRound').value;
-  const status = document.getElementById('probStatus').value;
-  const date = document.getElementById('probDate').value;
-  const memo = document.getElementById('probMemo').value;
-
-  if (!records[targetProbKey]) records[targetProbKey] = { history: [] };
-
-  if (editingHistoryIndex !== null) {
-    const old = records[targetProbKey].history[editingHistoryIndex];
-    records[targetProbKey].history[editingHistoryIndex] = { ...old, round, status, date, memo };
-  } else {
-    records[targetProbKey].history.push({ round, status, date, scheduledDate: date, memo });
-  }
-
-  let reviewDays = 0;
-  if (status.includes('☆') || status.includes('★')) reviewDays = 2;
-  else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
-  else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
-
-  if (reviewDays > 0) {
-    const baseDate = new Date(date);
-    baseDate.setDate(baseDate.getDate() + reviewDays);
-    const reviewDateStr = baseDate.toISOString().split('T')[0];
-    const nextRound = String(Number(round) + 1);
-
-    records[targetProbKey].history.push({
-      round: nextRound,
-      status: '미진행',
-      date: reviewDateStr,
-      scheduledDate: reviewDateStr,
-      memo: `[자동 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
-    });
-
-    alert(`[오답 복습 스케줄 생성]\n${reviewDays}일 후인 ${reviewDateStr}에 ${nextRound}회독 복습 할 일이 자동으로 생성되었습니다.`);
-  }
-
-  saveData(records);
-  closeModal('probModal');
-  renderStudy();
-}
-
-function deleteProbRecord(pKey, idx) {
-  if (!confirm('이 기록을 삭제하시겠습니까?')) return;
-  const records = getData();
-  records[pKey].history.splice(idx, 1);
-  saveData(records);
-  renderStudy();
-}
-
-function addProblem(pathKey) {
-  const input = prompt('추가할 문제 번호/범위 입력 (예: 1-10 또는 5)');
-  if (!input) return;
-  const records = getData();
-  if (input.includes('-')) {
-    const [start, end] = input.split('-').map(Number);
-    for (let i = start; i <= end; i++) {
-      records[`${pathKey}|${i}`] = records[`${pathKey}|${i}`] || { history: [] };
     }
-  } else {
-    records[`${pathKey}|${input}`] = records[`${pathKey}|${input}`] || { history: [] };
-  }
-  saveData(records);
-  renderStudy();
 }
 
-function deleteProblem(pKey) {
-  if (!confirm('이 문제를 완전히 삭제하시겠습니까?')) return;
-  const records = getData();
-  delete records[pKey];
-  saveData(records);
-  renderStudy();
+function moveMonth(delta) {
+    currentCalDate.setMonth(currentCalDate.getMonth() + delta);
+    renderCalendar();
 }
 
-function moveItem(depth, path, index, direction) {
-  const struct = getStructure();
-  let target;
-  if (depth === 0) target = struct;
-  else if (depth === 1) target = struct[path[0]];
-  else if (depth === 2) target = struct[path[0]][path[1]];
-  else if (depth === 3) target = struct[path[0]][path[1]][path[2]];
-
-  if (Array.isArray(target)) {
-    const newIdx = index + direction;
-    if (newIdx < 0 || newIdx >= target.length) return;
-    const temp = target[index];
-    target[index] = target[newIdx];
-    target[newIdx] = temp;
-  } else {
-    const keys = Object.keys(target);
-    const newIdx = index + direction;
-    if (newIdx < 0 || newIdx >= keys.length) return;
-    const newObj = {};
-    const keyToMove = keys[index];
-    keys.splice(index, 1);
-    keys.splice(newIdx, 0, keyToMove);
-    keys.forEach(k => { newObj[k] = target[k]; });
-
-    if (depth === 0) saveStructure(newObj);
-    else if (depth === 1) struct[path[0]] = newObj;
-    else if (depth === 2) struct[path[0]][path[1]] = newObj;
-  }
-  saveStructure(struct);
-  renderStudy();
+function openBatchDateMoveModal() {
+    document.getElementById('moveFromDate').value = "2026-09-07";
+    document.getElementById('moveToDate').value = "2026-09-06";
+    document.getElementById('batchDateMoveModal').classList.add('active');
 }
 
-function addMainSubject() {
-  const name = prompt('새 대과목 이름');
-  if (!name) return;
-  const struct = getStructure();
-  if (!struct[name]) struct[name] = {};
-  saveStructure(struct);
-  renderStudy();
-}
-function deleteMainSubject(subj) {
-  if (!confirm(`${subj} 과목을 삭제하시겠습니까?`)) return;
-  const struct = getStructure();
-  delete struct[subj];
-  saveStructure(struct);
-  renderStudy();
-}
-function editMainSubject(oldName) {
-  const newName = prompt('수정할 이름', oldName);
-  if (!newName || newName === oldName) return;
-  const struct = getStructure();
-  const newStruct = {};
-  Object.keys(struct).forEach(k => { newStruct[k === oldName ? newName : k] = struct[k]; });
-  saveStructure(newStruct);
-  updateRecordKeys(oldName, newName);
-  renderStudy();
+function executeBatchDateMove() {
+    const from = document.getElementById('moveFromDate').value;
+    const to = document.getElementById('moveToDate').value;
+
+    if(!from || !to) { alert("날짜를 입력해주세요."); return; }
+
+    if(cpaSchedules[from]) {
+        if(!cpaSchedules[to]) cpaSchedules[to] = [];
+        cpaSchedules[to] = cpaSchedules[to].concat(cpaSchedules[from]);
+        delete cpaSchedules[from];
+    }
+
+    // Update records dates as well
+    Object.keys(cpaRecords).forEach(key => {
+        cpaRecords[key].forEach(rec => {
+            if(rec.date === from) rec.date = to;
+        });
+    });
+
+    saveAllData();
+    closeModal('batchDateMoveModal');
+    renderCalendar();
+    alert(`${from}의 일정이 ${to}로 이동되었습니다.`);
 }
 
-function addSubSubject(subj) {
-  const name = prompt('하위 과목 이름');
-  if (!name) return;
-  const struct = getStructure();
-  if (!struct[subj][name]) struct[subj][name] = {};
-  saveStructure(struct);
-  renderStudy();
-}
-function deleteSubSubject(subj, sub) {
-  if (!confirm(`${sub} 과목을 삭제하시겠습니까?`)) return;
-  const struct = getStructure();
-  delete struct[subj][sub];
-  saveStructure(struct);
-  renderStudy();
-}
-function editSubSubject(subj, oldName) {
-  const newName = prompt('수정할 이름', oldName);
-  if (!newName || newName === oldName) return;
-  const struct = getStructure();
-  const oldObj = struct[subj];
-  const newObj = {};
-  Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
-  struct[subj] = newObj;
-  saveStructure(struct);
-  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`);
-  renderStudy();
+/* -------------------------------------------------------------------------- */
+/* DASHBOARD MATRIX                                                           */
+/* -------------------------------------------------------------------------- */
+function renderMatrix() {
+    const tbody = document.getElementById('matrixTbody');
+    tbody.innerHTML = '';
+
+    const courses = ["연습서인강", "연습서문풀", "객관식", "객기출", "객모고", "기타"];
+    let allSubSubs = [];
+
+    Object.keys(cpaStructure).forEach(m => {
+        Object.keys(cpaStructure[m]).forEach(s => {
+            allSubSubs.push(s);
+        });
+    });
+
+    if(allSubSubs.length === 0) allSubSubs = ["법인세법", "재무회계"];
+
+    allSubSubs.forEach(subName => {
+        let trHtml = `<tr><td style="font-weight:600;">${subName}</td>`;
+        courses.forEach(c => {
+            const matrixKey = `${subName}|${c}`;
+            const val = cpaProgressMatrix[matrixKey] || "(해당없음)";
+
+            trHtml += `
+                <td>
+                    <select class="form-control" style="padding:0.2rem 0.4rem; font-size:0.8rem;" onchange="updateMatrix('${matrixKey}', this.value)">
+                        <option value="(해당없음)" ${val==='(해당없음)'?'selected':''}>-</option>
+                        <option value="진행중" ${val==='진행중'?'selected':''}>진행중</option>
+                        <option value="1회독" ${val==='1회독'?'selected':''}>1회독</option>
+                        <option value="2회독" ${val==='2회독'?'selected':''}>2회독</option>
+                        <option value="3회독" ${val==='3회독'?'selected':''}>3회독</option>
+                        <option value="완료" ${val==='완료'?'selected':''}>완료</option>
+                    </select>
+                </td>
+            `;
+        });
+        trHtml += '</tr>';
+        tbody.innerHTML += trHtml;
+    });
+
+    // Quick Stats
+    document.getElementById('quickStatsInfo').innerHTML = `
+        총 기록된 문제 수: <b>${Object.keys(cpaRecords).length}</b>개<br>
+        등록된 과목 수: <b>${allSubSubs.length}</b>개
+    `;
 }
 
-function addTask(subj, sub) {
-  const name = prompt('문제집/강좌 이름');
-  if (!name) return;
-  const struct = getStructure();
-  if (!struct[subj][sub][name]) struct[subj][sub][name] = [];
-  saveStructure(struct);
-  renderStudy();
-}
-function deleteTask(subj, sub, task) {
-  if (!confirm(`${task} 항목을 삭제하시겠습니까?`)) return;
-  const struct = getStructure();
-  delete struct[subj][sub][task];
-  saveStructure(struct);
-  renderStudy();
-}
-function editTask(subj, sub, oldName) {
-  const newName = prompt('수정할 이름', oldName);
-  if (!newName || newName === oldName) return;
-  const struct = getStructure();
-  const oldObj = struct[subj][sub];
-  const newObj = {};
-  Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
-  struct[subj][sub] = newObj;
-  saveStructure(struct);
-  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`);
-  renderStudy();
+function updateMatrix(key, val) {
+    cpaProgressMatrix[key] = val;
+    saveAllData();
 }
 
-function addChapter(subj, sub, task) {
-  const name = prompt('챕터 이름');
-  if (!name) return;
-  const struct = getStructure();
-  struct[subj][sub][task].push(name);
-  saveStructure(struct);
-  renderStudy();
-}
-function deleteChapter(subj, sub, task, ch) {
-  if (!confirm(`${ch} 챕터를 삭제하시겠습니까?`)) return;
-  const struct = getStructure();
-  struct[subj][sub][task] = struct[subj][sub][task].filter(c => c !== ch);
-  saveStructure(struct);
-  renderStudy();
-}
-function editChapter(subj, sub, task, oldName) {
-  const newName = prompt('수정할 이름', oldName);
-  if (!newName || newName === oldName) return;
-  const struct = getStructure();
-  const arr = struct[subj][sub][task];
-  const idx = arr.indexOf(oldName);
-  if (idx !== -1) arr[idx] = newName;
-  saveStructure(struct);
-  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`);
-  renderStudy();
+/* -------------------------------------------------------------------------- */
+/* STRUCTURE MANAGEMENT                                                       */
+/* -------------------------------------------------------------------------- */
+function renderStructureTree() {
+    const treeEl = document.getElementById('structureTree');
+    treeEl.innerHTML = '<pre style="background:#f1f5f9; padding:1rem; border-radius:6px; font-size:0.85rem;">' + JSON.stringify(cpaStructure, null, 2) + '</pre>';
 }
 
+/* -------------------------------------------------------------------------- */
+/* BACKUP / RESTORE                                                            */
+/* -------------------------------------------------------------------------- */
 function exportData() {
-  const data = {
-    struct: getStructure(),
-    records: getData(),
-    schedules: getSchedules(),
-    matrix: getProgressMatrix()
-  };
-  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `CPA_Tracker_Backup_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-}
-
-function importData() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = e => {
-    const reader = new FileReader();
-    reader.onload = event => {
-      try {
-        const parsed = JSON.parse(event.target.result);
-        if (parsed.struct) saveStructure(parsed.struct);
-        if (parsed.records) saveData(parsed.records);
-        if (parsed.schedules) saveSchedules(parsed.schedules);
-        if (parsed.matrix) saveProgressMatrix(parsed.matrix);
-        alert('복구가 완료되었습니다!');
-        location.reload();
-      } catch (err) { alert('백업 파일 형식이 올바르지 않습니다.'); }
+    const data = {
+        struct: cpaStructure,
+        records: cpaRecords,
+        schedules: cpaSchedules,
+        matrix: cpaProgressMatrix
     };
-    reader.readAsText(event.target.files[0]);
-  };
-  input.click();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `CPA_Tracker_Backup_${new Date().toISOString().substring(0,10)}.json`;
+    a.click();
 }
 
-renderDashboard();
+function triggerImport() {
+    document.getElementById('importFile').click();
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const imported = JSON.parse(event.target.result);
+            if(imported.struct) cpaStructure = imported.struct;
+            if(imported.records) cpaRecords = imported.records;
+            if(imported.schedules) cpaSchedules = imported.schedules;
+            if(imported.matrix) cpaProgressMatrix = imported.matrix;
+
+            saveAllData();
+            location.reload();
+        } catch(err) {
+            alert('올바른 백업 JSON 파일이 아닙니다.');
+        }
+    };
+    reader.readAsText(file);
+}
 </script>
 </body>
 </html>
