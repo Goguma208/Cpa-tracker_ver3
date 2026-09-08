@@ -85,24 +85,12 @@
   .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
   .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
   .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
-  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 72px; }
-  .month-cell { position: relative; min-height: 72px; padding: 4px; cursor: pointer; transition: background 0.15s; }
+  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 52px; }
+  .month-cell { position: relative; min-height: 52px; padding: 4px; cursor: pointer; transition: background 0.15s; }
   .month-cell:hover { background: rgba(255, 255, 255, 0.03); }
   .month-cell.today .date-num { color: var(--accent); font-weight: 800; }
   .month-cell.other-month { opacity: 0.25; }
   .date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 4px; pointer-events: none; }
-  
-  .gantt-bars-container { position: absolute; top: 22px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
-  .gantt-bar-slot { height: 14px; position: relative; width: 100%; }
-  .gantt-bar { position: absolute; height: 14px; line-height: 14px; font-size: 8px; font-weight: 600; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10; box-sizing: border-box; }
-  .gantt-start { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
-  .gantt-end { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
-  
-  .gantt-경영학 { background: var(--color-경영학-bg); border: 1px solid var(--color-경영학-border); color: var(--color-경영학-text); }
-  .gantt-경제학 { background: var(--color-경제학-bg); border: 1px solid var(--color-경제학-border); color: var(--color-경제학-text); }
-  .gantt-상법   { background: var(--color-상법-bg); border: 1px solid var(--color-상법-border); color: var(--color-상법-text); }
-  .gantt-세법   { background: var(--color-세법-bg); border: 1px solid var(--color-세법-border); color: var(--color-세법-text); }
-  .gantt-회계학 { background: var(--color-회계학-bg); border: 1px solid var(--color-회계학-border); color: var(--color-회계학-text); }
 
   .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
@@ -949,7 +937,7 @@ function openSelectedBulkDateModal() {
   document.getElementById('bulkDateModal').classList.add('open');
 }
 
-/* ★ 동일 회독 덮어쓰기 로직 적용된 일괄 수정 실행 함수 ★ */
+/* 동일 회독 덮어쓰기 로직 적용된 일괄 수정 실행 함수 */
 function executeSelectedBulkDateChange() {
   const round = document.getElementById('bulkRound').value;
   const status = document.getElementById('bulkStatus').value;
@@ -974,11 +962,9 @@ function executeSelectedBulkDateChange() {
   selectedKeys.forEach(k => {
     if (!records[k]) records[k] = { history: [] };
     
-    // 선택한 회독(round)과 일치하는 기존 기록이 있는지 검색
     const existingIdx = records[k].history.findIndex(h => String(h.round) === String(round));
 
     if (existingIdx !== -1) {
-      // 동일 회독이 존재하면 새로 추가하지 않고 기존 기록을 덮어씌움 (수정)
       records[k].history[existingIdx] = {
         ...records[k].history[existingIdx],
         status: status,
@@ -987,7 +973,6 @@ function executeSelectedBulkDateChange() {
         memo: memo
       };
     } else {
-      // 해당 회독 기록이 없으면 신규 추가
       records[k].history.push({
         round: round,
         status: status,
@@ -998,7 +983,6 @@ function executeSelectedBulkDateChange() {
     }
     updatedCount++;
 
-    // 오답 상태일 경우 복습 할일 자동 연동
     if (reviewDays > 0) {
       const baseDate = new Date(targetDate);
       baseDate.setDate(baseDate.getDate() + reviewDays);
@@ -1182,8 +1166,6 @@ function renderCalendar() {
     const endDiff = lastDay === 0 ? 0 : 7 - lastDay;
     endDate.setDate(endDate.getDate() + endDiff);
 
-    const schedules = getSchedules();
-
     let calendarWeeks = [];
     let curr = new Date(startDate);
     
@@ -1222,11 +1204,6 @@ function renderCalendar() {
     `;
 
     calendarWeeks.forEach(week => {
-      const weekStartStr = week[0].dateStr;
-      const weekEndStr = week[6].dateStr;
-
-      const weekSchedules = schedules.filter(s => s.start <= weekEndStr && s.end >= weekStartStr);
-
       html += `<div class="month-week-row">`;
 
       week.forEach((day) => {
@@ -1237,35 +1214,7 @@ function renderCalendar() {
         `;
       });
 
-      html += `<div class="gantt-bars-container">`;
-      weekSchedules.slice(0, 3).forEach((s) => {
-        let startCol = 0;
-        let endCol = 6;
-
-        for (let i = 0; i < 7; i++) {
-          if (week[i].dateStr === s.start) startCol = i;
-          if (week[i].dateStr === s.end) endCol = i;
-        }
-
-        if (s.start < weekStartStr) startCol = 0;
-        if (s.end > weekEndStr) endCol = 6;
-
-        const leftPercent = (startCol / 7) * 100;
-        const widthPercent = ((endCol - startCol + 1) / 7) * 100;
-        const isStart = s.start >= weekStartStr;
-        const isEnd = s.end <= weekEndStr;
-
-        html += `
-          <div class="gantt-bar-slot">
-            <div class="gantt-bar gantt-${s.subj} ${isStart ? 'gantt-start' : ''} ${isEnd ? 'gantt-end' : ''}" 
-                 style="left: ${leftPercent}%; width: ${widthPercent}%;" 
-                 title="${s.subj}: ${s.title}">
-                 ${isStart ? s.title : ''}
-            </div>
-          </div>
-        `;
-      });
-      html += `</div></div>`;
+      html += `</div>`;
     });
 
     html += `</div>`;
@@ -1298,7 +1247,7 @@ function openProbModal(pKey, historyIndex = null) {
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-/* ★ 단일 저장 시에도 동일 회독 덮어쓰기 지원 ★ */
+/* 단일 저장 시에도 동일 회독 덮어쓰기 지원 */
 function saveProbRecord() {
   if (!targetProbKey) return;
   const records = getData();
@@ -1313,7 +1262,6 @@ function saveProbRecord() {
     const old = records[targetProbKey].history[editingHistoryIndex];
     records[targetProbKey].history[editingHistoryIndex] = { ...old, round, status, date, memo };
   } else {
-    // 특정 회독을 명시하여 저장할 때 해당 회독이 이미 있으면 덮어쓰기
     const existingIdx = records[targetProbKey].history.findIndex(h => String(h.round) === String(round));
     if (existingIdx !== -1) {
       records[targetProbKey].history[existingIdx] = {
