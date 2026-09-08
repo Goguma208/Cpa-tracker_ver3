@@ -19,7 +19,7 @@
       --radius-sm: 6px;
       --radius-md: 10px;
 
-      /* 과목별 파스텔 태그 색상 (기존 보존) */
+      /* 과목별 파스텔 태그 색상 */
       --color-경영학-bg: rgba(59, 130, 246, 0.2); --color-경영학-border: #3b82f6; --color-경영학-text: #93c5fd;
       --color-경제학-bg: rgba(16, 185, 129, 0.2); --color-경제학-border: #10b981; --color-경제학-text: #6ee7b7;
       --color-상법-bg:   rgba(245, 158, 11, 0.2); --color-상법-border:   #f59e0b; --color-상법-text:   #fde047;
@@ -30,7 +30,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-bottom: 40px; }
 
-    /* 헤더 & 네비게이션 (100% 보존) */
+    /* 헤더 & 네비게이션 */
     .header { background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
     .header-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
     .header-sub { font-size: 10px; color: var(--text2); }
@@ -53,32 +53,51 @@
     .btn-danger { background: rgba(244, 63, 94, 0.2); color: var(--red); border-color: var(--red); }
     .btn-sm { padding: 4px 8px; font-size: 11px; }
 
-    /* 서브 탭 (100% 보존) */
+    /* 서브 탭 */
     .sub-tab-bar { display: flex; gap: 6px; margin-bottom: 12px; }
     .sub-tab-btn { flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center; background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; }
     .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-    /* 기존 데일리/위클리 전용 스타일 (100% 보존) */
+    /* 캘린더 공통 */
     .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
     .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
-    .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
-    .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
-    .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .prob-num { font-size: 14px; font-weight: 700; }
+    .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
+    .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .badge-pending { background: rgba(255, 255, 255, 0.1); color: #bbb; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
     .badge-rollover { background: rgba(249, 115, 22, 0.2); color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
     .badge-done { background: rgba(62, 207, 142, 0.15); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
 
-    /* 대시보드 및 공부기록용 스타일 (100% 보존) */
-    .history-list { font-size: 11px; color: var(--text2); border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
-    .history-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 0; }
+    /* 대시보드 & 매트릭스 스타일 */
+    .matrix-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; }
+    .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 4px; }
+    .matrix-table th { background: var(--surface2); color: var(--text2); }
+    .matrix-select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 2px; font-size: 10px; width: 100%; }
+
+    /* 공부기록 트랙 & 필터 */
+    .filter-bar { display: flex; gap: 6px; margin-bottom: 12px; }
+    .filter-select { flex: 1; background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 6px; border-radius: var(--radius-sm); font-size: 11px; }
     .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
     .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+    
+    .tree-item { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .breadcrumb { font-size: 11px; color: var(--text2); margin-bottom: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+    .breadcrumb span { cursor: pointer; color: var(--accent); }
 
-    /* ==========================================================================
-       ★ 신규: 먼슬리 3블럭 전용 스타일 (간트차트 완전 제거, 3구역 깔끔 배치)
-       ========================================================================== */
+    /* 모달 공통 */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+    .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; color: var(--text); outline: none; }
+
+    /* 요일 선택 */
+    .days-checkboxes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .day-chk { display: none; }
+    .day-lbl { padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; cursor: pointer; }
+    .day-chk:checked + .day-lbl { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* 먼슬리 3블럭 전용 스타일 */
     .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
     .m-grid-head { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
     .m-grid-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -97,11 +116,9 @@
     .m-cell:hover { border-color: var(--accent); }
     .m-cell.other-month { opacity: 0.3; }
     .m-cell.today { border: 1px solid var(--accent); background: rgba(91, 127, 255, 0.08); }
-    
     .m-date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 3px; color: var(--text); }
     .m-cell.today .m-date-num { color: var(--accent); }
 
-    /* 3블럭 영역 (아침, 점심, 저녁) */
     .m-block-list { display: flex; flex-direction: column; gap: 2px; flex: 1; justify-content: space-between; }
     .m-block-item {
       display: flex;
@@ -124,37 +141,17 @@
       font-weight: 500;
     }
 
-    /* 모달 레이아웃 & 태그 선택 전용 CSS */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
-    .form-group { margin-bottom: 14px; }
-    .form-label { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
-    .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; color: var(--text); outline: none; }
-
-    /* 모달 내 칩(태그) 선택기 */
     .chip-group { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
     .chip-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 12px;
-      cursor: pointer;
-      user-select: none;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      font-size: 11px; padding: 4px 8px; border-radius: 12px; cursor: pointer; user-select: none;
     }
     .chip-btn.selected { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
-
-    .days-checkboxes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-    .day-chk { display: none; }
-    .day-lbl { padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; cursor: pointer; }
-    .day-chk:checked + .day-lbl { background: var(--accent); color: white; border-color: var(--accent); }
   </style>
 </head>
 <body>
 
-  <!-- 헤더 (100% 보존) -->
+  <!-- 헤더 -->
   <header class="header">
     <div>
       <div class="header-title">📚 CPA Tracker Pro</div>
@@ -168,7 +165,7 @@
     </div>
   </header>
 
-  <!-- 상단 네비게이션 (100% 보존) -->
+  <!-- 상단 네비게이션 -->
   <nav class="nav-tabs">
     <div class="nav-btn active" onclick="switchMainTab('dashboard')">대시보드</div>
     <div class="nav-btn" onclick="switchMainTab('tracker')">공부기록</div>
@@ -178,36 +175,76 @@
 
   <div class="container">
 
-    <!-- 1. 대시보드 탭 (100% 보존) -->
+    <!-- 1. 대시보드 탭 -->
     <section id="tab-dashboard" class="tab-content active">
       <div class="card">
-        <div class="card-title">⏳ 2027년 CPA 1차 시험 D-Day</div>
+        <div class="card-title">⏳ 2027년 CPA 1차 시험 D-Day (2027-02-28)</div>
         <div style="text-align:center; padding: 10px 0;">
           <span id="dday-count" style="font-size:32px; font-weight:900; color:var(--accent);">D-000</span>
-          <div style="font-size:11px; color:var(--text2); margin-top:4px;">목표일: 2027년 2월 28일</div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">📊 전체 과목 진도율 총괄</div>
-        <div id="dashboard-matrix" style="font-size:11px;"></div>
+        <div class="card-title">📊 과목별 총괄 진도표</div>
+        <div style="overflow-x:auto;">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>과목</th>
+                <th>연습서인강</th>
+                <th>연습서문풀</th>
+                <th>객관식</th>
+                <th>객기출</th>
+                <th>객모고</th>
+                <th>기타</th>
+              </tr>
+            </thead>
+            <tbody id="matrix-body"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <!-- 2. 공부기록 탭 (100% 보존) -->
+    <!-- 2. 공부기록 탭 -->
     <section id="tab-tracker" class="tab-content">
       <div class="card">
-        <div class="card-title">
-          <span>📚 공부 기록 및 문제 관리</span>
-          <button class="btn btn-primary btn-sm" onclick="openAddProbModal()">+ 문제 추가</button>
+        <div id="breadcrumb-area" class="breadcrumb"></div>
+        <div class="filter-bar">
+          <select id="filterRound" class="filter-select" onchange="renderTrackerTree()">
+            <option value="">전체 회독</option>
+            <option value="1">1회독</option><option value="2">2회독</option><option value="3">3회독</option>
+            <option value="4">4회독</option><option value="5">5회독</option>
+          </select>
+          <select id="filterSymbol" class="filter-select" onchange="renderTrackerTree()">
+            <option value="">전체 기호</option>
+            <option value="★">★ (오답)</option>
+            <option value="☆">☆ (오답)</option>
+            <option value="♥">♥ (다시풀기)</option>
+            <option value="△">△ (실수)</option>
+            <option value="O">O (정답)</option>
+          </select>
         </div>
+
+        <div id="bulk-bar" class="bulk-bar" style="display:none;">
+          <div><input type="checkbox" id="chkAll" class="chk-custom" onchange="toggleSelectAll(this)"> <span id="selectedCount" style="font-size:11px;font-weight:bold;">0개 선택</span></div>
+          <div>
+            <button class="btn btn-sm btn-primary" onclick="openBulkDateModal()">일괄 날짜 변경</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteSelectedProbs()">일괄 삭제</button>
+          </div>
+        </div>
+
         <div id="tracker-tree"></div>
+        <button id="btnAddItem" class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="openAddModal()">+ 항목 추가</button>
       </div>
     </section>
 
-    <!-- 3. 스케줄러 탭 (100% 보존) -->
+    <!-- 3. 스케줄러 탭 -->
     <section id="tab-scheduler" class="tab-content">
       <div class="card">
         <div class="card-title">🗓️ 자동 문제 스케줄 배분</div>
+        <div class="form-group">
+          <label class="form-label">대상 챕터 선택</label>
+          <select id="schChapterSelect" class="form-input"></select>
+        </div>
         <div class="form-group">
           <label class="form-label">배분할 총 문제 수 (예: 50)</label>
           <input type="number" class="form-input" id="schTotal" placeholder="예: 50">
@@ -235,7 +272,7 @@
       </div>
     </section>
 
-    <!-- 4. 캘린더 탭 (Daily/Weekly 보존, Monthly만 3블럭 교체) -->
+    <!-- 4. 캘린더 탭 -->
     <section id="tab-calendar" class="tab-content">
       <div class="sub-tab-bar">
         <button class="sub-tab-btn" onclick="switchCalSubTab('daily')">Daily</button>
@@ -243,31 +280,31 @@
         <button class="sub-tab-btn active" onclick="switchCalSubTab('monthly')">Monthly</button>
       </div>
 
-      <!-- Daily View (100% 보존) -->
+      <!-- Daily View -->
       <div id="cal-daily" class="sub-tab-content" style="display:none;">
         <div class="cal-header">
           <button class="btn btn-sm" onclick="changeCalDate(-1)">◀ 이전날</button>
-          <span id="daily-date-title" style="font-weight:700; font-size:14px;">2026-09-08</span>
+          <span id="daily-date-title" style="font-weight:700; font-size:14px;"></span>
           <button class="btn btn-sm" onclick="changeCalDate(1)">다음날 ▶</button>
         </div>
         <div id="daily-task-list"></div>
       </div>
 
-      <!-- Weekly View (100% 보존) -->
+      <!-- Weekly View -->
       <div id="cal-weekly" class="sub-tab-content" style="display:none;">
         <div class="cal-header">
           <button class="btn btn-sm" onclick="changeCalWeek(-1)">◀ 이전주</button>
-          <span id="weekly-date-title" style="font-weight:700; font-size:13px;">9월 1주차</span>
+          <span id="weekly-date-title" style="font-weight:700; font-size:13px;"></span>
           <button class="btn btn-sm" onclick="changeCalWeek(1)">다음주 ▶</button>
         </div>
         <div id="weekly-container"></div>
       </div>
 
-      <!-- Monthly View (★ 3블럭 시스템 적용) -->
+      <!-- Monthly View (3블럭 시스템) -->
       <div id="cal-monthly" class="sub-tab-content">
         <div class="cal-header">
           <button class="btn btn-sm" onclick="changeCalMonth(-1)">◀ 이전달</button>
-          <span id="monthly-date-title" style="font-weight:700; font-size:14px;">2026년 9월</span>
+          <span id="monthly-date-title" style="font-weight:700; font-size:14px;"></span>
           <button class="btn btn-sm" onclick="changeCalMonth(1)">다음달 ▶</button>
         </div>
         
@@ -288,29 +325,26 @@
 
   </div>
 
-  <!-- 먼슬리 3블럭 모달 (신규) -->
+  <!-- 먼슬리 3블럭 모달 -->
   <div id="monthlyModal" class="modal-overlay">
     <div class="modal">
       <div class="card-title">
-        <span id="mModalTitle">2026-09-08 일정 설정</span>
+        <span id="mModalTitle">일정 설정</span>
         <button class="btn btn-sm" onclick="closeMonthlyModal()">✕</button>
       </div>
 
-      <!-- 아침 🌞 -->
       <div class="form-group">
         <label class="form-label">🌞 아침</label>
         <div class="chip-group" id="chips-morning"></div>
         <input type="text" class="form-input" id="input-morning" placeholder="태그 선택 또는 직접 입력">
       </div>
 
-      <!-- 점심 ☕ -->
       <div class="form-group">
         <label class="form-label">☕ 점심</label>
         <div class="chip-group" id="chips-afternoon"></div>
         <input type="text" class="form-input" id="input-afternoon" placeholder="태그 선택 또는 직접 입력">
       </div>
 
-      <!-- 저녁 🌙 -->
       <div class="form-group">
         <label class="form-label">🌙 저녁</label>
         <div class="chip-group" id="chips-evening"></div>
@@ -324,59 +358,84 @@
     </div>
   </div>
 
+  <!-- 일반 편집 / 일괄 모달 -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal">
+      <div class="card-title">
+        <span id="modalTitle">항목 편집</span>
+        <button class="btn btn-sm" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
   <script>
     /* ==========================================================================
-       기본 데이터 및 로컬스토리지 초기화 (기존 100% 보존)
+       데이터 스토리지 & 기본 초기화
        ========================================================================== */
     const PRESET_TAGS = ['🏢 출근', '🏡 재택', '🎬 영화', '📚 독서', '⏳ 시험', '🧸 휴식', '🔥 공부', '🏥 병원', '💤 잠', '🧹 집안일', '🤯 멘탈나감', '🛸 놀았어요'];
+    const SUB_SUBJECTS = [
+      '경영학인강', '경영학문풀', '경제학인강', '경제학문풀', '상법인강', '상법문풀',
+      '법인세법', '소득세법', '부가가치세법', '기타세법', '세법문풀',
+      '재무회계인강', '재무회계문풀', '원가관리회계', '회계학문풀'
+    ];
+    const MATRIX_COLS = ['연습서인강', '연습서문풀', '객관식', '객기출', '객모고', '기타'];
+    const MATRIX_OPTIONS = ['-', '미진행', '완료', '1회독', '2회독', '3회독', '4회독', '5회독'];
 
-    let state = {
-      problems: [],
-      monthlySchedules: {}, // { "YYYY-MM-DD": { morning: "", afternoon: "", evening: "" } }
-      currentDate: new Date('2026-09-08')
-    };
+    let cpaStructure = {};
+    let cpaRecords = {};
+    let cpaSchedules = [];
+    let cpaProgressMatrix = {};
+    let monthlySchedules = {};
 
-    function loadState() {
-      const saved = localStorage.getItem('cpa_tracker_pro_db');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          state.problems = parsed.problems || [];
-          state.monthlySchedules = parsed.monthlySchedules || {};
-        } catch(e) {
-          console.error(e);
-        }
-      }
+    let currentNavPath = []; // [대과목, 하위과목, 교재, 챕터]
+    let selectedProbKeys = new Set();
+    let currentCalDate = new Date('2026-09-08');
+
+    function initData() {
+      cpaStructure = JSON.parse(localStorage.getItem('cpaStructure')) || {
+        "세법": { "법인세법": { "강경태 연습서": ["Chapter 1. 법인세 총론", "Chapter 2. 익금산입"] } },
+        "회계학": { "재무회계인강": { "김기동 연습서": ["Chapter 1. 재무회계 개념체계"] } }
+      };
+      cpaRecords = JSON.parse(localStorage.getItem('cpaRecords')) || {};
+      cpaSchedules = JSON.parse(localStorage.getItem('cpaSchedules')) || [];
+      cpaProgressMatrix = JSON.parse(localStorage.getItem('cpaProgressMatrix')) || {};
+      monthlySchedules = JSON.parse(localStorage.getItem('monthlySchedules')) || {};
+
+      saveAll();
     }
 
-    function saveState() {
-      localStorage.setItem('cpa_tracker_pro_db', JSON.stringify({
-        problems: state.problems,
-        monthlySchedules: state.monthlySchedules
-      }));
+    function saveAll() {
+      localStorage.setItem('cpaStructure', JSON.stringify(cpaStructure));
+      localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
+      localStorage.setItem('cpaSchedules', JSON.stringify(cpaSchedules));
+      localStorage.setItem('cpaProgressMatrix', JSON.stringify(cpaProgressMatrix));
+      localStorage.setItem('monthlySchedules', JSON.stringify(monthlySchedules));
     }
 
-    /* 초기 실행 */
     window.onload = function() {
-      loadState();
+      initData();
       calculateDDay();
-      renderDashboard();
+      renderMatrix();
+      renderTrackerTree();
+      populateSchedulerChapters();
+      renderDailyCalendar();
+      renderWeeklyCalendar();
       renderMonthlyCalendar();
     };
 
-    /* 메인 탭 전환 */
+    /* 탭 전환 */
     function switchMainTab(tabId) {
-      document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
+      document.querySelectorAll('.nav-btn').forEach((btn, i) => {
         const tabs = ['dashboard', 'tracker', 'scheduler', 'calendar'];
-        btn.classList.toggle('active', tabs[idx] === tabId);
+        btn.classList.toggle('active', tabs[i] === tabId);
       });
-      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.getElementById(`tab-${tabId}`).classList.add('active');
 
       if (tabId === 'calendar') renderMonthlyCalendar();
     }
 
-    /* 서브 탭 전환 */
     function switchCalSubTab(subId) {
       document.querySelectorAll('.sub-tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.textContent.toLowerCase() === subId);
@@ -384,10 +443,12 @@
       document.querySelectorAll('.sub-tab-content').forEach(el => el.style.display = 'none');
       document.getElementById(`cal-${subId}`).style.display = 'block';
 
+      if (subId === 'daily') renderDailyCalendar();
+      if (subId === 'weekly') renderWeeklyCalendar();
       if (subId === 'monthly') renderMonthlyCalendar();
     }
 
-    /* D-Day 계산 */
+    /* 1. 대시보드 로직 */
     function calculateDDay() {
       const target = new Date('2027-02-28');
       const today = new Date('2026-09-08');
@@ -395,32 +456,470 @@
       document.getElementById('dday-count').textContent = `D-${diff}`;
     }
 
-    function renderDashboard() {
-      document.getElementById('dashboard-matrix').innerHTML = `<p style="color:var(--text2);text-align:center;">진도표 로드 완료</p>`;
+    function renderMatrix() {
+      const tbody = document.getElementById('matrix-body');
+      tbody.innerHTML = '';
+
+      SUB_SUBJECTS.forEach(sub => {
+        const tr = document.createElement('tr');
+        let html = `<td style="font-weight:bold;text-align:left;">${sub}</td>`;
+        MATRIX_COLS.forEach(col => {
+          const key = `${sub}|${col}`;
+          const currentVal = cpaProgressMatrix[key] || '-';
+          html += `
+            <td>
+              <select class="matrix-select" onchange="updateMatrix('${key}', this.value)">
+                ${MATRIX_OPTIONS.map(opt => `<option value="${opt}" ${opt === currentVal ? 'selected' : ''}>${opt}</option>`).join('')}
+              </select>
+            </td>
+          `;
+        });
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+      });
     }
 
-    /* ==========================================================================
-       ★ 신규: 먼슬리 3블럭 렌더링 & 모달 제어 로직
-       ========================================================================== */
+    function updateMatrix(key, val) {
+      cpaProgressMatrix[key] = val;
+      saveAll();
+    }
+
+    /* 2. 공부기록 (트리 & 문제 연동) */
+    function renderTrackerTree() {
+      const breadcrumb = document.getElementById('breadcrumb-area');
+      const treeContainer = document.getElementById('tracker-tree');
+      const bulkBar = document.getElementById('bulk-bar');
+      const filterRound = document.getElementById('filterRound').value;
+      const filterSymbol = document.getElementById('filterSymbol').value;
+
+      // Breadcrumb 생성
+      let bcHtml = `<span onclick="navToLevel(-1)">루트</span>`;
+      currentNavPath.forEach((p, idx) => {
+        bcHtml += ` > <span onclick="navToLevel(${idx})">${p}</span>`;
+      });
+      breadcrumb.innerHTML = bcHtml;
+
+      treeContainer.innerHTML = '';
+      bulkBar.style.display = 'none';
+
+      // 4단계(CHAPTER) 선택 시 문제 목록 출력
+      if (currentNavPath.length === 4) {
+        bulkBar.style.display = 'flex';
+        const [mainS, subS, bookS, chapS] = currentNavPath;
+        const prefix = `${mainS}|${subS}|${bookS}|${chapS}|`;
+
+        const keys = Object.keys(cpaRecords).filter(k => k.startsWith(prefix));
+        
+        // 필터링 적용
+        const filteredKeys = keys.filter(k => {
+          const rec = cpaRecords[k];
+          if (filterRound && String(rec.round) !== filterRound) return false;
+          if (filterSymbol && rec.symbol !== filterSymbol) return false;
+          return true;
+        });
+
+        if (filteredKeys.length === 0) {
+          treeContainer.innerHTML = `<div style="text-align:center; color:var(--text2); padding:20px;">등록되거나 필터 조건에 맞는 문제가 없습니다.</div>`;
+          return;
+        }
+
+        filteredKeys.forEach(k => {
+          const probNum = k.split('|')[4];
+          const rec = cpaRecords[k];
+          const isChecked = selectedProbKeys.has(k);
+
+          const item = document.createElement('div');
+          item.className = 'prob-card';
+          item.innerHTML = `
+            <div class="prob-header">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" class="chk-custom" ${isChecked ? 'checked' : ''} onchange="toggleSelectProb('${k}', this.checked)">
+                <span style="font-weight:bold;font-size:13px;">문제 ${probNum}</span>
+              </div>
+              <div>
+                <span class="btn btn-sm" onclick="editProbDetail('${k}')">수정</span>
+                <span class="btn btn-sm btn-danger" onclick="deleteProb('${k}')">삭제</span>
+              </div>
+            </div>
+            <div style="font-size:11px; color:var(--text2);">
+              상태: <b style="color:var(--accent);">${rec.symbol || '미진행'}</b> | 회독: ${rec.round || 0}회독 | 날짜: ${rec.date || '미정'}
+              ${rec.memo ? `<br>메모: ${escapeHtml(rec.memo)}` : ''}
+            </div>
+          `;
+          treeContainer.appendChild(item);
+        });
+        updateSelectedCount();
+        return;
+      }
+
+      // 계층형 항목 출력 (루트 ~ 챕터)
+      let currentObj = cpaStructure;
+      for (let i = 0; i < currentNavPath.length; i++) {
+        currentObj = currentObj[currentNavPath[i]];
+      }
+
+      const keys = Array.isArray(currentObj) ? currentObj : Object.keys(currentObj || {});
+      
+      if (keys.length === 0) {
+        treeContainer.innerHTML = `<div style="text-align:center; color:var(--text2); padding:20px;">하위 항목이 없습니다. + 버튼을 눌러 추가하세요.</div>`;
+      }
+
+      keys.forEach((key, idx) => {
+        const item = document.createElement('div');
+        item.className = 'tree-item';
+        item.innerHTML = `
+          <span style="font-weight:600; cursor:pointer;" onclick="enterSubLevel('${key}')">📁 ${key}</span>
+          <div>
+            <button class="btn btn-sm" onclick="moveTreeItem(${idx}, -1)">▲</button>
+            <button class="btn btn-sm" onclick="moveTreeItem(${idx}, 1)">▼</button>
+            <button class="btn btn-sm" onclick="renameTreeItem('${key}')">수정</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteTreeItem('${key}')">삭제</button>
+          </div>
+        `;
+        treeContainer.appendChild(item);
+      });
+    }
+
+    function navToLevel(levelIdx) {
+      if (levelIdx === -1) currentNavPath = [];
+      else currentNavPath = currentNavPath.slice(0, levelIdx + 1);
+      selectedProbKeys.clear();
+      renderTrackerTree();
+    }
+
+    function enterSubLevel(key) {
+      currentNavPath.push(key);
+      selectedProbKeys.clear();
+      renderTrackerTree();
+    }
+
+    /* 다중 선택 & 일괄 편집 */
+    function toggleSelectProb(key, checked) {
+      if (checked) selectedProbKeys.add(key);
+      else selectedProbKeys.delete(key);
+      updateSelectedCount();
+    }
+
+    function toggleSelectAll(chk) {
+      const [mainS, subS, bookS, chapS] = currentNavPath;
+      const prefix = `${mainS}|${subS}|${bookS}|${chapS}|`;
+      const keys = Object.keys(cpaRecords).filter(k => k.startsWith(prefix));
+
+      if (chk.checked) keys.forEach(k => selectedProbKeys.add(k));
+      else selectedProbKeys.clear();
+
+      renderTrackerTree();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selectedCount').textContent = `${selectedProbKeys.size}개 선택`;
+    }
+
+    function openBulkDateModal() {
+      if (selectedProbKeys.size === 0) return alert('선택된 문제가 없습니다.');
+      const modal = document.getElementById('editModal');
+      document.getElementById('modalTitle').textContent = '일괄 날짜 변경';
+      document.getElementById('modalBody').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">변경할 날짜 지정</label>
+          <input type="date" class="form-input" id="bulkDateInput" value="2026-09-08">
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="applyBulkDate()">일괄 변경 적용</button>
+      `;
+      modal.classList.add('open');
+    }
+
+    function applyBulkDate() {
+      const newDate = document.getElementById('bulkDateInput').value;
+      if (!newDate) return;
+
+      selectedProbKeys.forEach(k => {
+        if (cpaRecords[k]) cpaRecords[k].date = newDate;
+      });
+
+      saveAll();
+      closeModal();
+      renderTrackerTree();
+      renderDailyCalendar();
+      renderWeeklyCalendar();
+    }
+
+    function deleteSelectedProbs() {
+      if (selectedProbKeys.size === 0) return alert('선택된 문제가 없습니다.');
+      if (confirm(`선택한 ${selectedProbKeys.size}개 문제를 삭제하시겠습니까?`)) {
+        selectedProbKeys.forEach(k => delete cpaRecords[k]);
+        selectedProbKeys.clear();
+        saveAll();
+        renderTrackerTree();
+      }
+    }
+
+    /* 자동 오답 복습 연동 로직 */
+    function saveProbRecord(key, symbol, round, date, memo) {
+      cpaRecords[key] = { symbol, round: parseInt(round) || 1, date, memo };
+
+      // 오답 기호 복습 자동 생성 (☆: 2일, ♥: 7일, △: 14일)
+      let addDays = 0;
+      if (symbol === '★' || symbol === '☆') addDays = 2;
+      else if (symbol === '♥' || symbol === '♡') addDays = 7;
+      else if (symbol === '▲' || symbol === '△') addDays = 14;
+
+      if (addDays > 0 && date) {
+        const baseDate = new Date(date);
+        baseDate.setDate(baseDate.getDate() + addDays);
+        const reviewDate = baseDate.toISOString().slice(0, 10);
+
+        const probNum = key.split('|')[4];
+        cpaSchedules.push({
+          date: reviewDate,
+          title: `[복습] ${currentNavPath[1] || ''} - 문제 ${probNum} (${symbol})`,
+          completed: false
+        });
+      }
+
+      saveAll();
+    }
+
+    /* 항목 추가 / 편집 모달 */
+    function openAddModal() {
+      const modal = document.getElementById('editModal');
+      document.getElementById('modalTitle').textContent = '새 항목/문제 추가';
+
+      if (currentNavPath.length === 4) {
+        // 문제 추가
+        document.getElementById('modalBody').innerHTML = `
+          <div class="form-group"><label class="form-label">문제 번호 (예: 101)</label><input type="text" class="form-input" id="mProbNum"></div>
+          <div class="form-group"><label class="form-label">상태 기호</label>
+            <select class="form-input" id="mSymbol">
+              <option value="O">O (정답)</option><option value="☆">☆ (오답 +2일복습)</option>
+              <option value="♥">♥ (다시풀기 +7일복습)</option><option value="△">△ (실수 +14일복습)</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">회독 수</label><input type="number" class="form-input" id="mRound" value="1"></div>
+          <div class="form-group"><label class="form-label">공부 날짜</label><input type="date" class="form-input" id="mDate" value="2026-09-08"></div>
+          <div class="form-group"><label class="form-label">메모</label><input type="text" class="form-input" id="mMemo"></div>
+          <button class="btn btn-primary" style="width:100%;" onclick="confirmAddProb()">추가하기</button>
+        `;
+      } else {
+        // 계층 추가
+        document.getElementById('modalBody').innerHTML = `
+          <div class="form-group"><label class="form-label">항목 이름</label><input type="text" class="form-input" id="mItemName"></div>
+          <button class="btn btn-primary" style="width:100%;" onclick="confirmAddTreeItem()">추가하기</button>
+        `;
+      }
+      modal.classList.add('open');
+    }
+
+    function confirmAddProb() {
+      const num = document.getElementById('mProbNum').value.trim();
+      if (!num) return alert('문제 번호를 입력하세요.');
+      const key = `${currentNavPath.join('|')}|${num}`;
+      
+      saveProbRecord(key, 
+        document.getElementById('mSymbol').value,
+        document.getElementById('mRound').value,
+        document.getElementById('mDate').value,
+        document.getElementById('mMemo').value
+      );
+
+      closeModal();
+      renderTrackerTree();
+    }
+
+    function confirmAddTreeItem() {
+      const name = document.getElementById('mItemName').value.trim();
+      if (!name) return;
+
+      let curr = cpaStructure;
+      for (let i = 0; i < currentNavPath.length; i++) {
+        curr = curr[currentNavPath[i]];
+      }
+
+      if (Array.isArray(curr)) {
+        curr.push(name);
+      } else {
+        if (currentNavPath.length === 3) curr[name] = [];
+        else curr[name] = {};
+      }
+
+      saveAll();
+      closeModal();
+      renderTrackerTree();
+      populateSchedulerChapters();
+    }
+
+    /* 3. 스케줄러 자동 배분 */
+    function populateSchedulerChapters() {
+      const sel = document.getElementById('schChapterSelect');
+      sel.innerHTML = '';
+
+      Object.keys(cpaStructure).forEach(mainS => {
+        Object.keys(cpaStructure[mainS] || {}).forEach(subS => {
+          Object.keys(cpaStructure[mainS][subS] || {}).forEach(bookS => {
+            const chaps = cpaStructure[mainS][subS][bookS] || [];
+            chaps.forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = `${mainS}|${subS}|${bookS}|${c}`;
+              opt.textContent = `[${subS}] ${c}`;
+              sel.appendChild(opt);
+            });
+          });
+        });
+      });
+    }
+
+    function generateSchedule() {
+      const chapPath = document.getElementById('schChapterSelect').value;
+      const total = parseInt(document.getElementById('schTotal').value);
+      const startStr = document.getElementById('schStart').value;
+      const endStr = document.getElementById('schEnd').value;
+
+      if (!chapPath || !total || !startStr || !endStr) return alert('모든 항목을 입력해 주세요.');
+
+      const checkedDays = Array.from(document.querySelectorAll('.day-chk:checked')).map(c => parseInt(c.value));
+      if (checkedDays.length === 0) return alert('최소 하나 이상의 공부 요일을 선택하세요.');
+
+      const startDate = new Date(startStr);
+      const endDate = new Date(endStr);
+      const targetDates = [];
+
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        if (checkedDays.includes(d.getDay())) {
+          targetDates.push(d.toISOString().slice(0, 10));
+        }
+      }
+
+      if (targetDates.length === 0) return alert('선택한 기간 내에 해당하는 요일이 없습니다.');
+
+      const probsPerDay = Math.ceil(total / targetDates.length);
+      let probCounter = 1;
+
+      targetDates.forEach(dStr => {
+        const count = Math.min(probsPerDay, total - probCounter + 1);
+        if (count <= 0) return;
+
+        const startNum = probCounter;
+        const endNum = probCounter + count - 1;
+
+        // 1. 공부기록에 문제 데이터 등록
+        for (let p = startNum; p <= endNum; p++) {
+          const recordKey = `${chapPath}|${p}`;
+          cpaRecords[recordKey] = { symbol: '미진행', round: 1, date: dStr, memo: '' };
+        }
+
+        // 2. 캘린더 스케줄 등록
+        const parts = chapPath.split('|');
+        cpaSchedules.push({
+          date: dStr,
+          title: `${parts[1]} ${parts[3]} (문제 ${startNum}~${endNum})`,
+          completed: false
+        });
+
+        probCounter += count;
+      });
+
+      saveAll();
+      alert(`성공적으로 ${targetDates.length}일 동안 문제가 자동 배분되었습니다!`);
+      switchMainTab('calendar');
+    }
+
+    /* 4. 캘린더 (Daily / Weekly) */
+    function changeCalDate(delta) {
+      currentCalDate.setDate(currentCalDate.getDate() + delta);
+      renderDailyCalendar();
+    }
+
+    function renderDailyCalendar() {
+      const dStr = currentCalDate.toISOString().slice(0, 10);
+      document.getElementById('daily-date-title').textContent = dStr;
+
+      const listContainer = document.getElementById('daily-task-list');
+      listContainer.innerHTML = '';
+
+      // 1. 당일 스케줄 및 이월 항목
+      const todayTasks = cpaSchedules.filter(s => s.date === dStr);
+      const rolloverTasks = cpaSchedules.filter(s => s.date < dStr && !s.completed);
+
+      if (rolloverTasks.length > 0) {
+        listContainer.innerHTML += `<div style="font-size:11px;font-weight:bold;color:var(--orange);margin-bottom:6px;">⚠️ 미달성 이월 항목</div>`;
+        rolloverTasks.forEach(t => {
+          listContainer.innerHTML += `
+            <div class="prob-card">
+              <div class="prob-header">
+                <span style="font-size:12px;font-weight:bold;">${escapeHtml(t.title)}</span>
+                <span class="badge-rollover">이월 (${t.date})</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      listContainer.innerHTML += `<div style="font-size:11px;font-weight:bold;margin:10px 0 6px 0;">📅 오늘의 공부 스케줄</div>`;
+      if (todayTasks.length === 0) {
+        listContainer.innerHTML += `<div style="font-size:11px;color:var(--text2);">예정된 일정이 없습니다.</div>`;
+      } else {
+        todayTasks.forEach(t => {
+          listContainer.innerHTML += `
+            <div class="prob-card">
+              <div class="prob-header">
+                <span style="font-size:12px;font-weight:bold;">${escapeHtml(t.title)}</span>
+                <span class="${t.completed ? 'badge-done' : 'badge-pending'}">${t.completed ? '완료' : '진행중'}</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function changeCalWeek(delta) {
+      currentCalDate.setDate(currentCalDate.getDate() + (delta * 7));
+      renderWeeklyCalendar();
+    }
+
+    function renderWeeklyCalendar() {
+      const container = document.getElementById('weekly-container');
+      container.innerHTML = '';
+
+      const curr = new Date(currentCalDate);
+      let dayOfWeek = curr.getDay() - 1;
+      if (dayOfWeek === -1) dayOfWeek = 6;
+      curr.setDate(curr.getDate() - dayOfWeek); // 월요일 시작
+
+      document.getElementById('weekly-date-title').textContent = `${curr.getFullYear()}년 ${curr.getMonth()+1}월 주차`;
+
+      for (let i = 0; i < 7; i++) {
+        const dStr = curr.toISOString().slice(0, 10);
+        const dayTasks = cpaSchedules.filter(s => s.date === dStr);
+
+        const dayCard = document.createElement('div');
+        dayCard.className = 'prob-card';
+        dayCard.innerHTML = `
+          <div style="font-weight:bold;font-size:12px;color:var(--accent);margin-bottom:4px;">${dStr}</div>
+          ${dayTasks.length === 0 ? '<div style="font-size:10px;color:var(--text2);">일정 없음</div>' : 
+            dayTasks.map(t => `<div style="font-size:11px;">• ${escapeHtml(t.title)}</div>`).join('')}
+        `;
+        container.appendChild(dayCard);
+        curr.setDate(curr.getDate() + 1);
+      }
+    }
+
+    /* 먼슬리 3블럭 캘린더 전용 로직 */
     let selectedDateStr = "";
 
     function changeCalMonth(delta) {
-      state.currentDate.setMonth(state.currentDate.getMonth() + delta);
+      currentCalDate.setMonth(currentCalDate.getMonth() + delta);
       renderMonthlyCalendar();
     }
 
     function renderMonthlyCalendar() {
-      const year = state.currentDate.getFullYear();
-      const month = state.currentDate.getMonth();
+      const year = currentCalDate.getFullYear();
+      const month = currentCalDate.getMonth();
       document.getElementById('monthly-date-title').textContent = `${year}년 ${month + 1}월`;
 
       const gridBody = document.getElementById('monthly-grid-body');
       gridBody.innerHTML = '';
 
       const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-
-      // 월요일 시작 오프셋 계산 (0: 월, ..., 6: 일)
       let startDayOfWeek = firstDay.getDay() - 1;
       if (startDayOfWeek === -1) startDayOfWeek = 6;
 
@@ -429,7 +928,6 @@
 
       const todayStr = '2026-09-08';
 
-      // 5주 또는 6주 그리드 생성 (총 35 또는 42개 셀)
       for (let i = 0; i < 35; i++) {
         const curr = new Date(startDate);
         curr.setDate(startDate.getDate() + i);
@@ -442,7 +940,7 @@
         const isOtherMonth = curr.getMonth() !== month;
         const isToday = dateStr === todayStr;
 
-        const sched = state.monthlySchedules[dateStr] || { morning: '', afternoon: '', evening: '' };
+        const sched = monthlySchedules[dateStr] || { morning: '', afternoon: '', evening: '' };
 
         const cell = document.createElement('div');
         cell.className = `m-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
@@ -451,31 +949,20 @@
         cell.innerHTML = `
           <div class="m-date-num">${curr.getDate()}</div>
           <div class="m-block-list">
-            <div class="m-block-item">
-              <span class="m-icon">🌞</span>
-              <span class="m-text">${escapeHtml(sched.morning || '')}</span>
-            </div>
-            <div class="m-block-item">
-              <span class="m-icon">☕</span>
-              <span class="m-text">${escapeHtml(sched.afternoon || '')}</span>
-            </div>
-            <div class="m-block-item">
-              <span class="m-icon">🌙</span>
-              <span class="m-text">${escapeHtml(sched.evening || '')}</span>
-            </div>
+            <div class="m-block-item"><span class="m-icon">🌞</span><span class="m-text">${escapeHtml(sched.morning || '')}</span></div>
+            <div class="m-block-item"><span class="m-icon">☕</span><span class="m-text">${escapeHtml(sched.afternoon || '')}</span></div>
+            <div class="m-block-item"><span class="m-icon">🌙</span><span class="m-text">${escapeHtml(sched.evening || '')}</span></div>
           </div>
         `;
-
         gridBody.appendChild(cell);
       }
     }
 
-    /* 모달 열기 */
     function openMonthlyModal(dateStr) {
       selectedDateStr = dateStr;
       document.getElementById('mModalTitle').textContent = `${dateStr} 일정 설정`;
 
-      const sched = state.monthlySchedules[dateStr] || { morning: '', afternoon: '', evening: '' };
+      const sched = monthlySchedules[dateStr] || { morning: '', afternoon: '', evening: '' };
 
       setupBlockUI('morning', sched.morning || '');
       setupBlockUI('afternoon', sched.afternoon || '');
@@ -510,30 +997,27 @@
       };
     }
 
-    /* 모달 저장 */
     function saveMonthlySchedule() {
       if (!selectedDateStr) return;
-
       const morning = document.getElementById('input-morning').value.trim();
       const afternoon = document.getElementById('input-afternoon').value.trim();
       const evening = document.getElementById('input-evening').value.trim();
 
       if (!morning && !afternoon && !evening) {
-        delete state.monthlySchedules[selectedDateStr];
+        delete monthlySchedules[selectedDateStr];
       } else {
-        state.monthlySchedules[selectedDateStr] = { morning, afternoon, evening };
+        monthlySchedules[selectedDateStr] = { morning, afternoon, evening };
       }
 
-      saveState();
+      saveAll();
       closeMonthlyModal();
       renderMonthlyCalendar();
     }
 
-    /* 일정 초기화 */
     function clearMonthlySchedule() {
       if (!selectedDateStr) return;
-      delete state.monthlySchedules[selectedDateStr];
-      saveState();
+      delete monthlySchedules[selectedDateStr];
+      saveAll();
       closeMonthlyModal();
       renderMonthlyCalendar();
     }
@@ -542,26 +1026,31 @@
       document.getElementById('monthlyModal').classList.remove('open');
     }
 
-    /* 유틸리티 */
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    /* 백업 & 복구 & 유틸 */
     function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
     function resetAllData() {
       if (confirm('모든 데이터를 초기화하시겠습니까?')) {
-        localStorage.removeItem('cpa_tracker_pro_db');
+        localStorage.clear();
         location.reload();
       }
     }
 
     function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `CPA_Tracker_Backup_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+      const data = { cpaStructure, cpaRecords, cpaSchedules, cpaProgressMatrix, monthlySchedules };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+      const anchor = document.createElement('a');
+      anchor.setAttribute("href", dataStr);
+      anchor.setAttribute("download", `CPA_Tracker_Pro_Backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
     }
 
     function importData() {
@@ -575,12 +1064,16 @@
       reader.onload = function(evt) {
         try {
           const parsed = JSON.parse(evt.target.result);
-          state = parsed;
-          saveState();
-          alert('데이터 복구 성공!');
+          cpaStructure = parsed.cpaStructure || {};
+          cpaRecords = parsed.cpaRecords || {};
+          cpaSchedules = parsed.cpaSchedules || [];
+          cpaProgressMatrix = parsed.cpaProgressMatrix || {};
+          monthlySchedules = parsed.monthlySchedules || {};
+          saveAll();
+          alert('데이터가 성공적으로 복구되었습니다.');
           location.reload();
         } catch(err) {
-          alert('올바른 JSON 파일이 아닙니다.');
+          alert('올바른 JSON 백업 파일이 아닙니다.');
         }
       };
       reader.readAsText(file);
