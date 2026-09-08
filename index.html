@@ -417,8 +417,16 @@ const MATRIX_SUB_LIST = [
 const MATRIX_COLS = ["(연)인강", "(연)문풀", "(객)문풀", "(객)기출", "(객)모고", "기타"];
 const MATRIX_OPTIONS = ["-", "미진행", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
 
-/* 먼슬리 3블럭 태그 옵션 정의 (요청 태그 추가) */
+/* 먼슬리 3블럭 태그 옵션 정의 */
 const BLOCK_TAGS = ["공부🔥", "출근🏢", "재택🏡", "영화🎬", "독서📚", "시험⏳", "휴식🧸", "병원🏥", "잠💤", "집안일🧹", "멘탈나감🤯", "놀았어요···🛸", "운동💪", "야구⚾", "다꾸🎨", "국제정세🌏", "금융💵", "코딩💻", "✏️"];
+
+/* 날짜 포맷 함수 (Timezone 이슈 방지) */
+function formatDateToYMD(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
 function getProgressMatrix() {
   return JSON.parse(localStorage.getItem('cpaProgressMatrix') || '{}');
@@ -502,7 +510,7 @@ function renderDashboard() {
   const exam = new Date('2027-02-28');
   const diff = Math.ceil((exam - new Date()) / 86400000);
   document.getElementById('ddayNum').textContent = diff >= 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
-  document.getElementById('todayDate').textContent = new Date().toISOString().split('T')[0];
+  document.getElementById('todayDate').textContent = formatDateToYMD(new Date());
 
   /* 총괄 진도표 매트릭스 랜더링 */
   const matrixData = getProgressMatrix();
@@ -639,7 +647,7 @@ function generateSchedule() {
   dates.forEach(d => {
     if (currentNum > total) return;
     const endNum = Math.min(currentNum + perDay - 1, total);
-    const dateFormatted = d.toISOString().split('T')[0];
+    const dateFormatted = formatDateToYMD(d);
 
     for (let i = currentNum; i <= endNum; i++) {
       const pKey = `${subj}|${sub}|${task}|${ch}|${i}`;
@@ -985,7 +993,7 @@ function openSelectedBulkDateModal() {
     alert('수정할 문제를 체크박스로 하나 이상 선택해 주세요.');
     return;
   }
-  document.getElementById('bulkTargetDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bulkTargetDate').value = formatDateToYMD(new Date());
   document.getElementById('bulkMemo').value = '';
   document.getElementById('bulkDateModal').classList.add('open');
 }
@@ -1039,7 +1047,7 @@ function executeSelectedBulkDateChange() {
     if (reviewDays > 0) {
       const baseDate = new Date(targetDate);
       baseDate.setDate(baseDate.getDate() + reviewDays);
-      const reviewDateStr = baseDate.toISOString().split('T')[0];
+      const reviewDateStr = formatDateToYMD(baseDate);
       const nextRound = String(Number(round) + 1);
 
       records[k].history.push({
@@ -1086,7 +1094,7 @@ function resetCalToToday() {
 
 function getDailyEvents(targetDateStr) {
   const records = getData();
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = formatDateToYMD(new Date());
   const events = [];
 
   Object.keys(records).forEach(pKey => {
@@ -1179,10 +1187,10 @@ function saveMonthlyBlocks() {
 
 function renderCalendar() {
   const list = document.getElementById('calList');
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = formatDateToYMD(new Date());
 
   if (calViewMode === 'daily') {
-    const curStr = currentCalDate.toISOString().split('T')[0];
+    const curStr = formatDateToYMD(currentCalDate);
     const dayName = ['일','월','화','수','목','금','토'][currentCalDate.getDay()];
     const events = getDailyEvents(curStr);
 
@@ -1218,8 +1226,8 @@ function renderCalendar() {
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
 
-    const monStr = monday.toISOString().split('T')[0];
-    const sunStr = sunday.toISOString().split('T')[0];
+    const monStr = formatDateToYMD(monday);
+    const sunStr = formatDateToYMD(sunday);
 
     let html = `
     <div class="cal-header">
@@ -1233,7 +1241,7 @@ function renderCalendar() {
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      const dStr = d.toISOString().split('T')[0];
+      const dStr = formatDateToYMD(d);
       const dayName = ['일','월','화','수','목','금','토'][d.getDay()];
       const events = getDailyEvents(dStr);
 
@@ -1271,7 +1279,7 @@ function renderCalendar() {
     while (curr <= endDate) {
       let week = [];
       for (let i = 0; i < 7; i++) {
-        const dStr = curr.toISOString().split('T')[0];
+        const dStr = formatDateToYMD(curr);
         week.push({
           dateObj: new Date(curr),
           dateStr: dStr,
@@ -1349,11 +1357,11 @@ function openProbModal(pKey, historyIndex = null) {
     document.getElementById('probModalTitle').textContent = '문제 기록 수정';
     document.getElementById('probRound').value = item.round || '1';
     document.getElementById('probStatus').value = item.status || 'O';
-    document.getElementById('probDate').value = item.date || new Date().toISOString().split('T')[0];
+    document.getElementById('probDate').value = item.date || formatDateToYMD(new Date());
     document.getElementById('probMemo').value = item.memo || '';
   } else {
     document.getElementById('probModalTitle').textContent = '문제 기록 추가';
-    document.getElementById('probDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('probDate').value = formatDateToYMD(new Date());
     document.getElementById('probMemo').value = '';
   }
   document.getElementById('probModal').classList.add('open');
@@ -1395,7 +1403,7 @@ function saveProbRecord() {
   if (reviewDays > 0) {
     const baseDate = new Date(date);
     baseDate.setDate(baseDate.getDate() + reviewDays);
-    const reviewDateStr = baseDate.toISOString().split('T')[0];
+    const reviewDateStr = formatDateToYMD(baseDate);
     const nextRound = String(Number(round) + 1);
 
     records[targetProbKey].history.push({
@@ -1598,7 +1606,7 @@ function exportData() {
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `CPA_Tracker_Backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `CPA_Tracker_Backup_${formatDateToYMD(new Date())}.json`;
   a.click();
 }
 
