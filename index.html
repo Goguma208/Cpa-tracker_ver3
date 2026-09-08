@@ -85,12 +85,24 @@
   .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
   .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
   .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
-  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 52px; }
-  .month-cell { position: relative; min-height: 52px; padding: 4px; cursor: pointer; transition: background 0.15s; }
+  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 85px; }
+  .month-cell { position: relative; min-height: 85px; padding: 2px; cursor: pointer; transition: background 0.15s; border-right: 1px dashed rgba(255,255,255,0.05); }
+  .month-cell:last-child { border-right: none; }
   .month-cell:hover { background: rgba(255, 255, 255, 0.03); }
   .month-cell.today .date-num { color: var(--accent); font-weight: 800; }
   .month-cell.other-month { opacity: 0.25; }
-  .date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 4px; pointer-events: none; }
+  .date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 2px; pointer-events: none; }
+
+  /* 먼슬리 3블럭 스타일 */
+  .block-container { display: flex; flex-direction: column; gap: 2px; font-size: 9px; }
+  .block-item { background: var(--surface2); border-radius: 3px; padding: 1px 2px; display: flex; align-items: center; gap: 1px; overflow: hidden; white-space: nowrap; height: 18px; }
+  .block-emoji { flex-shrink: 0; font-size: 9px; }
+  .block-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; color: var(--text2); line-height: 1; }
+
+  /* 블럭 입력 모달 전용 스타일 */
+  .tag-chip-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; margin-bottom: 8px; }
+  .tag-chip { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; cursor: pointer; user-select: none; }
+  .tag-chip:hover { border-color: var(--accent); color: var(--accent); }
 
   .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
@@ -264,6 +276,36 @@
   <div id="calList"></div>
 </div>
 
+<!-- 먼슬리 3블럭 입력 팝업 모달 -->
+<div class="modal-overlay" id="monthlyBlockModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;" id="monthlyModalTitle">일정 관리 (3블럭)</div>
+    
+    <div class="form-group">
+      <label class="form-label">🌞 아침 일정</label>
+      <input type="text" class="form-input" id="blockMorningInput" placeholder="직접 입력 또는 아래 태그 클릭">
+      <div class="tag-chip-container" id="mTags"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">☕ 점심 일정</label>
+      <input type="text" class="form-input" id="blockAfternoonInput" placeholder="직접 입력 또는 아래 태그 클릭">
+      <div class="tag-chip-container" id="aTags"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">🌙 저녁 일정</label>
+      <input type="text" class="form-input" id="blockEveningInput" placeholder="직접 입력 또는 아래 태그 클릭">
+      <div class="tag-chip-container" id="eTags"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('monthlyBlockModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveMonthlyBlocks()">저장하기</button>
+    </div>
+  </div>
+</div>
+
 <!-- 다중 선택 필터 모달 -->
 <div class="modal-overlay" id="filterModal">
   <div class="modal">
@@ -376,11 +418,22 @@ const MATRIX_SUB_LIST = [
 const MATRIX_COLS = ["(연)인강", "(연)문풀", "(객)문풀", "(객)기출", "(객)모고", "기타"];
 const MATRIX_OPTIONS = ["-", "미진행", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
 
+/* 먼슬리 3블럭 태그 옵션 정의 */
+const BLOCK_TAGS = ["공부🔥", "출근🏢", "재택🏡", "영화🎬", "독서📚", "시험⏳", "휴식🧸", "병원🏥", "잠💤", "집안일🧹", "멘탈나감🤯", "놀았어요···🛸"];
+
 function getProgressMatrix() {
   return JSON.parse(localStorage.getItem('cpaProgressMatrix') || '{}');
 }
 function saveProgressMatrix(data) {
   localStorage.setItem('cpaProgressMatrix', JSON.stringify(data));
+}
+
+/* 먼슬리 블럭 데이터 구조 저장/불러오기 */
+function getMonthlyBlocks() {
+  return JSON.parse(localStorage.getItem('cpaMonthlyBlocks') || '{}');
+}
+function saveMonthlyBlocksData(data) {
+  localStorage.setItem('cpaMonthlyBlocks', JSON.stringify(data));
 }
 
 /* 다중 선택 필터 데이터 구조 */
@@ -424,6 +477,7 @@ function updateRecordKeys(oldPrefix, newPrefix) {
 let studyPath = [];
 let calViewMode = 'daily';
 let currentCalDate = new Date();
+let selectedMonthlyDateStr = null;
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1031,12 +1085,6 @@ function resetCalToToday() {
   renderCalendar();
 }
 
-function goToDailyView(dateStr) {
-  const parts = dateStr.split('-');
-  currentCalDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-  setCalView('daily');
-}
-
 function getDailyEvents(targetDateStr) {
   const records = getData();
   const todayStr = new Date().toISOString().split('T')[0];
@@ -1076,6 +1124,58 @@ function getDailyEvents(targetDateStr) {
   });
 
   return events;
+}
+
+/* 먼슬리 3블럭 모달 열기 및 렌더링 */
+function openMonthlyBlockModal(dateStr) {
+  selectedMonthlyDateStr = dateStr;
+  document.getElementById('monthlyModalTitle').textContent = `일정 관리 (${dateStr})`;
+
+  const blocks = getMonthlyBlocks();
+  const dayBlock = blocks[dateStr] || { morning: '', afternoon: '', evening: '' };
+
+  document.getElementById('blockMorningInput').value = dayBlock.morning || '';
+  document.getElementById('blockAfternoonInput').value = dayBlock.afternoon || '';
+  document.getElementById('blockEveningInput').value = dayBlock.evening || '';
+
+  renderTagChips('mTags', 'blockMorningInput');
+  renderTagChips('aTags', 'blockAfternoonInput');
+  renderTagChips('eTags', 'blockEveningInput');
+
+  document.getElementById('monthlyBlockModal').classList.add('open');
+}
+
+function renderTagChips(containerId, inputId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  BLOCK_TAGS.forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.textContent = tag;
+    chip.onclick = () => {
+      document.getElementById(inputId).value = tag;
+    };
+    container.appendChild(chip);
+  });
+}
+
+function saveMonthlyBlocks() {
+  if (!selectedMonthlyDateStr) return;
+
+  const morning = document.getElementById('blockMorningInput').value.trim();
+  const afternoon = document.getElementById('blockAfternoonInput').value.trim();
+  const evening = document.getElementById('blockEveningInput').value.trim();
+
+  const blocks = getMonthlyBlocks();
+  if (!morning && !afternoon && !evening) {
+    delete blocks[selectedMonthlyDateStr];
+  } else {
+    blocks[selectedMonthlyDateStr] = { morning, afternoon, evening };
+  }
+
+  saveMonthlyBlocksData(blocks);
+  closeModal('monthlyBlockModal');
+  renderCalendar();
 }
 
 function renderCalendar() {
@@ -1185,6 +1285,8 @@ function renderCalendar() {
       calendarWeeks.push(week);
     }
 
+    const monthlyBlocks = getMonthlyBlocks();
+
     let html = `
     <div class="cal-header">
       <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전달</button>
@@ -1207,9 +1309,25 @@ function renderCalendar() {
       html += `<div class="month-week-row">`;
 
       week.forEach((day) => {
+        const b = monthlyBlocks[day.dateStr] || { morning: '', afternoon: '', evening: '' };
+
         html += `
-          <div class="month-cell ${day.isToday ? 'today' : ''} ${!day.isCurrentMonth ? 'other-month' : ''}" onclick="goToDailyView('${day.dateStr}')">
+          <div class="month-cell ${day.isToday ? 'today' : ''} ${!day.isCurrentMonth ? 'other-month' : ''}" onclick="openMonthlyBlockModal('${day.dateStr}')">
             <div class="date-num">${day.dayNum}</div>
+            <div class="block-container">
+              <div class="block-item">
+                <span class="block-emoji">🌞</span>
+                <span class="block-text">${b.morning || ''}</span>
+              </div>
+              <div class="block-item">
+                <span class="block-emoji">☕</span>
+                <span class="block-text">${b.afternoon || ''}</span>
+              </div>
+              <div class="block-item">
+                <span class="block-emoji">🌙</span>
+                <span class="block-text">${b.evening || ''}</span>
+              </div>
+            </div>
           </div>
         `;
       });
@@ -1478,7 +1596,8 @@ function exportData() {
     struct: getStructure(),
     records: getData(),
     schedules: getSchedules(),
-    matrix: getProgressMatrix()
+    matrix: getProgressMatrix(),
+    monthlyBlocks: getMonthlyBlocks()
   };
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -1500,6 +1619,7 @@ function importData() {
         if (parsed.records) saveData(parsed.records);
         if (parsed.schedules) saveSchedules(parsed.schedules);
         if (parsed.matrix) saveProgressMatrix(parsed.matrix);
+        if (parsed.monthlyBlocks) saveMonthlyBlocksData(parsed.monthlyBlocks);
         alert('복구가 완료되었습니다!');
         location.reload();
       } catch (err) { alert('백업 파일 형식이 올바르지 않습니다.'); }
