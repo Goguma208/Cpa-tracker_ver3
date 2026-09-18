@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -840,7 +838,13 @@ function renderStudy() {
     const pathKey = `${subj}|${sub}|${task}|${ch}`;
     
     const records = getData();
-    const probs = Object.keys(records).filter(k => k.startsWith(pathKey + '|'));
+    const probs = Object.keys(records)
+      .filter(k => k.startsWith(pathKey + '|'))
+      .sort((a, b) => {
+        const numA = a.split('|')[4] || '';
+        const numB = b.split('|')[4] || '';
+        return numA.localeCompare(numB, undefined, { numeric: true, sensitivity: 'base' });
+      });
 
     let html = `
       <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>
@@ -926,6 +930,10 @@ function renderFilteredProblems() {
         history: matchedHistory
       });
     }
+  });
+
+  filteredCards.sort((a, b) => {
+    return String(a.num).localeCompare(String(b.num), undefined, { numeric: true, sensitivity: 'base' });
   });
 
   if (filteredCards.length === 0) {
