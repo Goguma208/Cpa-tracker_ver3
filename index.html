@@ -1,1694 +1,1789 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPA Tracker Pro</title>
-    <style>
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --surface: #334155;
-            --surface2: #475569;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #38bdf8;
-            --accent-hover: #0284c7;
-            --success: #22c55e;
-            --warning: #eab308;
-            --danger: #ef4444;
-            --border: #475569;
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            background-color: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .subtitle {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-left: 8px;
-            font-weight: normal;
-        }
-
-        nav {
-            display: flex;
-            gap: 8px;
-        }
-
-        .nav-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            padding: 8px 16px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: var(--radius-sm);
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            color: var(--text-primary);
-            background-color: var(--surface);
-        }
-
-        .nav-btn.active {
-            color: var(--accent);
-            background-color: var(--surface);
-        }
-
-        main {
-            flex: 1;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Dashboard Styles */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .card {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .d-day-display {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--accent);
-            text-align: center;
-            margin: 1rem 0;
-        }
-
-        .d-day-sub {
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* Progress Matrix */
-        .matrix-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 0.85rem;
-        }
-
-        .matrix-table th, .matrix-table td {
-            border: 1px solid var(--border);
-            padding: 8px;
-            text-align: center;
-        }
-
-        .matrix-table th {
-            background-color: var(--surface);
-            color: var(--text-primary);
-        }
-
-        .matrix-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            text-align: center;
-            font-size: 0.85rem;
-        }
-
-        .matrix-input:focus {
-            outline: 1px solid var(--accent);
-            background-color: var(--surface);
-        }
-
-        /* Tracker Styles */
-        .tracker-container {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 1.5rem;
-            align-items: start;
-        }
-
-        .sidebar-tree {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 1rem;
-            max-height: calc(100vh - 180px);
-            overflow-y: auto;
-        }
-
-        .tree-node {
-            margin-left: 12px;
-            margin-top: 4px;
-        }
-
-        .tree-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 8px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            user-select: none;
-            font-size: 0.9rem;
-        }
-
-        .tree-item:hover {
-            background-color: var(--surface);
-        }
-
-        .tree-item.selected {
-            background-color: var(--surface2);
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .tree-item-title {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .tree-actions {
-            display: none;
-            gap: 4px;
-        }
-
-        .tree-item:hover .tree-actions {
-            display: flex;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 2px 4px;
-            font-size: 0.8rem;
-            border-radius: 4px;
-        }
-
-        .icon-btn:hover {
-            color: var(--text-primary);
-            background-color: var(--surface2);
-        }
-
-        /* 1단계 단축된 입력 폼 스타일 */
-        .add-form-1step {
-            display: flex;
-            gap: 6px;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed var(--border);
-        }
-
-        .btn {
-            background-color: var(--surface);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background-color: var(--surface2);
-        }
-
-        .btn-primary {
-            background-color: var(--accent);
-            color: #000;
-            border: none;
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-hover);
-            color: #fff;
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: #fff;
-            border: none;
-        }
-
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: 0.75rem;
-        }
-
-        .form-control {
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 6px 10px;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            width: 100%;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        /* Detail View */
-        .detail-view {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            min-height: 500px;
-        }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .breadcrumb span {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .filter-bar {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            background: var(--bg-primary);
-            padding: 10px 14px;
-            border-radius: var(--radius-sm);
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85rem;
-        }
-
-        .filter-chip-group {
-            display: flex;
-            gap: 4px;
-        }
-
-        .filter-chip {
-            padding: 3px 8px;
-            font-size: 0.75rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-chip.active {
-            background: var(--accent);
-            color: #000;
-            border-color: var(--accent);
-            font-weight: bold;
-        }
-
-        .bulk-bar {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--surface2);
-            padding: 8px 12px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .chk-custom {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: var(--accent);
-        }
-
-        .record-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 12px;
-        }
-
-        .record-card {
-            background-color: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 10px 12px;
-            position: relative;
-        }
-
-        .record-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid var(--surface);
-        }
-
-        .record-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .status-select {
-            background-color: var(--surface);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-
-        .memo-input {
-            width: 100%;
-            background: transparent;
-            border: 1px dashed var(--border);
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            padding: 4px;
-            border-radius: 4px;
-            margin-top: 6px;
-        }
-
-        .memo-input:focus {
-            color: var(--text-primary);
-            border-style: solid;
-            border-color: var(--accent);
-            outline: none;
-        }
-
-        /* Scheduler & Calendar */
-        .scheduler-layout {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 1.5rem;
-        }
-
-        .days-checkboxes {
-            display: flex;
-            gap: 6px;
-            margin: 8px 0;
-        }
-
-        .day-chk {
-            display: none;
-        }
-
-        .day-lbl {
-            flex: 1;
-            text-align: center;
-            padding: 6px 0;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .day-chk:checked + .day-lbl {
-            background: var(--accent);
-            color: #000;
-            font-weight: bold;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .calendar-view-selector {
-            display: flex;
-            gap: 4px;
-            background: var(--surface);
-            padding: 2px;
-            border-radius: var(--radius-sm);
-        }
-
-        .view-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            padding: 4px 10px;
-            font-size: 0.8rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .view-btn.active {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-        }
-
-        .calendar-day-header {
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            padding: 4px;
-            font-weight: 600;
-        }
-
-        .calendar-cell {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            min-height: 90px;
-            padding: 6px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .calendar-cell.other-month {
-            opacity: 0.3;
-        }
-
-        .date-num {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 2px;
-        }
-
-        .schedule-item {
-            font-size: 0.7rem;
-            padding: 2px 4px;
-            border-radius: 3px;
-            background: var(--surface2);
-            color: var(--text-primary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        .schedule-item.done {
-            text-decoration: line-through;
-            opacity: 0.5;
-            background: #1e3a8a;
-        }
-
-        .schedule-item.rollover {
-            border-left: 2px solid var(--warning);
-        }
-
-        .gantt-bar {
-            height: 14px;
-            border-radius: 3px;
-            font-size: 0.65rem;
-            line-height: 14px;
-            padding: 0 4px;
-            color: #fff;
-            font-weight: bold;
-            margin-bottom: 2px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            width: 450px;
-            max-width: 90%;
-        }
-
-        .modal-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 1.5rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CPA 트래커 Pro</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222636;
+    --border: #2e3348;
+    --text: #e8eaf0;
+    --text2: #8b90a7;
+    --text3: #4a4f6a;
+    --accent: #5b7fff;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --radius: 12px;
+    --radius-sm: 8px;
+
+    /* 과목별 파스텔 색상 정의 */
+    --color-경영학-bg: rgba(34, 197, 94, 0.25);
+    --color-경영학-border: #22c55e;
+    --color-경영학-text: #86efac;
+
+    --color-경제학-bg: rgba(249, 115, 22, 0.25);
+    --color-경제학-border: #f97316;
+    --color-경제학-text: #fdba74;
+
+    --color-상법-bg: rgba(234, 179, 8, 0.25);
+    --color-상법-border: #eab308;
+    --color-상법-text: #fef08a;
+
+    --color-세법-bg: rgba(14, 165, 233, 0.25);
+    --color-세법-border: #0ea5e9;
+    --color-세법-text: #7dd3fc;
+
+    --color-회계학-bg: rgba(239, 68, 68, 0.25);
+    --color-회계학-border: #ef4444;
+    --color-회계학-text: #fca5a5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, 'Pretendard', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; padding-bottom: 80px; }
+  .top-bar { padding: 20px 20px 16px; background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .top-bar h1 { font-size: 18px; font-weight: 700; }
+  .top-bar .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .tab-bar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { flex: 1; min-width: 60px; padding: 12px 6px; font-size: 12px; font-weight: 600; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .page { display: none; padding: 16px 20px; }
+  .page.active { display: block; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.8px; text-transform: uppercase; margin: 16px 0 8px; }
+  .btn { padding: 8px 12px; border-radius: var(--radius-sm); border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn:active { opacity: 0.75; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-ghost { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: rgba(255,107,107,0.15); color: var(--red); }
+  .btn-sm { padding: 4px 8px; font-size: 11px; }
+  .dday-card { background: linear-gradient(135deg, #1e2a5e 0%, #2d1f5e 100%); border: 1px solid #3d4a8a; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .dday-left { display: flex; flex-direction: column; gap: 4px; }
+  .dday-main { display: flex; align-items: baseline; gap: 8px; }
+  .dday-num { font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .dday-target-date { font-size: 13px; font-weight: 600; color: #a5b4fc; }
+  .dday-right { text-align: right; }
+  
+  .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .bc-item { font-size: 12px; color: var(--text2); cursor: pointer; padding: 3px 6px; border-radius: 4px; background: var(--surface2); }
+  .bc-sep { font-size: 10px; color: var(--text3); }
+  .bc-current { font-size: 12px; color: var(--text); font-weight: 600; }
+  .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
+  .action-btns { display: flex; gap: 4px; }
+  .prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
+  .prob-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .prob-num { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .history-list { font-size: 11px; color: var(--text2); border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
+  .history-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; padding: 2px 0; }
+  .sub-tab-bar { display: flex; gap: 6px; margin-bottom: 12px; }
+  .sub-tab-btn { flex: 1; padding: 8px; font-size: 11px; font-weight: bold; text-align: center; background: var(--surface2); color: var(--text2); border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; }
+  .sub-tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: var(--surface); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+  
+  .monthly-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 4px; }
+  .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
+  .cal-day-head { font-size: 11px; font-weight: bold; color: var(--text2); padding: 4px 0; }
+  .month-week-row { display: grid; grid-template-columns: repeat(7, 1fr); position: relative; border-top: 1px solid var(--border); min-height: 85px; }
+  .month-cell { position: relative; min-height: 85px; padding: 2px; cursor: pointer; transition: background 0.15s; border-right: 1px dashed rgba(255,255,255,0.05); }
+  .month-cell:last-child { border-right: none; }
+  .month-cell:hover { background: rgba(255, 255, 255, 0.03); }
+  .month-cell.today .date-num { color: var(--accent); font-weight: 800; }
+  .month-cell.other-month { opacity: 0.25; }
+  .date-num { font-size: 10px; font-weight: 700; text-align: center; margin-bottom: 2px; pointer-events: none; }
+
+  /* 먼슬리 3블럭 스타일 */
+  .block-container { display: flex; flex-direction: column; gap: 2px; font-size: 9px; }
+  .block-item { background: var(--surface2); border-radius: 3px; padding: 1px 2px; display: flex; align-items: center; gap: 1px; overflow: hidden; white-space: nowrap; height: 18px; }
+  .block-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; color: var(--text2); line-height: 1; }
+
+  /* 블럭 입력 모달 전용 스타일 */
+  .tag-chip-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; margin-bottom: 8px; }
+  .tag-chip { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; cursor: pointer; user-select: none; }
+  .tag-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  .weekly-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; display: block; }
+  .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; color: var(--text); outline: none; }
+  .days-checkboxes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .day-chk { display: none; }
+  .day-lbl { padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; cursor: pointer; }
+  .day-chk:checked + .day-lbl { background: var(--accent); color: white; border-color: var(--accent); }
+  
+  .badge-pending { background: rgba(255, 255, 255, 0.1); color: #bbb; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+  .badge-rollover { background: rgba(249, 115, 22, 0.2); color: #f97316; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+  .badge-done { background: rgba(62, 207, 142, 0.15); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+
+  .bulk-bar { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: var(--surface2); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border); }
+  .chk-custom { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+
+  /* 다중 필터바 스타일 */
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 12px; background: var(--surface2); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); align-items: center; flex-wrap: wrap; }
+  .filter-btn { flex: 1; min-width: 90px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 11px; padding: 6px 8px; text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
+  .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; background: var(--surface2); padding: 8px 10px; border-radius: 6px; }
+
+  /* 총괄 진도표 전용 CSS */
+  .matrix-wrapper { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; margin-top: 8px; }
+  .matrix-table { width: 100%; border-collapse: collapse; min-width: 520px; font-size: 11px; }
+  .matrix-table th, .matrix-table td { border: 1px solid var(--border); padding: 6px 4px; text-align: center; vertical-align: middle; }
+  .matrix-table th { background: var(--surface2); color: var(--text2); font-weight: 600; white-space: nowrap; }
+  .matrix-table td.sub-name { background: var(--surface2); font-weight: 700; color: var(--text); white-space: nowrap; position: sticky; left: 0; z-index: 5; text-align: left; padding-left: 8px; }
+  .matrix-select { background: transparent; color: var(--text); border: none; font-size: 11px; font-weight: 600; cursor: pointer; text-align-last: center; outline: none; width: 100%; }
+  
+  /* 진도 시각화 배지 스타일 */
+  .badge-matrix { display: inline-block; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; width: 100%; text-align: center; }
+  .status-none { background: rgba(255,255,255,0.05); color: var(--text3); }
+  .status-done { background: rgba(62, 207, 142, 0.2); color: var(--green); border: 1px solid var(--green); }
+  .status-1r   { background: rgba(91, 127, 255, 0.2); color: var(--accent); border: 1px solid var(--accent); }
+  .status-2r   { background: rgba(14, 165, 233, 0.2); color: #7dd3fc; border: 1px solid #0ea5e9; }
+  .status-3r   { background: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid #eab308; }
+  .status-4r   { background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid #f97316; }
+  .status-5r   { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+  .task-type-tag { font-size: 10px; padding: 2px 4px; border-radius: 4px; margin-left: 6px; font-weight: normal; background: var(--surface2); color: var(--text2); }
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">
-            <span>📊</span> CPA Tracker Pro
-            <span class="subtitle">2027년 동차 합격 목표</span>
-        </div>
-        <nav>
-            <button class="nav-btn active" onclick="switchTab('dashboard')">대시보드</button>
-            <button class="nav-btn" onclick="switchTab('tracker')">공부기록</button>
-            <button class="nav-btn" onclick="switchTab('scheduler')">스케줄러/캘린더</button>
-        </nav>
-    </header>
+<div class="top-bar">
+  <div>
+    <h1>📚 CPA Tracker Pro</h1>
+    <div class="sub">2027년 동차 합격 목표</div>
+  </div>
+  <div>
+    <button class="btn btn-sm btn-ghost" onclick="resetToDefault()">🔄 초기화</button>
+    <button class="btn btn-sm btn-ghost" onclick="exportData()">💾 백업</button>
+    <button class="btn btn-sm btn-ghost" onclick="importData()">📂 복구</button>
+  </div>
+</div>
 
-    <main>
-        <!-- 1. DASHBOARD TAB -->
-        <section id="dashboard" class="tab-content active">
-            <div class="dashboard-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">CPA 1차 D-Day</span>
-                        <span style="font-size: 0.8rem; color: var(--text-secondary);">(2027-02-28)</span>
-                    </div>
-                    <div class="d-day-display" id="dDayCount">D-0</div>
-                    <div class="d-day-sub">꿈을 향한 꾸준한 걸음, 완주까지 화이팅!</div>
-                </div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showPage('dashboard')">대시보드</button>
+  <button class="tab-btn" onclick="showPage('study')">공부기록</button>
+  <button class="tab-btn" onclick="showPage('scheduler')">스케줄러</button>
+  <button class="tab-btn" onclick="showPage('calendar')">캘린더</button>
+</div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">전체 문제 풀이 진도</span>
-                    </div>
-                    <div class="d-day-display" id="totalSolveProgress" style="color: var(--success);">0%</div>
-                    <div class="d-day-sub" id="totalSolveSub">0 / 0 문제 완료</div>
-                </div>
+<!-- 대시보드 -->
+<div id="page-dashboard" class="page active">
+  <div class="dday-card">
+    <div class="dday-left">
+      <div class="dday-main">
+        <div class="dday-num" id="ddayNum">D-—</div>
+        <div class="dday-target-date" style="font-size:12px; color:var(--text2);">2027-02-28</div>
+      </div>
+    </div>
+    <div class="dday-right">
+      <div style="font-size:12px;color:var(--text2);" id="todayDate"></div>
+      <div style="font-size:14px;font-weight:700;">CPA 1차 시험</div>
+    </div>
+  </div>
+  
+  <div class="section-title">📊 과목별 총괄 진도표</div>
+  <div class="matrix-wrapper">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th style="min-width: 100px;">하위 과목</th>
+          <th>(연)인강</th>
+          <th>(연)문풀</th>
+          <th>(객)문풀</th>
+          <th>(객)기출</th>
+          <th>(객)모고</th>
+          <th>기타</th>
+        </tr>
+      </thead>
+      <tbody id="matrixTableBody"></tbody>
+    </table>
+  </div>
+</div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">데이터 백업 & 복구</span>
-                    </div>
-                    <div style="display:flex; gap: 8px; margin-top: 10px;">
-                        <button class="btn btn-primary" style="flex:1;" onclick="exportData()">JSON 백업 다운로드</button>
-                        <button class="btn" style="flex:1;" onclick="document.getElementById('importFile').click()">JSON 복구</button>
-                        <input type="file" id="importFile" style="display:none" onchange="importData(event)" accept=".json">
-                    </div>
-                </div>
-            </div>
+<!-- 공부기록 트래커 -->
+<div id="page-study" class="page">
+  <div class="breadcrumb" id="breadcrumb"></div>
 
-            <!-- Total Progress Matrix -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">과목별 총괄 진도표</span>
-                    <button class="btn btn-sm" onclick="saveProgressMatrix()">진도표 저장</button>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="matrix-table">
-                        <thead>
-                            <tr>
-                                <th>대과목</th>
-                                <th>하위과목</th>
-                                <th>(연)인강</th>
-                                <th>(연)문풀</th>
-                                <th>(객)문풀</th>
-                                <th>(객)기출</th>
-                                <th>(객)모고</th>
-                                <th>기타</th>
-                            </tr>
-                        </thead>
-                        <tbody id="matrixTbody">
-                            <!-- JS Dynamically Rendered -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+  <!-- 다중 중복 선택 필터 바 -->
+  <div class="filter-bar">
+    <button class="filter-btn" id="filterRoundBtn" onclick="openFilterModal('round')">회독 중복 선택</button>
+    <button class="filter-btn" id="filterStatusBtn" onclick="openFilterModal('status')">기호 중복 선택</button>
+    <button class="btn btn-sm btn-ghost" onclick="resetFilters()">🔄 초기화</button>
+  </div>
 
-        <!-- 2. TRACKER TAB -->
-        <section id="tracker" class="tab-content">
-            <div class="tracker-container">
-                <!-- Sidebar Tree -->
-                <div class="sidebar-tree">
-                    <div style="font-weight:600; margin-bottom: 8px; font-size:0.9rem; color:var(--text-secondary);">과목/교재 구조 Tree</div>
-                    <div id="treeContainer"></div>
-                </div>
+  <div id="studyList"></div>
+</div>
 
-                <!-- Main Detail Area -->
-                <div class="detail-view">
-                    <div class="breadcrumb" id="trackerBreadcrumb">
-                        선택된 과목 또는 교재가 없습니다.
-                    </div>
-
-                    <!-- Multi-Filter & Search Bar -->
-                    <div class="filter-bar" id="filterBar" style="display:none;">
-                        <div class="filter-group">
-                            <span>회독 필터:</span>
-                            <div class="filter-chip-group" id="cycleFilterGroup">
-                                <div class="filter-chip active" onclick="toggleFilter('cycle', 'all', this)">전체</div>
-                                <div class="filter-chip" onclick="toggleFilter('cycle', '1', this)">1회독</div>
-                                <div class="filter-chip" onclick="toggleFilter('cycle', '2', this)">2회독</div>
-                                <div class="filter-chip" onclick="toggleFilter('cycle', '3', this)">3회독</div>
-                                <div class="filter-chip" onclick="toggleFilter('cycle', '4', this)">4회독</div>
-                                <div class="filter-chip" onclick="toggleFilter('cycle', '5', this)">5회독</div>
-                            </div>
-                        </div>
-
-                        <div class="filter-group" style="margin-left: 12px;">
-                            <span>상태 필터:</span>
-                            <div class="filter-chip-group" id="statusFilterGroup">
-                                <div class="filter-chip active" onclick="toggleFilter('status', 'all', this)">전체</div>
-                                <div class="filter-chip" onclick="toggleFilter('status', '△', this)">△ (수강중/진행)</div>
-                                <div class="filter-chip" onclick="toggleFilter('status', 'O', this)">O (완료/맞음)</div>
-                                <div class="filter-chip" onclick="toggleFilter('status', '☆', this)">☆ (오답)</div>
-                                <div class="filter-chip" onclick="toggleFilter('status', '♥', this)">♥ (다시)</div>
-                                <div class="filter-chip" onclick="toggleFilter('status', 're1', this)">re1</div>
-                                <div class="filter-chip" onclick="toggleFilter('status', 're2', this)">re2</div>
-                                <div class="filter-chip" onclick="toggleFilter('status', 'none', this)">미진행</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bulk Edit Action Bar -->
-                    <div class="bulk-bar" id="bulkBar" style="display:none;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <input type="checkbox" id="selectAllChk" class="chk-custom" onchange="toggleSelectAll(this)">
-                            <span style="font-size:0.85rem;" id="selectedCountText">0개 선택됨</span>
-                        </div>
-                        <div style="display:flex; gap:6px;">
-                            <!-- 세모 기호 선택 옵션 확장 -->
-                            <select id="bulkStatusSelect" class="form-control" style="width: auto; padding: 2px 6px;">
-                                <option value="O">O (맞음/완료)</option>
-                                <option value="△">△ (수강중/실수)</option>
-                                <option value="☆">☆ (오답/복습)</option>
-                                <option value="♥">♥ (다시풀기)</option>
-                                <option value="re1">re1 (1회독)</option>
-                                <option value="re2">re2 (2회독)</option>
-                                <option value="none">미진행</option>
-                            </select>
-                            <input type="date" id="bulkDateInput" class="form-control" style="width: auto; padding: 2px 6px;">
-                            <button class="btn btn-sm btn-primary" onclick="executeSelectedBulkDateChange()">선택 일괄 변경</button>
-                            <button class="btn btn-sm btn-danger" onclick="executeSelectedBulkDelete()">선택 삭제</button>
-                        </div>
-                    </div>
-
-                    <!-- Record Cards Grid -->
-                    <div class="record-grid" id="recordGrid">
-                        <div style="grid-column: 1/-1; color: var(--text-secondary); text-align: center; padding: 3rem 0;">
-                            왼쪽 트리에 과목/교재를 등록하거나 선택해 주세요.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. SCHEDULER & CALENDAR TAB -->
-        <section id="scheduler" class="tab-content">
-            <div class="scheduler-layout">
-                <!-- Schedule Allocator Panel -->
-                <div class="card">
-                    <div class="card-title" style="margin-bottom: 1rem;">스케줄 문제 자동 균등 배분</div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">대상 교재/강좌 선택</label>
-                        <select id="schTaskSelect" class="form-control"></select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">배분할 총 문제/강의 수 (예: 50)</label>
-                        <input type="number" class="form-input form-control" id="schTotal" placeholder="예: 50">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">시작일 ~ 종료일</label>
-                        <div style="display:flex; gap:6px;">
-                            <input type="date" class="form-control" id="schStart">
-                            <input type="date" class="form-control" id="schEnd">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">공부 요일 지정</label>
-                        <div class="days-checkboxes">
-                            <input type="checkbox" id="d1" class="day-chk" value="1" checked><label for="d1" class="day-lbl">월</label>
-                            <input type="checkbox" id="d2" class="day-chk" value="2" checked><label for="d2" class="day-lbl">화</label>
-                            <input type="checkbox" id="d3" class="day-chk" value="3" checked><label for="d3" class="day-lbl">수</label>
-                            <input type="checkbox" id="d4" class="day-chk" value="4" checked><label for="d4" class="day-lbl">목</label>
-                            <input type="checkbox" id="d5" class="day-chk" value="5" checked><label for="d5" class="day-lbl">금</label>
-                            <input type="checkbox" id="d6" class="day-chk" value="6"><label for="d6" class="day-lbl">토</label>
-                            <input type="checkbox" id="d0" class="day-chk" value="0"><label for="d0" class="day-lbl">일</label>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="generateSchedule()">배분 실행 & 공부기록 자동 연동</button>
-                </div>
-
-                <!-- Calendar View Area -->
-                <div class="card">
-                    <div class="calendar-header">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <button class="btn btn-sm" onclick="changeCalMonth(-1)">◀</button>
-                            <span id="calMonthTitle" style="font-weight:700; font-size:1.1rem;">2026년 10월</span>
-                            <button class="btn btn-sm" onclick="changeCalMonth(1)">▶</button>
-                        </div>
-
-                        <div class="calendar-view-selector">
-                            <button class="view-btn active" id="btnMonthly" onclick="setCalView('monthly')">Monthly</button>
-                            <button class="view-btn" id="btnWeekly" onclick="setCalView('weekly')">Weekly</button>
-                            <button class="view-btn" id="btnDaily" onclick="setCalView('daily')">Daily</button>
-                        </div>
-                    </div>
-
-                    <div id="calendarContent">
-                        <!-- Dynamically Generated Calendar Grid/Gantt -->
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal for Dynamic Prompts -->
-    <div class="modal" id="genericModal">
-        <div class="modal-content">
-            <div class="modal-title" id="modalTitle">입력</div>
-            <div id="modalBody"></div>
-            <div class="modal-footer">
-                <button class="btn" onclick="closeModal()">취소</button>
-                <button class="btn btn-primary" id="modalConfirmBtn">확인</button>
-            </div>
-        </div>
+<!-- 스케줄러 -->
+<div id="page-scheduler" class="page">
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:12px;">📅 공부 목표 및 기간 배분기</div>
+    <div class="form-group">
+      <label class="form-label">1. 대과목 선택</label>
+      <select class="form-input" id="schSubj" onchange="updateSubSelect()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">2. 하위 과목 선택</label>
+      <select class="form-input" id="schSub" onchange="updateTaskSelect()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">3. 교재 / 강좌 선택</label>
+      <select class="form-input" id="schTask" onchange="updateChSelect()"></select>
+    </div>
+    <div class="form-group" id="schChGroup">
+      <label class="form-label">4. 챕터 선택</label>
+      <select class="form-input" id="schCh"></select>
     </div>
 
-    <script>
-        // Default System Structures
-        const DEFAULT_SUBJECTS = [
-            { main: "경영학", subs: ["일반경영", "재무관리"] },
-            { main: "경제학", subs: ["미시경제", "거시경제"] },
-            { main: "상법", subs: ["상법총칙", "회사법", "어음수표법"] },
-            { main: "세법", subs: ["법인세법", "소득세법", "부가세법", "기타세법"] },
-            { main: "회계학", subs: ["중급회계", "고급회계", "원가관리회계", "정부회계"] }
-        ];
+    <div class="form-group">
+      <label class="form-label" id="schTotalLabel">배분할 총 문제 수 (예: 50)</label>
+      <input type="number" class="form-input" id="schTotal" placeholder="예: 50">
+    </div>
+    <div class="form-group">
+      <label class="form-label">시작일 ~ 종료일</label>
+      <div style="display:flex;gap:6px;">
+        <input type="date" class="form-input" id="schStart">
+        <input type="date" class="form-input" id="schEnd">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">공부 요일 지정</label>
+      <div class="days-checkboxes">
+        <input type="checkbox" id="d1" class="day-chk" value="1" checked><label for="d1" class="day-lbl">월</label>
+        <input type="checkbox" id="d2" class="day-chk" value="2" checked><label for="d2" class="day-lbl">화</label>
+        <input type="checkbox" id="d3" class="day-chk" value="3" checked><label for="d3" class="day-lbl">수</label>
+        <input type="checkbox" id="d4" class="day-chk" value="4" checked><label for="d4" class="day-lbl">목</label>
+        <input type="checkbox" id="d5" class="day-chk" value="5" checked><label for="d5" class="day-lbl">금</label>
+        <input type="checkbox" id="d6" class="day-chk" value="6"><label for="d6" class="day-lbl">토</label>
+        <input type="checkbox" id="d0" class="day-chk" value="0"><label for="d0" class="day-lbl">일</label>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="generateSchedule()">배분 실행 & 공부기록 자동 연동</button>
+  </div>
+</div>
 
-        // State Store
-        let cpaStructure = JSON.parse(localStorage.getItem('cpaStructure')) || [
-            { id: 1, main: "회계학", sub: "중급회계", title: "김재호 중급회계 연습", type: "book" }
-        ];
+<!-- 캘린더 -->
+<div id="page-calendar" class="page">
+  <div class="sub-tab-bar">
+    <div class="sub-tab-btn active" id="calTabDaily" onclick="setCalView('daily')">Daily</div>
+    <div class="sub-tab-btn" id="calTabWeekly" onclick="setCalView('weekly')">Weekly</div>
+    <div class="sub-tab-btn" id="calTabMonthly" onclick="setCalView('monthly')">Monthly</div>
+  </div>
+  <div id="calList"></div>
+</div>
 
-        let cpaRecords = JSON.parse(localStorage.getItem('cpaRecords')) || {};
-        let cpaSchedules = JSON.parse(localStorage.getItem('cpaSchedules')) || [];
-        let cpaProgressMatrix = JSON.parse(localStorage.getItem('cpaProgressMatrix')) || {};
+<!-- 먼슬리 3블럭 입력 팝업 모달 -->
+<div class="modal-overlay" id="monthlyBlockModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;" id="monthlyModalTitle">일정 관리 (3블럭)</div>
+    
+    <div class="form-group">
+      <label class="form-label">🌞 아침 일정</label>
+      <input type="text" class="form-input" id="blockMorningInput" placeholder="직접 입력 또는 아래 태그 클릭">
+      <div class="tag-chip-container" id="mTags"></div>
+    </div>
 
-        let currentSelectedTreeId = null;
-        let selectedRecordKeys = new Set();
-        let activeFilters = { cycle: 'all', status: 'all' };
+    <div class="form-group">
+      <label class="form-label">☕ 점심 일정</label>
+      <input type="text" class="form-input" id="blockAfternoonInput" placeholder="직접 입력 또는 아래 태그 클릭">
+      <div class="tag-chip-container" id="aTags"></div>
+    </div>
 
-        let currentCalDate = new Date();
-        let currentCalView = 'monthly';
+    <div class="form-group">
+      <label class="form-label">🌙 저녁 일정</label>
+      <input type="text" class="form-input" id="blockEveningInput" placeholder="직접 입력 또는 아래 태그 클릭">
+      <div class="tag-chip-container" id="eTags"></div>
+    </div>
 
-        // Initialize App
-        document.addEventListener("DOMContentLoaded", () => {
-            calculateDDay();
-            renderProgressMatrix();
-            renderSubjectTree();
-            updateSchedulerTaskSelect();
-            renderCalendar();
-            updateDashboardOverallProgress();
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('monthlyBlockModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveMonthlyBlocks()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 다중 선택 필터 모달 -->
+<div class="modal-overlay" id="filterModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;" id="filterModalTitle">필터 선택</div>
+    <div class="checkbox-group" id="filterCheckboxList"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('filterModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="applyMultiFilter()">필터 적용하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 개별 풀이/수강 기록 모달 -->
+<div class="modal-overlay" id="probModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">기록 수정</div>
+    <div class="form-group">
+      <label class="form-label">회독 선택</label>
+      <select class="form-input" id="probRound">
+        <option value="1">1회독</option>
+        <option value="2">2회독</option>
+        <option value="3">3회독</option>
+        <option value="4">4회독</option>
+        <option value="5">5회독</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">상태 변경</label>
+      <select class="form-input" id="probStatus"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">기록/예정 날짜</label>
+      <input type="date" class="form-input" id="probDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">메모</label>
+      <input type="text" class="form-input" id="probMemo" placeholder="메모 입력">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('probModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveProbRecord()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 일괄 기록 수정 모달 -->
+<div class="modal-overlay" id="bulkDateModal">
+  <div class="modal">
+    <div style="font-weight:700;margin-bottom:12px;">📝 선택 항목 일괄 수정</div>
+    <div class="form-group">
+      <label class="form-label">적용할 회독</label>
+      <select class="form-input" id="bulkRound">
+        <option value="1">1회독</option>
+        <option value="2">2회독</option>
+        <option value="3">3회독</option>
+        <option value="4">4회독</option>
+        <option value="5">5회독</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">일괄 적용할 상태</label>
+      <select class="form-input" id="bulkStatus"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">변경할 지정 날짜</label>
+      <input type="date" class="form-input" id="bulkTargetDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">메모 (선택사항)</label>
+      <input type="text" class="form-input" id="bulkMemo" placeholder="예: 1회차 일괄입력">
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">
+      * 체크 박스로 선택하신 모든 항목의 해당 회독 기록이 지정한 정보로 일괄 수정/업데이트 됩니다.
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('bulkDateModal')">취소</button>
+      <button class="btn btn-primary" style="flex:1" onclick="executeSelectedBulkDateChange()">일괄 수정 실행</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_STRUCTURE = {
+  "경영학": { "일반경영": { "객관식 기출": { type: "book", chapters: ["기본"] } }, "재무관리": { "연습서 문풀": { type: "book", chapters: ["기본"] } } },
+  "경제학": { "미시경제": { "객관식 기출": { type: "book", chapters: ["기본"] } } },
+  "상법": { "회사법": { "객관식 기출": { type: "book", chapters: ["기본"] } } },
+  "세법": { "법인세법": { "(객)강경태": { type: "book", chapters: ["CH.1 총설"] } } },
+  "회계학": { "중급회계": { "연습서 문풀": { type: "book", chapters: ["기본"] } } }
+};
+
+/* 새로 지정된 총괄 진도표 목록 및 옵션 설정 */
+const MATRIX_SUB_LIST = [
+  "일반경영", "재무관리", "미시경제", "거시경제", 
+  "회사법", "외감&공회법", "법인세법", "소득세법", 
+  "부가가치세법", "국기법", "상증&기타세법", 
+  "중급회계", "고급회계", "정부회계", "원가관리회계"
+];
+const MATRIX_COLS = ["(연)인강", "(연)문풀", "(객)문풀", "(객)기출", "(객)모고", "기타"];
+const MATRIX_OPTIONS = ["-", "미진행", "완료", "1회독", "2회독", "3회독", "4회독", "5회독"];
+
+/* 먼슬리 3블럭 태그 옵션 정의 */
+const BLOCK_TAGS = ["🔥공부", "🏢출근", "🏡재택", "🎬영화", "📚독서", "⏳시험", "🧸휴식", "🏥병원", "💤잠", "🧹집안일", "🤯멘탈나감", "🛸놀았어요···", "💪운동", "⚾야구", "🎨다꾸", "🌏국제정세", "💵금융", "💻코딩", "✏️"];
+
+/* 날짜 포맷 함수 (Timezone 이슈 방지) */
+function formatDateToYMD(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function getProgressMatrix() {
+  return JSON.parse(localStorage.getItem('cpaProgressMatrix') || '{}');
+}
+function saveProgressMatrix(data) {
+  localStorage.setItem('cpaProgressMatrix', JSON.stringify(data));
+}
+
+/* 먼슬리 블럭 데이터 구조 저장/불러오기 */
+function getMonthlyBlocks() {
+  return JSON.parse(localStorage.getItem('cpaMonthlyBlocks') || '{}');
+}
+function saveMonthlyBlocksData(data) {
+  localStorage.setItem('cpaMonthlyBlocks', JSON.stringify(data));
+}
+
+/* 다중 선택 필터 데이터 구조 */
+let selectedFilterRounds = [];
+let selectedFilterStatuses = [];
+let currentFilterTarget = null; // 'round' or 'status'
+
+function getStructure() {
+  const data = localStorage.getItem('cpaStructure');
+  if (!data) return DEFAULT_STRUCTURE;
+  const parsed = JSON.parse(data);
+  // 이전 구버전 데이터 호환성 보장 로직
+  Object.keys(parsed).forEach(subj => {
+    Object.keys(parsed[subj] || {}).forEach(sub => {
+      Object.keys(parsed[subj][sub] || {}).forEach(task => {
+        if (Array.isArray(parsed[subj][sub][task])) {
+          parsed[subj][sub][task] = { type: 'book', chapters: parsed[subj][sub][task] };
+        }
+      });
+    });
+  });
+  return parsed;
+}
+function saveStructure(struct) { localStorage.setItem('cpaStructure', JSON.stringify(struct)); }
+function getData() { return JSON.parse(localStorage.getItem('cpaRecords') || '{}'); }
+function saveData(data) { localStorage.setItem('cpaRecords', JSON.stringify(data)); }
+function getSchedules() { return JSON.parse(localStorage.getItem('cpaSchedules') || '[]'); }
+function saveSchedules(schs) { localStorage.setItem('cpaSchedules', JSON.stringify(schs)); }
+
+function resetToDefault() {
+  if (confirm('초기화하시겠습니까? 데이터가 전부 삭제됩니다.')) {
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+function updateRecordKeys(oldPrefix, newPrefix) {
+  const records = getData();
+  const updatedRecords = {};
+
+  Object.keys(records).forEach(key => {
+    if (key.startsWith(oldPrefix + '|')) {
+      const newKey = key.replace(oldPrefix + '|', newPrefix + '|');
+      updatedRecords[newKey] = records[key];
+    } else {
+      updatedRecords[key] = records[key];
+    }
+  });
+
+  saveData(updatedRecords);
+}
+
+let studyPath = [];
+let calViewMode = 'daily';
+let currentCalDate = new Date();
+let selectedMonthlyDateStr = null;
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'study') renderStudy();
+  if (id === 'scheduler') initSchedulerSelects();
+  if (id === 'calendar') renderCalendar();
+}
+
+function getStatusClass(val) {
+  if (val === '완료') return 'status-done';
+  if (val === '1회독') return 'status-1r';
+  if (val === '2회독') return 'status-2r';
+  if (val === '3회독') return 'status-3r';
+  if (val === '4회독') return 'status-4r';
+  if (val === '5회독') return 'status-5r';
+  return 'status-none';
+}
+
+function renderDashboard() {
+  const exam = new Date('2027-02-28');
+  const diff = Math.ceil((exam - new Date()) / 86400000);
+  document.getElementById('ddayNum').textContent = diff >= 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
+  document.getElementById('todayDate').textContent = formatDateToYMD(new Date());
+
+  /* 총괄 진도표 매트릭스 랜더링 */
+  const matrixData = getProgressMatrix();
+  const tbody = document.getElementById('matrixTableBody');
+  tbody.innerHTML = '';
+
+  MATRIX_SUB_LIST.forEach(sub => {
+    let rowHtml = `<tr><td class="sub-name">${sub}</td>`;
+    MATRIX_COLS.forEach(col => {
+      const key = `${sub}|${col}`;
+      let val = matrixData[key] || '-';
+      if (val === '(해당없음)') val = '-';
+
+      const statusClass = getStatusClass(val);
+
+      let optionsHtml = MATRIX_OPTIONS.map(opt => `
+        <option value="${opt}" ${opt === val ? 'selected' : ''}>${opt}</option>
+      `).join('');
+
+      rowHtml += `
+        <td>
+          <div class="badge-matrix ${statusClass}">
+            <select class="matrix-select" onchange="updateMatrixStatus('${sub}', '${col}', this.value)">
+              ${optionsHtml}
+            </select>
+          </div>
+        </td>
+      `;
+    });
+    rowHtml += `</tr>`;
+    tbody.innerHTML += rowHtml;
+  });
+}
+
+function updateMatrixStatus(sub, col, value) {
+  const matrixData = getProgressMatrix();
+  matrixData[`${sub}|${col}`] = value;
+  saveProgressMatrix(matrixData);
+  renderDashboard();
+}
+
+function initSchedulerSelects() {
+  const struct = getStructure();
+  const subjSelect = document.getElementById('schSubj');
+  subjSelect.innerHTML = '';
+  
+  Object.keys(struct).forEach(s => {
+    subjSelect.innerHTML += `<option value="${s}">${s}</option>`;
+  });
+  updateSubSelect();
+}
+
+function updateSubSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const subSelect = document.getElementById('schSub');
+  subSelect.innerHTML = '';
+
+  if (struct[subj]) {
+    Object.keys(struct[subj]).forEach(s => {
+      subSelect.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+  }
+  updateTaskSelect();
+}
+
+function updateTaskSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const taskSelect = document.getElementById('schTask');
+  taskSelect.innerHTML = '';
+
+  if (struct[subj] && struct[subj][sub]) {
+    Object.keys(struct[subj][sub]).forEach(t => {
+      taskSelect.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+  }
+  updateChSelect();
+}
+
+function updateChSelect() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const task = document.getElementById('schTask').value;
+  const chSelect = document.getElementById('schCh');
+  const chGroup = document.getElementById('schChGroup');
+  const totalLabel = document.getElementById('schTotalLabel');
+
+  chSelect.innerHTML = '';
+
+  if (struct[subj] && struct[subj][sub] && struct[subj][sub][task]) {
+    const taskObj = struct[subj][sub][task];
+    if (taskObj.type === 'lecture') {
+      chGroup.style.display = 'none';
+      totalLabel.textContent = '배분할 총 강의 수 (예: 40)';
+    } else {
+      chGroup.style.display = 'block';
+      totalLabel.textContent = '배분할 총 문제 수 (예: 50)';
+      (taskObj.chapters || []).forEach(ch => {
+        chSelect.innerHTML += `<option value="${ch}">${ch}</option>`;
+      });
+    }
+  }
+}
+
+function generateSchedule() {
+  const struct = getStructure();
+  const subj = document.getElementById('schSubj').value;
+  const sub = document.getElementById('schSub').value;
+  const task = document.getElementById('schTask').value;
+  
+  const taskObj = struct[subj] && struct[subj][sub] && struct[subj][sub][task];
+  const isLecture = taskObj && taskObj.type === 'lecture';
+
+  const ch = isLecture ? 'NONE' : document.getElementById('schCh').value;
+  const total = Number(document.getElementById('schTotal').value);
+  const startStr = document.getElementById('schStart').value;
+  const endStr = document.getElementById('schEnd').value;
+  const selectedDays = Array.from(document.querySelectorAll('.day-chk:checked')).map(cb => Number(cb.value));
+
+  if (!subj || !sub || !task || (!isLecture && !ch) || !total || !startStr || !endStr || selectedDays.length === 0) {
+    alert('모든 단계를 정확히 선택/입력해 주세요.');
+    return;
+  }
+
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  let dates = [];
+  let curr = new Date(start);
+  while (curr <= end) {
+    if (selectedDays.includes(curr.getDay())) dates.push(new Date(curr));
+    curr.setDate(curr.getDate() + 1);
+  }
+
+  if (dates.length === 0) {
+    alert('선택한 기간 내에 지정한 공부 요일이 없습니다.');
+    return;
+  }
+
+  const schedules = getSchedules();
+  schedules.push({ subj, title: isLecture ? `${task}` : `${task} (${ch})`, start: startStr, end: endStr });
+  saveSchedules(schedules);
+
+  const records = getData();
+  const perDay = Math.ceil(total / dates.length);
+  let currentNum = 1;
+
+  dates.forEach(d => {
+    if (currentNum > total) return;
+    const endNum = Math.min(currentNum + perDay - 1, total);
+    const dateFormatted = formatDateToYMD(d);
+
+    for (let i = currentNum; i <= endNum; i++) {
+      const pKey = `${subj}|${sub}|${task}|${ch}|${i}`;
+      if (!records[pKey]) records[pKey] = { history: [] };
+      records[pKey].history.push({
+        round: '1',
+        status: '미진행',
+        date: dateFormatted,
+        scheduledDate: dateFormatted,
+        memo: '스케줄 자동 배분'
+      });
+    }
+    currentNum = endNum + 1;
+  });
+
+  saveData(records);
+  alert('선택한 공부기록 위치로 배분이 완료되었습니다.');
+  showPage('calendar');
+}
+
+/* 필터 UI 업데이트 및 모달 제어 */
+function openFilterModal(target) {
+  currentFilterTarget = target;
+  const list = document.getElementById('filterCheckboxList');
+  const title = document.getElementById('filterModalTitle');
+  list.innerHTML = '';
+
+  if (target === 'round') {
+    title.textContent = '회독 선택 (중복 가능)';
+    ['1', '2', '3', '4', '5'].forEach(r => {
+      const isChecked = selectedFilterRounds.includes(r) ? 'checked' : '';
+      list.innerHTML += `
+        <label class="checkbox-item">
+          <input type="checkbox" class="chk-custom filter-chk" value="${r}" ${isChecked}>
+          ${r}회독
+        </label>
+      `;
+    });
+  } else {
+    title.textContent = '기호 선택 (중복 가능)';
+    [
+      { val: 'O', label: 'O' },
+      { val: 're1', label: 're1 (수강)' },
+      { val: 're2', label: 're2 (수강)' },
+      { val: '△', label: '△ (실수)' },
+      { val: '☆', label: '☆ (오답)' },
+      { val: '♥', label: '♥ (다시풀기)' },
+      { val: '미진행', label: '미진행' }
+    ].forEach(item => {
+      const isChecked = selectedFilterStatuses.includes(item.val) ? 'checked' : '';
+      list.innerHTML += `
+        <label class="checkbox-item">
+          <input type="checkbox" class="chk-custom filter-chk" value="${item.val}" ${isChecked}>
+          ${item.label}
+        </label>
+      `;
+    });
+  }
+  document.getElementById('filterModal').classList.add('open');
+}
+
+function applyMultiFilter() {
+  const chks = document.querySelectorAll('.filter-chk:checked');
+  const values = Array.from(chks).map(c => c.value);
+
+  if (currentFilterTarget === 'round') {
+    selectedFilterRounds = values;
+  } else {
+    selectedFilterStatuses = values;
+  }
+
+  closeModal('filterModal');
+  updateFilterBarUI();
+  renderStudy();
+}
+
+function resetFilters() {
+  selectedFilterRounds = [];
+  selectedFilterStatuses = [];
+  updateFilterBarUI();
+  renderStudy();
+}
+
+function updateFilterBarUI() {
+  const roundBtn = document.getElementById('filterRoundBtn');
+  const statusBtn = document.getElementById('filterStatusBtn');
+
+  if (selectedFilterRounds.length > 0) {
+    roundBtn.classList.add('active');
+    roundBtn.textContent = `회독: ${selectedFilterRounds.join(', ')}회`;
+  } else {
+    roundBtn.classList.remove('active');
+    roundBtn.textContent = '회독 중복 선택';
+  }
+
+  if (selectedFilterStatuses.length > 0) {
+    statusBtn.classList.add('active');
+    statusBtn.textContent = `기호: ${selectedFilterStatuses.join(', ')}`;
+  } else {
+    statusBtn.classList.remove('active');
+    statusBtn.textContent = '기호 중복 선택';
+  }
+}
+
+function renderStudy() {
+  const struct = getStructure();
+  const bc = document.getElementById('breadcrumb');
+  const list = document.getElementById('studyList');
+
+  const isFiltering = (selectedFilterRounds.length > 0 || selectedFilterStatuses.length > 0);
+
+  let bcHtml = '<span class="bc-item" onclick="navTo([])">전체 과목</span>';
+  studyPath.forEach((p, i) => {
+    bcHtml += ' <span class="bc-sep">›</span> ';
+    bcHtml += i < studyPath.length - 1 
+      ? `<span class="bc-item" onclick="navTo(studyPath.slice(0,${i+1}))">${p}</span>`
+      : `<span class="bc-current">${p}</span>`;
+  });
+  bc.innerHTML = bcHtml;
+  list.innerHTML = '';
+
+  if (isFiltering) {
+    renderFilteredProblems();
+    return;
+  }
+
+  const depth = studyPath.length;
+
+  if (depth === 0) {
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addMainSubject()">+ 대과목 추가</button>`;
+    Object.keys(struct).forEach((subj, idx) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}'])" style="flex:1;cursor:pointer"><strong>${subj}</strong></div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(0, [], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(0, [], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editMainSubject('${subj}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteMainSubject('${subj}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  } 
+  else if (depth === 1) {
+    const subj = studyPath[0];
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addSubSubject('${subj}')">+ 하위 과목 추가</button>`;
+    Object.keys(struct[subj] || {}).forEach((sub, idx) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}','${sub}'])" style="flex:1;cursor:pointer"><strong>${sub}</strong></div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(1, ['${subj}'], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(1, ['${subj}'], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editSubSubject('${subj}','${sub}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSubSubject('${subj}','${sub}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  } 
+  else if (depth === 2) {
+    const [subj, sub] = studyPath;
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 문제집/강좌 추가</button>`;
+    Object.keys(struct[subj][sub] || {}).forEach((task, idx) => {
+      const taskObj = struct[subj][sub][task];
+      const typeTag = taskObj.type === 'lecture' ? '🎬 강좌' : '📚 문제집';
+      list.innerHTML += `<div class="list-item">
+        <div onclick="clickTaskItem('${subj}','${sub}','${task}')" style="flex:1;cursor:pointer">
+          <strong>${task}</strong>
+          <span class="task-type-tag">${typeTag}</span>
+        </div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editTask('${subj}','${sub}','${task}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteTask('${subj}','${sub}','${task}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  }
+  else if (depth === 3) {
+    const [subj, sub, task] = studyPath;
+    const taskObj = struct[subj][sub][task];
+
+    // 강좌일 경우 바로 강의 목록 페이지로 변환
+    if (taskObj && taskObj.type === 'lecture') {
+      renderLectureItems(subj, sub, task);
+      return;
+    }
+
+    list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addChapter('${subj}','${sub}','${task}')">+ 챕터 추가</button>`;
+    ((taskObj && taskObj.chapters) || []).forEach((ch, idx) => {
+      list.innerHTML += `<div class="list-item">
+        <div onclick="navTo(['${subj}','${sub}','${task}','${ch}'])" style="flex:1;cursor:pointer"><strong>${ch}</strong></div>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(3, ['${subj}','${sub}','${task}'], ${idx}, -1)">▲</button>
+          <button class="btn btn-sm btn-ghost" onclick="moveItem(3, ['${subj}','${sub}','${task}'], ${idx}, 1)">▼</button>
+          <button class="btn btn-sm btn-ghost" onclick="editChapter('${subj}','${sub}','${task}','${ch}')">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteChapter('${subj}','${sub}','${task}','${ch}')">삭제</button>
+        </div>
+      </div>`;
+    });
+  }
+  else if (depth === 4) {
+    const [subj, sub, task, ch] = studyPath;
+    renderProblemOrLectureList(subj, sub, task, ch);
+  }
+}
+
+function clickTaskItem(subj, sub, task) {
+  const struct = getStructure();
+  const taskObj = struct[subj][sub][task];
+  if (taskObj && taskObj.type === 'lecture') {
+    navTo([subj, sub, task, 'NONE']);
+  } else {
+    navTo([subj, sub, task]);
+  }
+}
+
+function renderLectureItems(subj, sub, task) {
+  renderProblemOrLectureList(subj, sub, task, 'NONE');
+}
+
+function renderProblemOrLectureList(subj, sub, task, ch) {
+  const list = document.getElementById('studyList');
+  const pathKey = `${subj}|${sub}|${task}|${ch}`;
+  const struct = getStructure();
+  const taskObj = struct[subj][sub][task];
+  const isLecture = taskObj && taskObj.type === 'lecture';
+  
+  const records = getData();
+  const probs = Object.keys(records)
+    .filter(k => k.startsWith(pathKey + '|'))
+    .sort((a, b) => {
+      const numA = a.split('|')[4] || '';
+      const numB = b.split('|')[4] || '';
+      return numA.localeCompare(numB, undefined, { numeric: true, sensitivity: 'base' });
+    });
+
+  const itemUnit = isLecture ? '강' : '번 문제';
+  const addBtnText = isLecture ? '+ 강의 수동 추가' : '+ 문제 수동 추가';
+
+  let html = `
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}', ${isLecture})">${addBtnText}</button>
+  `;
+
+  if (probs.length > 0) {
+    html += `
+      <div class="bulk-bar">
+        <label style="font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="chk-custom" id="selectAllProb" onchange="toggleSelectAllProbs(this)">
+          전체 선택
+        </label>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm btn-ghost" onclick="openSelectedBulkDateModal(${isLecture})">📝 일괄 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSelectedProblems()">🗑️ 일괄 삭제</button>
+        </div>
+      </div>
+    `;
+  }
+
+  probs.forEach(pKey => {
+    const probNum = pKey.split('|')[4];
+    const history = records[pKey].history || [];
+
+    let historyHtml = history.map((h, idx) => {
+      return `<div class="history-item">
+        <div>
+          <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
+          ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
+        </div>
+        <div>
+          <button class="btn btn-sm btn-ghost" onclick="openProbModal('${pKey}', ${idx}, ${isLecture})">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProbRecord('${pKey}', ${idx})">삭제</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    html += `<div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-num">
+          <input type="checkbox" class="chk-custom prob-chk" value="${pKey}">
+          ${probNum}${itemUnit}
+        </div>
+        <div>
+          <button class="btn btn-sm btn-danger" style="margin-right:4px;" onclick="deleteProblem('${pKey}')">삭제</button>
+          <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}', null, ${isLecture})">+ 수강/회독 기록</button>
+        </div>
+      </div>
+      <div class="history-list">${historyHtml || '기록 없음'}</div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+function renderFilteredProblems() {
+  const list = document.getElementById('studyList');
+  const records = getData();
+  const currentPathPrefix = studyPath.join('|');
+
+  let filteredCards = [];
+
+  Object.keys(records).forEach(pKey => {
+    if (currentPathPrefix && !pKey.startsWith(currentPathPrefix)) return;
+
+    const parts = pKey.split('|');
+    if (parts.length < 5) return;
+    const [subj, sub, task, ch, num] = parts;
+    const history = records[pKey].history || [];
+
+    const matchedHistory = history.filter(h => {
+      const matchRound = (selectedFilterRounds.length === 0 || selectedFilterRounds.includes(String(h.round)));
+      const matchStatus = (selectedFilterStatuses.length === 0 || selectedFilterStatuses.includes(h.status));
+      return matchRound && matchStatus;
+    });
+
+    if (matchedHistory.length > 0) {
+      filteredCards.push({
+        pKey,
+        pathStr: ch === 'NONE' ? `${subj} > ${sub} > ${task}` : `${subj} > ${sub} > ${task} > ${ch}`,
+        num,
+        isLecture: ch === 'NONE',
+        history: matchedHistory
+      });
+    }
+  });
+
+  filteredCards.sort((a, b) => {
+    return String(a.num).localeCompare(String(b.num), undefined, { numeric: true, sensitivity: 'base' });
+  });
+
+  if (filteredCards.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">선택하신 중복 조건에 일치하는 항목이 없습니다.</div>';
+    return;
+  }
+
+  let html = `<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">🔍 중복 필터 검색 결과: ${filteredCards.length}개 항목</div>`;
+
+  filteredCards.forEach(item => {
+    let historyHtml = item.history.map((h) => {
+      return `<div class="history-item">
+        <div>
+          <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
+          ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    const unitText = item.isLecture ? '강' : '번 문제';
+
+    html += `<div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-num">${item.num}${unitText}</div>
+        <button class="btn btn-sm btn-primary" onclick="openProbModal('${item.pKey}', null, ${item.isLecture})">+ 기록 추가</button>
+      </div>
+      <div style="font-size:11px;color:var(--accent);margin-bottom:6px;">${item.pathStr}</div>
+      <div class="history-list">${historyHtml}</div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+function navTo(path) { studyPath = path; renderStudy(); }
+
+function toggleSelectAllProbs(master) {
+  const chks = document.querySelectorAll('.prob-chk');
+  chks.forEach(c => c.checked = master.checked);
+}
+
+function getSelectedProbKeys() {
+  const chks = document.querySelectorAll('.prob-chk:checked');
+  return Array.from(chks).map(c => c.value);
+}
+
+function deleteSelectedProblems() {
+  const selectedKeys = getSelectedProbKeys();
+  if (selectedKeys.length === 0) {
+    alert('삭제할 항목을 체크박스로 하나 이상 선택해 주세요.');
+    return;
+  }
+
+  if (!confirm(`선택한 ${selectedKeys.length}개 항목을 삭제하시겠습니까?`)) return;
+
+  const records = getData();
+  selectedKeys.forEach(k => {
+    delete records[k];
+  });
+
+  saveData(records);
+  alert(`${selectedKeys.length}개 항목이 성공적으로 삭제되었습니다.`);
+  renderStudy();
+}
+
+function openSelectedBulkDateModal(isLecture = false) {
+  const selectedKeys = getSelectedProbKeys();
+  if (selectedKeys.length === 0) {
+    alert('수정할 항목을 체크박스로 하나 이상 선택해 주세요.');
+    return;
+  }
+
+  // 강좌 여부에 따른 상태 옵션 동적 생성
+  const statusSelect = document.getElementById('bulkStatus');
+  if (isLecture) {
+    statusSelect.innerHTML = `
+      <option value="O">O (수강완료)</option>
+      <option value="re1">re1 (1차 재수강)</option>
+      <option value="re2">re2 (2차 재수강)</option>
+      <option value="re3">re3 (3차 재수강)</option>
+      <option value="미진행">미진행</option>
+    `;
+  } else {
+    statusSelect.innerHTML = `
+      <option value="O">O (맞음)</option>
+      <option value="△">△ (실수) - 14일 후 복습</option>
+      <option value="☆">☆ (오답) - 2일 후 복습</option>
+      <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
+      <option value="미진행">미진행</option>
+    `;
+  }
+
+  document.getElementById('bulkTargetDate').value = formatDateToYMD(new Date());
+  document.getElementById('bulkMemo').value = '';
+  document.getElementById('bulkDateModal').classList.add('open');
+}
+
+/* 동일 회독 덮어쓰기 로직 적용된 일괄 수정 실행 함수 */
+function executeSelectedBulkDateChange() {
+  const round = document.getElementById('bulkRound').value;
+  const status = document.getElementById('bulkStatus').value;
+  const targetDate = document.getElementById('bulkTargetDate').value;
+  const memo = document.getElementById('bulkMemo').value;
+
+  if (!targetDate) {
+    alert('날짜를 지정해 주세요.');
+    return;
+  }
+
+  const selectedKeys = getSelectedProbKeys();
+  const records = getData();
+  let updatedCount = 0;
+  let reviewCreatedCount = 0;
+
+  selectedKeys.forEach(k => {
+    if (!records[k]) records[k] = { history: [] };
+    
+    const parts = k.split('|');
+    const isLecture = parts[3] === 'NONE';
+
+    const existingIdx = records[k].history.findIndex(h => String(h.round) === String(round));
+
+    if (existingIdx !== -1) {
+      records[k].history[existingIdx] = {
+        ...records[k].history[existingIdx],
+        status: status,
+        date: targetDate,
+        scheduledDate: targetDate,
+        memo: memo
+      };
+    } else {
+      records[k].history.push({
+        round: round,
+        status: status,
+        date: targetDate,
+        scheduledDate: targetDate,
+        memo: memo
+      });
+    }
+    updatedCount++;
+
+    if (!isLecture) {
+      let reviewDays = 0;
+      if (status.includes('☆') || status.includes('★')) reviewDays = 2;
+      else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
+      else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
+
+      if (reviewDays > 0) {
+        const baseDate = new Date(targetDate);
+        baseDate.setDate(baseDate.getDate() + reviewDays);
+        const reviewDateStr = formatDateToYMD(baseDate);
+        const nextRound = String(Number(round) + 1);
+
+        records[k].history.push({
+          round: nextRound,
+          status: '미진행',
+          date: reviewDateStr,
+          scheduledDate: reviewDateStr,
+          memo: `[일괄 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
         });
+        reviewCreatedCount++;
+      }
+    }
+  });
 
-        // Tab Switcher
-        function switchTab(tabId) {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+  saveData(records);
 
-            if (tabId === 'scheduler') {
-                renderCalendar();
-            }
-        }
+  let msg = `선택된 ${selectedKeys.length}개 항목의 ${round}회독 정보가 [${status} / ${targetDate}]로 반영되었습니다.`;
+  if (reviewCreatedCount > 0) {
+    msg += `\n* 오답 복습 할 일 ${reviewCreatedCount}개가 자동으로 생성되었습니다.`;
+  }
+  alert(msg);
 
-        // D-Day Calculation
-        function calculateDDay() {
-            const targetDate = new Date('2027-02-28');
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            targetDate.setHours(0,0,0,0);
+  closeModal('bulkDateModal');
+  renderStudy();
+}
 
-            const diffTime = targetDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+function setCalView(mode) {
+  calViewMode = mode;
+  document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('calTab' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+  renderCalendar();
+}
 
-            const dDayElem = document.getElementById('dDayCount');
-            if (diffDays > 0) dDayElem.innerText = `D-${diffDays}`;
-            else if (diffDays === 0) dDayElem.innerText = "D-Day";
-            else dDayElem.innerText = `D+${Math.abs(diffDays)}`;
-        }
+function navigateCal(offset) {
+  if (calViewMode === 'daily') currentCalDate.setDate(currentCalDate.getDate() + offset);
+  else if (calViewMode === 'weekly') currentCalDate.setDate(currentCalDate.getDate() + (offset * 7));
+  else if (calViewMode === 'monthly') currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+  renderCalendar();
+}
 
-        // Progress Matrix Renderer
-        function renderProgressMatrix() {
-            const tbody = document.getElementById('matrixTbody');
-            tbody.innerHTML = '';
+function resetCalToToday() {
+  currentCalDate = new Date();
+  renderCalendar();
+}
 
-            DEFAULT_SUBJECTS.forEach(subjectGroup => {
-                subjectGroup.subs.forEach((subName, index) => {
-                    const tr = document.createElement('tr');
-                    
-                    if (index === 0) {
-                        const tdMain = document.createElement('td');
-                        tdMain.rowSpan = subjectGroup.subs.length;
-                        tdMain.innerText = subjectGroup.main;
-                        tdMain.style.fontWeight = 'bold';
-                        tr.appendChild(tdMain);
-                    }
+function getDailyEvents(targetDateStr) {
+  const records = getData();
+  const todayStr = formatDateToYMD(new Date());
+  const events = [];
 
-                    const tdSub = document.createElement('td');
-                    tdSub.innerText = subName;
-                    tr.appendChild(tdSub);
+  Object.keys(records).forEach(pKey => {
+    const parts = pKey.split('|');
+    if (parts.length >= 5) {
+      const [subj, sub, task, ch, num] = parts;
+      const history = records[pKey].history || [];
+      const unitText = ch === 'NONE' ? '강' : '번 문제';
+      const labelPath = ch === 'NONE' ? `${subj} > ${task}` : `${subj} > ${task} > ${ch}`;
 
-                    const cols = ['concept_lec', 'concept_prob', 'obj_prob', 'obj_past', 'obj_mock', 'etc'];
-                    cols.forEach(col => {
-                        const td = document.createElement('td');
-                        const key = `${subjectGroup.main}|${subName}|${col}`;
-                        const val = cpaProgressMatrix[key] || '';
+      history.forEach(h => {
+        const isPast = h.scheduledDate < todayStr;
+        const isUnfinished = h.status === '미진행';
 
-                        const input = document.createElement('input');
-                        input.className = 'matrix-input';
-                        input.value = val;
-                        input.placeholder = '-';
-                        input.onchange = (e) => {
-                            cpaProgressMatrix[key] = e.target.value;
-                        };
-                        td.appendChild(input);
-                        tr.appendChild(td);
-                    });
-
-                    tbody.appendChild(tr);
-                });
+        if (h.date === targetDateStr) {
+          if (isUnfinished && isPast && targetDateStr < todayStr) {
+            events.push({
+              type: 'rollover-past',
+              text: `➡️ [이월됨] ${labelPath} : ${num}${unitText} (${h.status})`
             });
-        }
-
-        function saveProgressMatrix() {
-            localStorage.setItem('cpaProgressMatrix', JSON.stringify(cpaProgressMatrix));
-            alert('과목별 총괄 진도표가 성공적으로 저장되었습니다.');
-        }
-
-        // Tree Navigation & 1-Step Form Rendering
-        function renderSubjectTree() {
-            const treeContainer = document.getElementById('treeContainer');
-            treeContainer.innerHTML = '';
-
-            const grouped = {};
-            DEFAULT_SUBJECTS.forEach(s => {
-                grouped[s.main] = {};
-                s.subs.forEach(sub => {
-                    grouped[s.main][sub] = [];
-                });
+          } else {
+            events.push({
+              type: isUnfinished ? 'pending' : 'done',
+              text: `[${labelPath}] ${num}${unitText} (${h.status})`
             });
-
-            cpaStructure.forEach(item => {
-                if (!grouped[item.main]) grouped[item.main] = {};
-                if (!grouped[item.main][item.sub]) grouped[item.main][item.sub] = [];
-                grouped[item.main][item.sub].push(item);
-            });
-
-            for (const mainSubject in grouped) {
-                const mainNode = document.createElement('div');
-                mainNode.className = 'tree-node';
-                
-                const mainTitle = document.createElement('div');
-                mainTitle.className = 'tree-item';
-                mainTitle.innerHTML = `<span class="tree-item-title">📘 <strong>${mainSubject}</strong></span>`;
-                mainNode.appendChild(mainTitle);
-
-                for (const subSubject in grouped[mainSubject]) {
-                    const subNode = document.createElement('div');
-                    subNode.className = 'tree-node';
-
-                    const subTitle = document.createElement('div');
-                    subTitle.className = 'tree-item';
-                    subTitle.innerHTML = `<span class="tree-item-title">📂 ${subSubject}</span>`;
-                    subNode.appendChild(subTitle);
-
-                    // 1-Step Add Item Component Integrated Here
-                    const items = grouped[mainSubject][subSubject];
-                    items.forEach(item => {
-                        const itemNode = document.createElement('div');
-                        itemNode.className = `tree-item ${currentSelectedTreeId === item.id ? 'selected' : ''}`;
-                        itemNode.style.paddingLeft = '20px';
-                        
-                        const icon = item.type === 'lecture' ? '🎥' : '📖';
-                        itemNode.innerHTML = `
-                            <span class="tree-item-title" onclick="selectTreeItem(${item.id})">${icon} ${item.title}</span>
-                            <div class="tree-actions">
-                                <button class="icon-btn" onclick="editTreeItem(${item.id})">✏️</button>
-                                <button class="icon-btn" onclick="deleteTreeItem(${item.id})">🗑️</button>
-                            </div>
-                        `;
-                        subNode.appendChild(itemNode);
-                    });
-
-                    // 1단계 통합 등록 폼 (유형 선택 + 교재/강좌명 + 추가 버튼)
-                    const addForm1Step = document.createElement('div');
-                    addForm1Step.className = 'add-form-1step';
-                    addForm1Step.innerHTML = `
-                        <select class="form-control" id="type_${mainSubject}_${subSubject}" style="width:75px; padding:2px 4px; font-size:0.75rem;">
-                            <option value="book">문제집</option>
-                            <option value="lecture">인강</option>
-                        </select>
-                        <input type="text" class="form-control" id="input_${mainSubject}_${subSubject}" placeholder="교재/강좌명" style="padding:2px 6px; font-size:0.75rem;">
-                        <button class="btn btn-sm btn-primary" onclick="addSubjectItem1Step('${mainSubject}', '${subSubject}')">추가</button>
-                    `;
-                    subNode.appendChild(addForm1Step);
-
-                    mainNode.appendChild(subNode);
-                }
-
-                treeContainer.appendChild(mainNode);
-            }
+          }
         }
-
-        // 1단계 단축된 교재/강좌 추가 함수
-        function addSubjectItem1Step(main, sub) {
-            const typeElem = document.getElementById(`type_${main}_${sub}`);
-            const inputElem = document.getElementById(`input_${main}_${sub}`);
-
-            const type = typeElem.value;
-            const title = inputElem.value.trim();
-
-            if (!title) {
-                alert('교재 또는 강좌 이름을 입력하세요.');
-                return;
-            }
-
-            const newItem = {
-                id: Date.now(),
-                main: main,
-                sub: sub,
-                title: title,
-                type: type
-            };
-
-            cpaStructure.push(newItem);
-            localStorage.setItem('cpaStructure', JSON.stringify(cpaStructure));
-            
-            inputElem.value = '';
-            renderSubjectTree();
-            updateSchedulerTaskSelect();
-
-            if (type === 'lecture') {
-                promptAutoGenerateLecture(newItem);
-            } else {
-                promptAutoGenerateChapters(newItem);
-            }
+        else if (targetDateStr === todayStr && isPast && isUnfinished) {
+          events.push({
+            type: 'rollover-today',
+            text: `↪️ [이월 할일] ${labelPath} : ${num}${unitText} (원래:${h.scheduledDate})`
+          });
         }
-
-        function promptAutoGenerateLecture(item) {
-            openModal("강좌 강의 수 자동 생성", `
-                <div class="form-group">
-                    <label class="form-label">총 강의 수를 입력하세요 (예: 40)</label>
-                    <input type="number" id="lecTotalCount" class="form-control" placeholder="예: 40">
-                </div>
-            `, () => {
-                const count = parseInt(document.getElementById('lecTotalCount').value);
-                if (count && count > 0) {
-                    for (let i = 1; i <= count; i++) {
-                        const key = `${item.main}|${item.sub}|${item.title}|전체강의|${i}강`;
-                        if (!cpaRecords[key]) {
-                            cpaRecords[key] = { history: [], memo: "" };
-                        }
-                    }
-                    localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-                    selectTreeItem(item.id);
-                }
-                closeModal();
-            });
-        }
-
-        function promptAutoGenerateChapters(item) {
-            openModal("문제집 챕터 및 문제 자동 생성", `
-                <div class="form-group">
-                    <label class="form-label">챕터명 (예: Chapter 01)</label>
-                    <input type="text" id="chapNameInput" class="form-control" value="Chapter 01">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">생성할 문제 수 (예: 30)</label>
-                    <input type="number" id="chapProbCount" class="form-control" placeholder="예: 30">
-                </div>
-            `, () => {
-                const chap = document.getElementById('chapNameInput').value.trim() || "Chapter 01";
-                const count = parseInt(document.getElementById('chapProbCount').value);
-                if (count && count > 0) {
-                    for (let i = 1; i <= count; i++) {
-                        const key = `${item.main}|${item.sub}|${item.title}|${chap}|${i}번`;
-                        if (!cpaRecords[key]) {
-                            cpaRecords[key] = { history: [], memo: "" };
-                        }
-                    }
-                    localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-                    selectTreeItem(item.id);
-                }
-                closeModal();
-            });
-        }
-
-        function editTreeItem(id) {
-            const item = cpaStructure.find(x => x.id === id);
-            if (!item) return;
-
-            openModal("교재/강좌명 수정", `
-                <div class="form-group">
-                    <label class="form-label">이름 수정</label>
-                    <input type="text" id="editTitleInput" class="form-control" value="${item.title}">
-                </div>
-            `, () => {
-                const newTitle = document.getElementById('editTitleInput').value.trim();
-                if (newTitle && newTitle !== item.title) {
-                    const oldTitle = item.title;
-                    item.title = newTitle;
-
-                    // Update cpaRecords keys without losing history
-                    const newRecords = {};
-                    const oldPrefix = `${item.main}|${item.sub}|${oldTitle}|`;
-                    const newPrefix = `${item.main}|${item.sub}|${newTitle}|`;
-
-                    for (const k in cpaRecords) {
-                        if (k.startsWith(oldPrefix)) {
-                            const newKey = k.replace(oldPrefix, newPrefix);
-                            newRecords[newKey] = cpaRecords[k];
-                        } else {
-                            newRecords[k] = cpaRecords[k];
-                        }
-                    }
-                    cpaRecords = newRecords;
-                    localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-                    localStorage.setItem('cpaStructure', JSON.stringify(cpaStructure));
-
-                    renderSubjectTree();
-                    selectTreeItem(id);
-                }
-                closeModal();
-            });
-        }
-
-        function deleteTreeItem(id) {
-            if (!confirm('정말 삭제하시겠습니까? 관련 모든 회독 기록이 삭제됩니다.')) return;
-            
-            const item = cpaStructure.find(x => x.id === id);
-            if (item) {
-                const prefix = `${item.main}|${item.sub}|${item.title}|`;
-                for (const k in cpaRecords) {
-                    if (k.startsWith(prefix)) {
-                        delete cpaRecords[k];
-                    }
-                }
-                localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-            }
-
-            cpaStructure = cpaStructure.filter(x => x.id !== id);
-            localStorage.setItem('cpaStructure', JSON.stringify(cpaStructure));
-
-            currentSelectedTreeId = null;
-            renderSubjectTree();
-            document.getElementById('trackerBreadcrumb').innerHTML = '선택된 과목 또는 교재가 없습니다.';
-            document.getElementById('filterBar').style.display = 'none';
-            document.getElementById('bulkBar').style.display = 'none';
-            document.getElementById('recordGrid').innerHTML = '<div style="grid-column: 1/-1; color: var(--text-secondary); text-align: center; padding: 3rem 0;">왼쪽 트리에 과목/교재를 선택해 주세요.</div>';
-        }
-
-        function selectTreeItem(id) {
-            currentSelectedTreeId = id;
-            selectedRecordKeys.clear();
-            renderSubjectTree();
-
-            const item = cpaStructure.find(x => x.id === id);
-            if (!item) return;
-
-            document.getElementById('trackerBreadcrumb').innerHTML = `
-                ${item.main} &gt; ${item.sub} &gt; <span>${item.type === 'lecture' ? '🎥' : '📖'} ${item.title}</span>
-            `;
-
-            document.getElementById('filterBar').style.display = 'flex';
-            document.getElementById('bulkBar').style.display = 'flex';
-
-            renderRecordCards();
-        }
-
-        // Multi-Filter Mechanism
-        function toggleFilter(type, value, elem) {
-            const parent = elem.parentElement;
-            parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-            elem.classList.add('active');
-
-            activeFilters[type] = value;
-            renderRecordCards();
-        }
-
-        // Record Cards Renderer with '△' (수강 중) Support
-        function renderRecordCards() {
-            const item = cpaStructure.find(x => x.id === currentSelectedTreeId);
-            if (!item) return;
-
-            const grid = document.getElementById('recordGrid');
-            grid.innerHTML = '';
-
-            const prefix = `${item.main}|${item.sub}|${item.title}|`;
-            const matchedKeys = Object.keys(cpaRecords).filter(k => k.startsWith(prefix));
-
-            if (matchedKeys.length === 0) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 2rem 0;">
-                        등록된 문제나 강의가 없습니다. 아래 버튼으로 추가해 주세요.<br><br>
-                        <button class="btn btn-primary" onclick="promptAutoGenerateChapters(cpaStructure.find(x=>x.id===${item.id}))">+ 문제/강의 추가 생성</button>
-                    </div>
-                `;
-                return;
-            }
-
-            let filteredKeys = matchedKeys.filter(key => {
-                const rec = cpaRecords[key];
-                const history = rec.history || [];
-                const latestHistory = history[history.length - 1] || {};
-
-                // Cycle Filter
-                if (activeFilters.cycle !== 'all') {
-                    const cycleNum = parseInt(activeFilters.cycle);
-                    if (history.length !== cycleNum) return false;
-                }
-
-                // Status Filter (Support △)
-                if (activeFilters.status !== 'all') {
-                    const statusVal = activeFilters.status;
-                    if (statusVal === 'none') {
-                        if (history.length > 0) return false;
-                    } else {
-                        if (latestHistory.status !== statusVal) return false;
-                    }
-                }
-
-                return true;
-            });
-
-            filteredKeys.sort();
-
-            document.getElementById('selectedCountText').innerText = `${selectedRecordKeys.size}개 선택됨 / 총 ${filteredKeys.length}개`;
-
-            filteredKeys.forEach(key => {
-                const parts = key.split('|');
-                const chap = parts[3];
-                const prob = parts[4];
-
-                const rec = cpaRecords[key];
-                const history = rec.history || [];
-                const latest = history[history.length - 1] || { status: 'none', date: '' };
-
-                const card = document.createElement('div');
-                card.className = 'record-card';
-
-                const isChecked = selectedRecordKeys.has(key);
-
-                // Option Menu includes '△' (수강 중 / 진행 중)
-                card.innerHTML = `
-                    <div class="record-card-header">
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <input type="checkbox" class="chk-custom" ${isChecked ? 'checked' : ''} onchange="toggleRecordSelection('${key}', this.checked)">
-                            <span class="record-title">${chap} ${prob}</span>
-                        </div>
-                        <select class="status-select" onchange="updateRecordStatus('${key}', this.value)">
-                            <option value="none" ${latest.status === 'none' ? 'selected' : ''}>- 선택 -</option>
-                            <option value="△" ${latest.status === '△' ? 'selected' : ''}>△ (수강중/진행)</option>
-                            <option value="O" ${latest.status === 'O' ? 'selected' : ''}>O (완료/맞음)</option>
-                            <option value="☆" ${latest.status === '☆' ? 'selected' : ''}>☆ (오답/복습)</option>
-                            <option value="♥" ${latest.status === '♥' ? 'selected' : ''}>♥ (다시풀기)</option>
-                            <option value="re1" ${latest.status === 're1' ? 'selected' : ''}>re1 (1회독)</option>
-                            <option value="re2" ${latest.status === 're2' ? 'selected' : ''}>re2 (2회독)</option>
-                        </select>
-                    </div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); display:flex; justify-content:space-between; margin-top:4px;">
-                        <span>회독수: ${history.length}회</span>
-                        <span>최근: ${latest.date || '-'}</span>
-                    </div>
-                    <input type="text" class="memo-input" placeholder="메모 입력..." value="${rec.memo || ''}" onchange="updateRecordMemo('${key}', this.value)">
-                `;
-
-                grid.appendChild(card);
-            });
-        }
-
-        function toggleRecordSelection(key, isChecked) {
-            if (isChecked) selectedRecordKeys.add(key);
-            else selectedRecordKeys.delete(key);
-            renderRecordCards();
-        }
-
-        function toggleSelectAll(elem) {
-            const item = cpaStructure.find(x => x.id === currentSelectedTreeId);
-            if (!item) return;
-
-            const prefix = `${item.main}|${item.sub}|${item.title}|`;
-            const matchedKeys = Object.keys(cpaRecords).filter(k => k.startsWith(prefix));
-
-            if (elem.checked) {
-                matchedKeys.forEach(k => selectedRecordKeys.add(k));
-            } else {
-                selectedRecordKeys.clear();
-            }
-            renderRecordCards();
-        }
-
-        // Status Update with Smart Forget Curve Scheduling
-        function updateRecordStatus(key, status) {
-            if (!cpaRecords[key]) cpaRecords[key] = { history: [], memo: "" };
-
-            const today = new Date().toISOString().split('T')[0];
-            cpaRecords[key].history.push({
-                status: status,
-                date: today
-            });
-
-            localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-
-            // Auto-Schedule Review Tasks based on Smart Curve (if ☆, ♥, etc.)
-            const item = cpaStructure.find(x => x.id === currentSelectedTreeId);
-            if (item && item.type === 'book') {
-                if (status === '☆') addAutoReviewSchedule(key, 2);      // 2일 뒤 복습
-                else if (status === '♥') addAutoReviewSchedule(key, 7); // 7일 뒤 복습
-                else if (status === '△') addAutoReviewSchedule(key, 1); // 1일 뒤 수강
-            }
-
-            renderRecordCards();
-            updateDashboardOverallProgress();
-        }
-
-        function addAutoReviewSchedule(key, offsetDays) {
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + offsetDays);
-            const dateStr = targetDate.toISOString().split('T')[0];
-
-            const parts = key.split('|');
-            const taskTitle = `[복습] ${parts[2]} - ${parts[4]}`;
-
-            cpaSchedules.push({
-                id: Date.now(),
-                title: taskTitle,
-                date: dateStr,
-                done: false,
-                key: key
-            });
-
-            localStorage.setItem('cpaSchedules', JSON.stringify(cpaSchedules));
-        }
-
-        function updateRecordMemo(key, memoText) {
-            if (!cpaRecords[key]) cpaRecords[key] = { history: [], memo: "" };
-            cpaRecords[key].memo = memoText;
-            localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-        }
-
-        // Bulk Actions (Includes '△' Status)
-        function executeSelectedBulkDateChange() {
-            if (selectedRecordKeys.size === 0) {
-                alert('선택된 항목이 없습니다.');
-                return;
-            }
-
-            const status = document.getElementById('bulkStatusSelect').value;
-            const date = document.getElementById('bulkDateInput').value || new Date().toISOString().split('T')[0];
-
-            selectedRecordKeys.forEach(key => {
-                if (!cpaRecords[key]) cpaRecords[key] = { history: [], memo: "" };
-                cpaRecords[key].history.push({ status: status, date: date });
-            });
-
-            localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-            alert(`${selectedRecordKeys.size}개 항목의 수강/회독 상태가 일괄 변경되었습니다.`);
-            renderRecordCards();
-            updateDashboardOverallProgress();
-        }
-
-        function executeSelectedBulkDelete() {
-            if (selectedRecordKeys.size === 0) {
-                alert('선택된 항목이 없습니다.');
-                return;
-            }
-
-            if (!confirm(`선택한 ${selectedRecordKeys.size}개 항목을 삭제하시겠습니까?`)) return;
-
-            selectedRecordKeys.forEach(key => {
-                delete cpaRecords[key];
-            });
-
-            localStorage.setItem('cpaRecords', JSON.stringify(cpaRecords));
-            selectedRecordKeys.clear();
-            renderRecordCards();
-            updateDashboardOverallProgress();
-        }
-
-        // Scheduler Allocator
-        function updateSchedulerTaskSelect() {
-            const select = document.getElementById('schTaskSelect');
-            select.innerHTML = '';
-
-            cpaStructure.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.id;
-                opt.innerText = `[${item.sub}] ${item.title} (${item.type === 'lecture' ? '인강' : '문제집'})`;
-                select.appendChild(opt);
-            });
-        }
-
-        function generateSchedule() {
-            const taskId = parseInt(document.getElementById('schTaskSelect').value);
-            const total = parseInt(document.getElementById('schTotal').value);
-            const startDateStr = document.getElementById('schStart').value;
-            const endDateStr = document.getElementById('schEnd').value;
-
-            if (!taskId || !total || !startDateStr || !endDateStr) {
-                alert('모든 설정값을 입력하세요.');
-                return;
-            }
-
-            const item = cpaStructure.find(x => x.id === taskId);
-            if (!item) return;
-
-            // Collect Selected Days
-            const selectedDays = [];
-            for (let i = 0; i <= 6; i++) {
-                const chk = document.getElementById(`d${i}`);
-                if (chk && chk.checked) selectedDays.push(parseInt(chk.value));
-            }
-
-            if (selectedDays.length === 0) {
-                alert('최소 하나 이상의 공부 요일을 선택하세요.');
-                return;
-            }
-
-            const startDate = new Date(startDateStr);
-            const endDate = new Date(endDateStr);
-
-            const activeDates = [];
-            let curr = new Date(startDate);
-            while (curr <= endDate) {
-                if (selectedDays.includes(curr.getDay())) {
-                    activeDates.push(new Date(curr).toISOString().split('T')[0]);
-                }
-                curr.setDate(curr.getDate() + 1);
-            }
-
-            if (activeDates.length === 0) {
-                alert('지정한 기간 내에 선택한 요일이 존재하지 않습니다.');
-                return;
-            }
-
-            const perDay = Math.ceil(total / activeDates.length);
-            let currentNum = 1;
-
-            activeDates.forEach(dateStr => {
-                if (currentNum > total) return;
-                const endNum = Math.min(currentNum + perDay - 1, total);
-                const title = `${item.title} (${currentNum}~${endNum}${item.type === 'lecture' ? '강' : '번'})`;
-
-                cpaSchedules.push({
-                    id: Date.now() + Math.random(),
-                    taskId: taskId,
-                    title: title,
-                    date: dateStr,
-                    done: false
-                });
-
-                currentNum = endNum + 1;
-            });
-
-            localStorage.setItem('cpaSchedules', JSON.stringify(cpaSchedules));
-            alert('스케줄이 성공적으로 배분 및 자동 생성되었습니다.');
-            renderCalendar();
-        }
-
-        // Calendar Render Logic
-        function setCalView(view) {
-            currentCalView = view;
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-            if (view === 'monthly') document.getElementById('btnMonthly').classList.add('active');
-            if (view === 'weekly') document.getElementById('btnWeekly').classList.add('active');
-            if (view === 'daily') document.getElementById('btnDaily').classList.add('active');
-
-            renderCalendar();
-        }
-
-        function changeCalMonth(offset) {
-            currentCalDate.setMonth(currentCalDate.getMonth() + offset);
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            const year = currentCalDate.getFullYear();
-            const month = currentCalDate.getMonth();
-            document.getElementById('calMonthTitle').innerText = `${year}년 ${month + 1}월`;
-
-            const container = document.getElementById('calendarContent');
-            container.innerHTML = '';
-
-            if (currentCalView === 'monthly') {
-                renderMonthlyView(container, year, month);
-            } else if (currentCalView === 'weekly') {
-                renderWeeklyView(container);
-            } else {
-                renderDailyView(container);
-            }
-        }
-
-        function renderMonthlyView(container, year, month) {
-            const grid = document.createElement('div');
-            grid.className = 'calendar-grid';
-
-            const days = ['일', '월', '화', '수', '목', '금', '토'];
-            days.forEach(d => {
-                const h = document.createElement('div');
-                h.className = 'calendar-day-header';
-                h.innerText = d;
-                grid.appendChild(h);
-            });
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const lastDate = new Date(year, month + 1, 0).getDate();
-
-            // Previous Month Fillers
-            for (let i = 0; i < firstDay; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'calendar-cell other-month';
-                grid.appendChild(cell);
-            }
-
-            // Current Month Days
-            for (let date = 1; date <= lastDate; date++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                const cell = document.createElement('div');
-                cell.className = 'calendar-cell';
-
-                const dateNum = document.createElement('div');
-                dateNum.className = 'date-num';
-                dateNum.innerText = date;
-                cell.appendChild(dateNum);
-
-                // Render Today's Scheduled Items
-                const daySchedules = cpaSchedules.filter(s => s.date === dateStr);
-                daySchedules.forEach(s => {
-                    const item = document.createElement('div');
-                    item.className = `schedule-item ${s.done ? 'done' : ''}`;
-                    item.innerText = s.title;
-                    item.onclick = () => toggleScheduleDone(s.id);
-                    cell.appendChild(item);
-                });
-
-                grid.appendChild(cell);
-            }
-
-            container.appendChild(grid);
-        }
-
-        function renderWeeklyView(container) {
-            container.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary);">주간 세부 일정 및 Rollover 이월 항목이 활성화되었습니다.</div>';
-            // Weekly grid structure mapping...
-        }
-
-        function renderDailyView(container) {
-            container.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary);">일일 집중 모드 스케줄 리스트입니다.</div>';
-            // Daily detail items mapping...
-        }
-
-        function toggleScheduleDone(schId) {
-            const sch = cpaSchedules.find(s => s.id === schId);
-            if (sch) {
-                sch.done = !sch.done;
-                localStorage.setItem('cpaSchedules', JSON.stringify(cpaSchedules));
-                renderCalendar();
-            }
-        }
-
-        // Overall Dashboard Calculation
-        function updateDashboardOverallProgress() {
-            const keys = Object.keys(cpaRecords);
-            const total = keys.length;
-            let solved = 0;
-
-            keys.forEach(k => {
-                const h = cpaRecords[k].history || [];
-                if (h.length > 0 && h[h.length - 1].status !== 'none') {
-                    solved++;
-                }
-            });
-
-            const percent = total > 0 ? Math.round((solved / total) * 100) : 0;
-            document.getElementById('totalSolveProgress').innerText = `${percent}%`;
-            document.getElementById('totalSolveSub').innerText = `${solved} / ${total} 항목 수강/풀이 완료`;
-        }
-
-        // Data Backup / Restore
-        function exportData() {
-            const data = {
-                cpaStructure,
-                cpaRecords,
-                cpaSchedules,
-                cpaProgressMatrix
-            };
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `cpa_tracker_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.cpaStructure) localStorage.setItem('cpaStructure', JSON.stringify(data.cpaStructure));
-                    if (data.cpaRecords) localStorage.setItem('cpaRecords', JSON.stringify(data.cpaRecords));
-                    if (data.cpaSchedules) localStorage.setItem('cpaSchedules', JSON.stringify(data.cpaSchedules));
-                    if (data.cpaProgressMatrix) localStorage.setItem('cpaProgressMatrix', JSON.stringify(data.cpaProgressMatrix));
-
-                    location.reload();
-                } catch (err) {
-                    alert('올바르지 않은 백업 파일 형식입니다.');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // Modal Utility
-        function openModal(title, bodyHtml, onConfirm) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalBody').innerHTML = bodyHtml;
-            const confirmBtn = document.getElementById('modalConfirmBtn');
-
-            confirmBtn.onclick = onConfirm;
-            document.getElementById('genericModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('genericModal').classList.remove('active');
-        }
-    </script>
+      });
+    }
+  });
+
+  return events;
+}
+
+/* 먼슬리 3블럭 모달 열기 및 렌더링 */
+function openMonthlyBlockModal(dateStr) {
+  selectedMonthlyDateStr = dateStr;
+  document.getElementById('monthlyModalTitle').textContent = `일정 관리 (${dateStr})`;
+
+  const blocks = getMonthlyBlocks();
+  const dayBlock = blocks[dateStr] || { morning: '', afternoon: '', evening: '' };
+
+  document.getElementById('blockMorningInput').value = dayBlock.morning || '';
+  document.getElementById('blockAfternoonInput').value = dayBlock.afternoon || '';
+  document.getElementById('blockEveningInput').value = dayBlock.evening || '';
+
+  renderTagChips('mTags', 'blockMorningInput');
+  renderTagChips('aTags', 'blockAfternoonInput');
+  renderTagChips('eTags', 'blockEveningInput');
+
+  document.getElementById('monthlyBlockModal').classList.add('open');
+}
+
+function renderTagChips(containerId, inputId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  BLOCK_TAGS.forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.textContent = tag;
+    chip.onclick = () => {
+      document.getElementById(inputId).value = tag;
+    };
+    container.appendChild(chip);
+  });
+}
+
+function saveMonthlyBlocks() {
+  if (!selectedMonthlyDateStr) return;
+
+  const morning = document.getElementById('blockMorningInput').value.trim();
+  const afternoon = document.getElementById('blockAfternoonInput').value.trim();
+  const evening = document.getElementById('blockEveningInput').value.trim();
+
+  const blocks = getMonthlyBlocks();
+  if (!morning && !afternoon && !evening) {
+    delete blocks[selectedMonthlyDateStr];
+  } else {
+    blocks[selectedMonthlyDateStr] = { morning, afternoon, evening };
+  }
+
+  saveMonthlyBlocksData(blocks);
+  closeModal('monthlyBlockModal');
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const list = document.getElementById('calList');
+  const todayStr = formatDateToYMD(new Date());
+
+  if (calViewMode === 'daily') {
+    const curStr = formatDateToYMD(currentCalDate);
+    const dayName = ['일','월','화','수','목','금','토'][currentCalDate.getDay()];
+    const events = getDailyEvents(curStr);
+
+    let html = `
+    <div class="cal-header">
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전날</button>
+      <strong style="font-size:14px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">
+        ${curStr} (${dayName}) ${curStr === todayStr ? '[오늘]' : ''}
+      </strong>
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음날 ▶</button>
+    </div>`;
+
+    if (events.length === 0) {
+      html += '<div style="text-align:center;padding:30px;color:var(--text2)">해당 날짜에 일정이 없거나 완료한 기록이 없습니다.</div>';
+    } else {
+      html += events.map(e => `
+        <div class="list-item" style="align-items:flex-start;flex-direction:column;gap:4px;">
+          <span class="${e.type.includes('rollover') ? 'badge-rollover' : (e.type === 'done' ? 'badge-done' : 'badge-pending')}">
+            ${e.type === 'done' ? '완료' : (e.type.includes('rollover') ? '미달성 이월' : '할 일')}
+          </span>
+          <div style="font-size:13px;line-height:1.4;">${e.text}</div>
+        </div>
+      `).join('');
+    }
+    list.innerHTML = html;
+  } 
+  else if (calViewMode === 'weekly') {
+    const curr = new Date(currentCalDate);
+    const dayOfWeek = curr.getDay();
+    const first = curr.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+    
+    const monday = new Date(curr.setDate(first));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    const monStr = formatDateToYMD(monday);
+    const sunStr = formatDateToYMD(sunday);
+
+    let html = `
+    <div class="cal-header">
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전주</button>
+      <strong style="font-size:13px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">
+        ${monStr} ~ ${sunStr}
+      </strong>
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음주 ▶</button>
+    </div>`;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dStr = formatDateToYMD(d);
+      const dayName = ['일','월','화','수','목','금','토'][d.getDay()];
+      const events = getDailyEvents(dStr);
+
+      html += `<div class="weekly-card">
+        <div style="font-size:12px;font-weight:bold;color:${dStr===todayStr?'var(--accent)':'var(--text)'};margin-bottom:6px;">
+          ${dStr} (${dayName}) ${dStr===todayStr?'[오늘]':''}
+        </div>
+        ${events.length > 0 
+          ? events.map(e => `<div style="font-size:11px;color:${e.type==='done'?'var(--green)':'var(--text2)'};margin-top:2px;">• ${e.text}</div>`).join('') 
+          : '<div style="font-size:11px;color:var(--text3);">기록 없음</div>'}
+      </div>`;
+    }
+    list.innerHTML = html;
+  } 
+  else if (calViewMode === 'monthly') {
+    const year = currentCalDate.getFullYear();
+    const month = currentCalDate.getMonth();
+    
+    const firstDate = new Date(year, month, 1);
+    const lastDate = new Date(year, month + 1, 0);
+    
+    const startDate = new Date(firstDate);
+    const firstDay = firstDate.getDay();
+    const dayDiff = firstDay === 0 ? 6 : firstDay - 1;
+    startDate.setDate(startDate.getDate() - dayDiff);
+    
+    const endDate = new Date(lastDate);
+    const lastDay = lastDate.getDay();
+    const endDiff = lastDay === 0 ? 0 : 7 - lastDay;
+    endDate.setDate(endDate.getDate() + endDiff);
+
+    let calendarWeeks = [];
+    let curr = new Date(startDate);
+    
+    while (curr <= endDate) {
+      let week = [];
+      for (let i = 0; i < 7; i++) {
+        const dStr = formatDateToYMD(curr);
+        week.push({
+          dateObj: new Date(curr),
+          dateStr: dStr,
+          dayNum: curr.getDate(),
+          isCurrentMonth: curr.getMonth() === month,
+          isToday: dStr === todayStr
+        });
+        curr.setDate(curr.getDate() + 1);
+      }
+      calendarWeeks.push(week);
+    }
+
+    const monthlyBlocks = getMonthlyBlocks();
+
+    let html = `
+    <div class="cal-header">
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(-1)">◀ 이전달</button>
+      <strong style="font-size:14px;color:var(--accent)" onclick="resetCalToToday()" style="cursor:pointer">${year}년 ${month + 1}월</strong>
+      <button class="btn btn-sm btn-ghost" onclick="navigateCal(1)">다음달 ▶</button>
+    </div>
+    <div class="monthly-container">
+      <div class="cal-grid-header">
+        <div class="cal-day-head">월</div>
+        <div class="cal-day-head">화</div>
+        <div class="cal-day-head">수</div>
+        <div class="cal-day-head">목</div>
+        <div class="cal-day-head">금</div>
+        <div class="cal-day-head" style="color:var(--accent)">토</div>
+        <div class="cal-day-head" style="color:var(--red)">일</div>
+      </div>
+    `;
+
+    calendarWeeks.forEach(week => {
+      html += `<div class="month-week-row">`;
+
+      week.forEach((day) => {
+        const b = monthlyBlocks[day.dateStr] || { morning: '', afternoon: '', evening: '' };
+
+        html += `
+          <div class="month-cell ${day.isToday ? 'today' : ''} ${!day.isCurrentMonth ? 'other-month' : ''}" onclick="openMonthlyBlockModal('${day.dateStr}')">
+            <div class="date-num">${day.dayNum}</div>
+            <div class="block-container">
+              <div class="block-item">
+                <span class="block-text">${b.morning || ''}</span>
+              </div>
+              <div class="block-item">
+                <span class="block-text">${b.afternoon || ''}</span>
+              </div>
+              <div class="block-item">
+                <span class="block-text">${b.evening || ''}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+    list.innerHTML = html;
+  }
+}
+
+let targetProbKey = null;
+let editingHistoryIndex = null;
+
+function openProbModal(pKey, historyIndex = null, isLecture = false) {
+  targetProbKey = pKey;
+  editingHistoryIndex = historyIndex;
+
+  // 강좌와 문제집 상태 선택 옵션 분기
+  const statusSelect = document.getElementById('probStatus');
+  if (isLecture) {
+    statusSelect.innerHTML = `
+      <option value="O">O (수강완료)</option>
+      <option value="re1">re1 (1차 재수강)</option>
+      <option value="re2">re2 (2차 재수강)</option>
+      <option value="re3">re3 (3차 재수강)</option>
+      <option value="미진행">미진행</option>
+    `;
+  } else {
+    statusSelect.innerHTML = `
+      <option value="O">O (맞음)</option>
+      <option value="△">△ (실수) - 14일 후 복습</option>
+      <option value="☆">☆ (오답) - 2일 후 복습</option>
+      <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
+      <option value="미진행">미진행</option>
+    `;
+  }
+  
+  if (historyIndex !== null) {
+    const records = getData();
+    const item = records[pKey].history[historyIndex];
+    document.getElementById('probModalTitle').textContent = isLecture ? '수강 기록 수정' : '문제 기록 수정';
+    document.getElementById('probRound').value = item.round || '1';
+    statusSelect.value = item.status || 'O';
+    document.getElementById('probDate').value = item.date || formatDateToYMD(new Date());
+    document.getElementById('probMemo').value = item.memo || '';
+  } else {
+    document.getElementById('probModalTitle').textContent = isLecture ? '수강 기록 추가' : '문제 기록 추가';
+    document.getElementById('probDate').value = formatDateToYMD(new Date());
+    document.getElementById('probMemo').value = '';
+  }
+  document.getElementById('probModal').classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* 단일 저장 시에도 동일 회독 덮어쓰기 지원 */
+function saveProbRecord() {
+  if (!targetProbKey) return;
+  const records = getData();
+  const round = document.getElementById('probRound').value;
+  const status = document.getElementById('probStatus').value;
+  const date = document.getElementById('probDate').value;
+  const memo = document.getElementById('probMemo').value;
+
+  const parts = targetProbKey.split('|');
+  const isLecture = parts[3] === 'NONE';
+
+  if (!records[targetProbKey]) records[targetProbKey] = { history: [] };
+
+  if (editingHistoryIndex !== null) {
+    const old = records[targetProbKey].history[editingHistoryIndex];
+    records[targetProbKey].history[editingHistoryIndex] = { ...old, round, status, date, memo };
+  } else {
+    const existingIdx = records[targetProbKey].history.findIndex(h => String(h.round) === String(round));
+    if (existingIdx !== -1) {
+      records[targetProbKey].history[existingIdx] = {
+        ...records[targetProbKey].history[existingIdx],
+        status, date, scheduledDate: date, memo
+      };
+    } else {
+      records[targetProbKey].history.push({ round, status, date, scheduledDate: date, memo });
+    }
+  }
+
+  if (!isLecture) {
+    let reviewDays = 0;
+    if (status.includes('☆') || status.includes('★')) reviewDays = 2;
+    else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
+    else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
+
+    if (reviewDays > 0) {
+      const baseDate = new Date(date);
+      baseDate.setDate(baseDate.getDate() + reviewDays);
+      const reviewDateStr = formatDateToYMD(baseDate);
+      const nextRound = String(Number(round) + 1);
+
+      records[targetProbKey].history.push({
+        round: nextRound,
+        status: '미진행',
+        date: reviewDateStr,
+        scheduledDate: reviewDateStr,
+        memo: `[자동 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
+      });
+
+      alert(`[오답 복습 스케줄 생성]\n${reviewDays}일 후인 ${reviewDateStr}에 ${nextRound}회독 복습 할 일이 자동으로 생성되었습니다.`);
+    }
+  }
+
+  saveData(records);
+  closeModal('probModal');
+  renderStudy();
+}
+
+function deleteProbRecord(pKey, idx) {
+  if (!confirm('이 기록을 삭제하시겠습니까?')) return;
+  const records = getData();
+  records[pKey].history.splice(idx, 1);
+  saveData(records);
+  renderStudy();
+}
+
+function addProblem(pathKey, isLecture = false) {
+  const promptMsg = isLecture 
+    ? '추가할 강의 수 또는 번호 범위 입력 (예: 1-40 또는 5)' 
+    : '추가할 문제 번호/범위 입력 (예: 1-10 또는 5)';
+  const input = prompt(promptMsg);
+  if (!input) return;
+  const records = getData();
+  if (input.includes('-')) {
+    const [start, end] = input.split('-').map(Number);
+    for (let i = start; i <= end; i++) {
+      records[`${pathKey}|${i}`] = records[`${pathKey}|${i}`] || { history: [] };
+    }
+  } else {
+    records[`${pathKey}|${input}`] = records[`${pathKey}|${input}`] || { history: [] };
+  }
+  saveData(records);
+  renderStudy();
+}
+
+function deleteProblem(pKey) {
+  if (!confirm('이 항목을 완전히 삭제하시겠습니까?')) return;
+  const records = getData();
+  delete records[pKey];
+  saveData(records);
+  renderStudy();
+}
+
+function moveItem(depth, path, index, direction) {
+  const struct = getStructure();
+  let target;
+  if (depth === 0) target = struct;
+  else if (depth === 1) target = struct[path[0]];
+  else if (depth === 2) target = struct[path[0]][path[1]];
+  else if (depth === 3) {
+    const taskObj = struct[path[0]][path[1]][path[2]];
+    target = taskObj ? taskObj.chapters : [];
+  }
+
+  if (Array.isArray(target)) {
+    const newIdx = index + direction;
+    if (newIdx < 0 || newIdx >= target.length) return;
+    const temp = target[index];
+    target[index] = target[newIdx];
+    target[newIdx] = temp;
+  } else {
+    const keys = Object.keys(target);
+    const newIdx = index + direction;
+    if (newIdx < 0 || newIdx >= keys.length) return;
+    const newObj = {};
+    const keyToMove = keys[index];
+    keys.splice(index, 1);
+    keys.splice(newIdx, 0, keyToMove);
+    keys.forEach(k => { newObj[k] = target[k]; });
+
+    if (depth === 0) saveStructure(newObj);
+    else if (depth === 1) struct[path[0]] = newObj;
+    else if (depth === 2) struct[path[0]][path[1]] = newObj;
+  }
+  saveStructure(struct);
+  renderStudy();
+}
+
+function addMainSubject() {
+  const name = prompt('새 대과목 이름');
+  if (!name) return;
+  const struct = getStructure();
+  if (!struct[name]) struct[name] = {};
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteMainSubject(subj) {
+  if (!confirm(`${subj} 과목을 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  delete struct[subj];
+  saveStructure(struct);
+  renderStudy();
+}
+function editMainSubject(oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const newStruct = {};
+  Object.keys(struct).forEach(k => { newStruct[k === oldName ? newName : k] = struct[k]; });
+  saveStructure(newStruct);
+  updateRecordKeys(oldName, newName);
+  renderStudy();
+}
+
+function addSubSubject(subj) {
+  const name = prompt('하위 과목 이름');
+  if (!name) return;
+  const struct = getStructure();
+  if (!struct[subj][name]) struct[subj][name] = {};
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteSubSubject(subj, sub) {
+  if (!confirm(`${sub} 과목을 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  delete struct[subj][sub];
+  saveStructure(struct);
+  renderStudy();
+}
+function editSubSubject(subj, oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const oldObj = struct[subj];
+  const newObj = {};
+  Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
+  struct[subj] = newObj;
+  saveStructure(struct);
+  updateRecordKeys(`${subj}|${oldName}`, `${subj}|${newName}`);
+  renderStudy();
+}
+
+function addTask(subj, sub) {
+  const name = prompt('교재/강좌 이름 입력');
+  if (!name) return;
+
+  const typeInput = prompt('유형을 선택하세요 (1: 문제집, 2: 강좌)\n기본값은 1(문제집)입니다.', '1');
+  const isLecture = typeInput === '2';
+
+  const struct = getStructure();
+  if (isLecture) {
+    struct[subj][sub][name] = { type: 'lecture', chapters: [] };
+    const totalCount = prompt('총 강의 수를 입력하세요 (예: 40)\n미입력 시 0개 생성됩니다.', '40');
+    const countNum = parseInt(totalCount, 10);
+    if (!isNaN(countNum) && countNum > 0) {
+      const records = getData();
+      const pathKey = `${subj}|${sub}|${name}|NONE`;
+      for (let i = 1; i <= countNum; i++) {
+        records[`${pathKey}|${i}`] = records[`${pathKey}|${i}`] || { history: [] };
+      }
+      saveData(records);
+    }
+  } else {
+    struct[subj][sub][name] = { type: 'book', chapters: [] };
+  }
+
+  saveStructure(struct);
+  renderStudy();
+}
+
+function deleteTask(subj, sub, task) {
+  if (!confirm(`${task} 항목을 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  delete struct[subj][sub][task];
+  saveStructure(struct);
+  renderStudy();
+}
+function editTask(subj, sub, oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const oldObj = struct[subj][sub];
+  const newObj = {};
+  Object.keys(oldObj).forEach(k => { newObj[k === oldName ? newName : k] = oldObj[k]; });
+  struct[subj][sub] = newObj;
+  saveStructure(struct);
+  updateRecordKeys(`${subj}|${sub}|${oldName}`, `${subj}|${sub}|${newName}`);
+  renderStudy();
+}
+
+function addChapter(subj, sub, task) {
+  const name = prompt('챕터 이름');
+  if (!name) return;
+  const struct = getStructure();
+  if (!struct[subj][sub][task].chapters) struct[subj][sub][task].chapters = [];
+  struct[subj][sub][task].chapters.push(name);
+  saveStructure(struct);
+  renderStudy();
+}
+function deleteChapter(subj, sub, task, ch) {
+  if (!confirm(`${ch} 챕터를 삭제하시겠습니까?`)) return;
+  const struct = getStructure();
+  struct[subj][sub][task].chapters = struct[subj][sub][task].chapters.filter(c => c !== ch);
+  saveStructure(struct);
+  renderStudy();
+}
+function editChapter(subj, sub, task, oldName) {
+  const newName = prompt('수정할 이름', oldName);
+  if (!newName || newName === oldName) return;
+  const struct = getStructure();
+  const arr = struct[subj][sub][task].chapters;
+  const idx = arr.indexOf(oldName);
+  if (idx !== -1) arr[idx] = newName;
+  saveStructure(struct);
+  updateRecordKeys(`${subj}|${sub}|${task}|${oldName}`, `${subj}|${sub}|${task}|${newName}`);
+  renderStudy();
+}
+
+function exportData() {
+  const data = {
+    struct: getStructure(),
+    records: getData(),
+    schedules: getSchedules(),
+    matrix: getProgressMatrix(),
+    monthlyBlocks: getMonthlyBlocks()
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `CPA_Tracker_Backup_${formatDateToYMD(new Date())}.json`;
+  a.click();
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = event => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (parsed.struct) saveStructure(parsed.struct);
+        if (parsed.records) saveData(parsed.records);
+        if (parsed.schedules) saveSchedules(parsed.schedules);
+        if (parsed.matrix) saveProgressMatrix(parsed.matrix);
+        if (parsed.monthlyBlocks) saveMonthlyBlocksData(parsed.monthlyBlocks);
+        alert('복구가 완료되었습니다!');
+        location.reload();
+      } catch (err) { alert('백업 파일 형식이 올바르지 않습니다.'); }
+    };
+    reader.readAsText(event.target.files[0]);
+  };
+  input.click();
+}
+
+renderDashboard();
+</script>
 </body>
 </html>
