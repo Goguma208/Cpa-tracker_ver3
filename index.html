@@ -146,6 +146,7 @@
   .status-3r   { background: rgba(234, 179, 8, 0.2); color: #fef08a; border: 1px solid #eab308; }
   .status-4r   { background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid #f97316; }
   .status-5r   { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+  .task-type-tag { font-size: 10px; padding: 2px 4px; border-radius: 4px; margin-left: 6px; font-weight: normal; background: var(--surface2); color: var(--text2); }
 </style>
 </head>
 <body>
@@ -233,13 +234,13 @@
       <label class="form-label">3. 교재 / 강좌 선택</label>
       <select class="form-input" id="schTask" onchange="updateChSelect()"></select>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="schChGroup">
       <label class="form-label">4. 챕터 선택</label>
       <select class="form-input" id="schCh"></select>
     </div>
 
     <div class="form-group">
-      <label class="form-label">배분할 총 문제 수 (예: 50)</label>
+      <label class="form-label" id="schTotalLabel">배분할 총 문제 수 (예: 50)</label>
       <input type="number" class="form-input" id="schTotal" placeholder="예: 50">
     </div>
     <div class="form-group">
@@ -317,10 +318,10 @@
   </div>
 </div>
 
-<!-- 개별 풀이 기록 모달 -->
+<!-- 개별 풀이/수강 기록 모달 -->
 <div class="modal-overlay" id="probModal">
   <div class="modal">
-    <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">문제 기록 수정</div>
+    <div style="font-weight:700;margin-bottom:12px;" id="probModalTitle">기록 수정</div>
     <div class="form-group">
       <label class="form-label">회독 선택</label>
       <select class="form-input" id="probRound">
@@ -333,21 +334,15 @@
     </div>
     <div class="form-group">
       <label class="form-label">상태 변경</label>
-      <select class="form-input" id="probStatus">
-        <option value="O">O (맞음)</option>
-        <option value="△">△ (실수) - 14일 후 복습</option>
-        <option value="☆">☆ (오답) - 2일 후 복습</option>
-        <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
-        <option value="미진행">미진행</option>
-      </select>
+      <select class="form-input" id="probStatus"></select>
     </div>
     <div class="form-group">
-      <label class="form-label">풀이/예정 날짜</label>
+      <label class="form-label">기록/예정 날짜</label>
       <input type="date" class="form-input" id="probDate">
     </div>
     <div class="form-group">
       <label class="form-label">메모</label>
-      <input type="text" class="form-input" id="probMemo" placeholder="오답 이유 등">
+      <input type="text" class="form-input" id="probMemo" placeholder="메모 입력">
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button class="btn btn-ghost" style="flex:1" onclick="closeModal('probModal')">취소</button>
@@ -359,7 +354,7 @@
 <!-- 일괄 기록 수정 모달 -->
 <div class="modal-overlay" id="bulkDateModal">
   <div class="modal">
-    <div style="font-weight:700;margin-bottom:12px;">📝 선택한 문제 일괄 수정</div>
+    <div style="font-weight:700;margin-bottom:12px;">📝 선택 항목 일괄 수정</div>
     <div class="form-group">
       <label class="form-label">적용할 회독</label>
       <select class="form-input" id="bulkRound">
@@ -371,14 +366,8 @@
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">일괄 적용할 상태(기호)</label>
-      <select class="form-input" id="bulkStatus">
-        <option value="O">O (맞음)</option>
-        <option value="△">△ (실수) - 14일 후 복습</option>
-        <option value="☆">☆ (오답) - 2일 후 복습</option>
-        <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
-        <option value="미진행">미진행</option>
-      </select>
+      <label class="form-label">일괄 적용할 상태</label>
+      <select class="form-input" id="bulkStatus"></select>
     </div>
     <div class="form-group">
       <label class="form-label">변경할 지정 날짜</label>
@@ -386,10 +375,10 @@
     </div>
     <div class="form-group">
       <label class="form-label">메모 (선택사항)</label>
-      <input type="text" class="form-input" id="bulkMemo" placeholder="예: 1회차 전체채점 일괄입력">
+      <input type="text" class="form-input" id="bulkMemo" placeholder="예: 1회차 일괄입력">
     </div>
     <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">
-      * 체크 박스로 선택하신 모든 문제의 해당 회독 기록이 지정한 정보로 일괄 수정/업데이트 됩니다.
+      * 체크 박스로 선택하신 모든 항목의 해당 회독 기록이 지정한 정보로 일괄 수정/업데이트 됩니다.
     </div>
     <div style="display:flex;gap:8px;margin-top:16px;">
       <button class="btn btn-ghost" style="flex:1" onclick="closeModal('bulkDateModal')">취소</button>
@@ -400,11 +389,11 @@
 
 <script>
 const DEFAULT_STRUCTURE = {
-  "경영학": { "일반경영": { "객관식 기출": ["기본"] }, "재무관리": { "연습서 문풀": ["기본"] } },
-  "경제학": { "미시경제": { "객관식 기출": ["기본"] } },
-  "상법": { "회사법": { "객관식 기출": ["기본"] } },
-  "세법": { "법인세법": { "(객)강경태": ["CH.1 총설"] } },
-  "회계학": { "중급회계": { "연습서 문풀": ["기본"] } }
+  "경영학": { "일반경영": { "객관식 기출": { type: "book", chapters: ["기본"] } }, "재무관리": { "연습서 문풀": { type: "book", chapters: ["기본"] } } },
+  "경제학": { "미시경제": { "객관식 기출": { type: "book", chapters: ["기본"] } } },
+  "상법": { "회사법": { "객관식 기출": { type: "book", chapters: ["기본"] } } },
+  "세법": { "법인세법": { "(객)강경태": { type: "book", chapters: ["CH.1 총설"] } } },
+  "회계학": { "중급회계": { "연습서 문풀": { type: "book", chapters: ["기본"] } } }
 };
 
 /* 새로 지정된 총괄 진도표 목록 및 옵션 설정 */
@@ -450,7 +439,19 @@ let currentFilterTarget = null; // 'round' or 'status'
 
 function getStructure() {
   const data = localStorage.getItem('cpaStructure');
-  return data ? JSON.parse(data) : DEFAULT_STRUCTURE;
+  if (!data) return DEFAULT_STRUCTURE;
+  const parsed = JSON.parse(data);
+  // 이전 구버전 데이터 호환성 보장 로직
+  Object.keys(parsed).forEach(subj => {
+    Object.keys(parsed[subj] || {}).forEach(sub => {
+      Object.keys(parsed[subj][sub] || {}).forEach(task => {
+        if (Array.isArray(parsed[subj][sub][task])) {
+          parsed[subj][sub][task] = { type: 'book', chapters: parsed[subj][sub][task] };
+        }
+      });
+    });
+  });
+  return parsed;
 }
 function saveStructure(struct) { localStorage.setItem('cpaStructure', JSON.stringify(struct)); }
 function getData() { return JSON.parse(localStorage.getItem('cpaRecords') || '{}'); }
@@ -598,26 +599,42 @@ function updateChSelect() {
   const sub = document.getElementById('schSub').value;
   const task = document.getElementById('schTask').value;
   const chSelect = document.getElementById('schCh');
+  const chGroup = document.getElementById('schChGroup');
+  const totalLabel = document.getElementById('schTotalLabel');
+
   chSelect.innerHTML = '';
 
   if (struct[subj] && struct[subj][sub] && struct[subj][sub][task]) {
-    struct[subj][sub][task].forEach(ch => {
-      chSelect.innerHTML += `<option value="${ch}">${ch}</option>`;
-    });
+    const taskObj = struct[subj][sub][task];
+    if (taskObj.type === 'lecture') {
+      chGroup.style.display = 'none';
+      totalLabel.textContent = '배분할 총 강의 수 (예: 40)';
+    } else {
+      chGroup.style.display = 'block';
+      totalLabel.textContent = '배분할 총 문제 수 (예: 50)';
+      (taskObj.chapters || []).forEach(ch => {
+        chSelect.innerHTML += `<option value="${ch}">${ch}</option>`;
+      });
+    }
   }
 }
 
 function generateSchedule() {
+  const struct = getStructure();
   const subj = document.getElementById('schSubj').value;
   const sub = document.getElementById('schSub').value;
   const task = document.getElementById('schTask').value;
-  const ch = document.getElementById('schCh').value;
+  
+  const taskObj = struct[subj] && struct[subj][sub] && struct[subj][sub][task];
+  const isLecture = taskObj && taskObj.type === 'lecture';
+
+  const ch = isLecture ? 'NONE' : document.getElementById('schCh').value;
   const total = Number(document.getElementById('schTotal').value);
   const startStr = document.getElementById('schStart').value;
   const endStr = document.getElementById('schEnd').value;
   const selectedDays = Array.from(document.querySelectorAll('.day-chk:checked')).map(cb => Number(cb.value));
 
-  if (!subj || !sub || !task || !ch || !total || !startStr || !endStr || selectedDays.length === 0) {
+  if (!subj || !sub || !task || (!isLecture && !ch) || !total || !startStr || !endStr || selectedDays.length === 0) {
     alert('모든 단계를 정확히 선택/입력해 주세요.');
     return;
   }
@@ -637,7 +654,7 @@ function generateSchedule() {
   }
 
   const schedules = getSchedules();
-  schedules.push({ subj, title: `${task} (${ch})`, start: startStr, end: endStr });
+  schedules.push({ subj, title: isLecture ? `${task}` : `${task} (${ch})`, start: startStr, end: endStr });
   saveSchedules(schedules);
 
   const records = getData();
@@ -664,7 +681,7 @@ function generateSchedule() {
   });
 
   saveData(records);
-  alert('선택한 공부기록 위치로 문제 생성이 완료되었습니다.');
+  alert('선택한 공부기록 위치로 배분이 완료되었습니다.');
   showPage('calendar');
 }
 
@@ -689,7 +706,9 @@ function openFilterModal(target) {
   } else {
     title.textContent = '기호 선택 (중복 가능)';
     [
-      { val: 'O', label: 'O (맞음)' },
+      { val: 'O', label: 'O' },
+      { val: 're1', label: 're1 (수강)' },
+      { val: 're2', label: 're2 (수강)' },
       { val: '△', label: '△ (실수)' },
       { val: '☆', label: '☆ (오답)' },
       { val: '♥', label: '♥ (다시풀기)' },
@@ -807,8 +826,13 @@ function renderStudy() {
     const [subj, sub] = studyPath;
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addTask('${subj}','${sub}')">+ 문제집/강좌 추가</button>`;
     Object.keys(struct[subj][sub] || {}).forEach((task, idx) => {
+      const taskObj = struct[subj][sub][task];
+      const typeTag = taskObj.type === 'lecture' ? '🎬 강좌' : '📚 문제집';
       list.innerHTML += `<div class="list-item">
-        <div onclick="navTo(['${subj}','${sub}','${task}'])" style="flex:1;cursor:pointer"><strong>${task}</strong></div>
+        <div onclick="clickTaskItem('${subj}','${sub}','${task}')" style="flex:1;cursor:pointer">
+          <strong>${task}</strong>
+          <span class="task-type-tag">${typeTag}</span>
+        </div>
         <div class="action-btns">
           <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, -1)">▲</button>
           <button class="btn btn-sm btn-ghost" onclick="moveItem(2, ['${subj}','${sub}'], ${idx}, 1)">▼</button>
@@ -820,8 +844,16 @@ function renderStudy() {
   }
   else if (depth === 3) {
     const [subj, sub, task] = studyPath;
+    const taskObj = struct[subj][sub][task];
+
+    // 강좌일 경우 바로 강의 목록 페이지로 변환
+    if (taskObj && taskObj.type === 'lecture') {
+      renderLectureItems(subj, sub, task);
+      return;
+    }
+
     list.innerHTML += `<button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="addChapter('${subj}','${sub}','${task}')">+ 챕터 추가</button>`;
-    (struct[subj][sub][task] || []).forEach((ch, idx) => {
+    ((taskObj && taskObj.chapters) || []).forEach((ch, idx) => {
       list.innerHTML += `<div class="list-item">
         <div onclick="navTo(['${subj}','${sub}','${task}','${ch}'])" style="flex:1;cursor:pointer"><strong>${ch}</strong></div>
         <div class="action-btns">
@@ -835,70 +867,95 @@ function renderStudy() {
   }
   else if (depth === 4) {
     const [subj, sub, task, ch] = studyPath;
-    const pathKey = `${subj}|${sub}|${task}|${ch}`;
-    
-    const records = getData();
-    const probs = Object.keys(records)
-      .filter(k => k.startsWith(pathKey + '|'))
-      .sort((a, b) => {
-        const numA = a.split('|')[4] || '';
-        const numB = b.split('|')[4] || '';
-        return numA.localeCompare(numB, undefined, { numeric: true, sensitivity: 'base' });
-      });
+    renderProblemOrLectureList(subj, sub, task, ch);
+  }
+}
 
-    let html = `
-      <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}')">+ 문제 수동 추가</button>
-    `;
+function clickTaskItem(subj, sub, task) {
+  const struct = getStructure();
+  const taskObj = struct[subj][sub][task];
+  if (taskObj && taskObj.type === 'lecture') {
+    navTo([subj, sub, task, 'NONE']);
+  } else {
+    navTo([subj, sub, task]);
+  }
+}
 
-    if (probs.length > 0) {
-      html += `
-        <div class="bulk-bar">
-          <label style="font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" class="chk-custom" id="selectAllProb" onchange="toggleSelectAllProbs(this)">
-            전체 선택
-          </label>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-sm btn-ghost" onclick="openSelectedBulkDateModal()">📝 선택 항목 일괄 수정</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteSelectedProblems()">🗑️ 선택 일괄 삭제</button>
-          </div>
-        </div>
-      `;
-    }
+function renderLectureItems(subj, sub, task) {
+  renderProblemOrLectureList(subj, sub, task, 'NONE');
+}
 
-    probs.forEach(pKey => {
-      const probNum = pKey.split('|')[4];
-      const history = records[pKey].history || [];
-
-      let historyHtml = history.map((h, idx) => {
-        return `<div class="history-item">
-          <div>
-            <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
-            ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
-          </div>
-          <div>
-            <button class="btn btn-sm btn-ghost" onclick="openProbModal('${pKey}', ${idx})">수정</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteProbRecord('${pKey}', ${idx})">삭제</button>
-          </div>
-        </div>`;
-      }).join('');
-
-      html += `<div class="prob-card">
-        <div class="prob-header">
-          <div class="prob-num">
-            <input type="checkbox" class="chk-custom prob-chk" value="${pKey}">
-            ${probNum}번 문제
-          </div>
-          <div>
-            <button class="btn btn-sm btn-danger" style="margin-right:4px;" onclick="deleteProblem('${pKey}')">삭제</button>
-            <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}')">+ 회독 기록</button>
-          </div>
-        </div>
-        <div class="history-list">${historyHtml || '기록 없음'}</div>
-      </div>`;
+function renderProblemOrLectureList(subj, sub, task, ch) {
+  const list = document.getElementById('studyList');
+  const pathKey = `${subj}|${sub}|${task}|${ch}`;
+  const struct = getStructure();
+  const taskObj = struct[subj][sub][task];
+  const isLecture = taskObj && taskObj.type === 'lecture';
+  
+  const records = getData();
+  const probs = Object.keys(records)
+    .filter(k => k.startsWith(pathKey + '|'))
+    .sort((a, b) => {
+      const numA = a.split('|')[4] || '';
+      const numB = b.split('|')[4] || '';
+      return numA.localeCompare(numB, undefined, { numeric: true, sensitivity: 'base' });
     });
 
-    list.innerHTML = html;
+  const itemUnit = isLecture ? '강' : '번 문제';
+  const addBtnText = isLecture ? '+ 강의 수동 추가' : '+ 문제 수동 추가';
+
+  let html = `
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:12px" onclick="addProblem('${pathKey}', ${isLecture})">${addBtnText}</button>
+  `;
+
+  if (probs.length > 0) {
+    html += `
+      <div class="bulk-bar">
+        <label style="font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" class="chk-custom" id="selectAllProb" onchange="toggleSelectAllProbs(this)">
+          전체 선택
+        </label>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm btn-ghost" onclick="openSelectedBulkDateModal(${isLecture})">📝 일괄 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSelectedProblems()">🗑️ 일괄 삭제</button>
+        </div>
+      </div>
+    `;
   }
+
+  probs.forEach(pKey => {
+    const probNum = pKey.split('|')[4];
+    const history = records[pKey].history || [];
+
+    let historyHtml = history.map((h, idx) => {
+      return `<div class="history-item">
+        <div>
+          <strong>${h.round}회독 [${h.status}]</strong> - ${h.date} 
+          ${h.memo ? `<span style="color:var(--text3)">| ${h.memo}</span>` : ''}
+        </div>
+        <div>
+          <button class="btn btn-sm btn-ghost" onclick="openProbModal('${pKey}', ${idx}, ${isLecture})">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProbRecord('${pKey}', ${idx})">삭제</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    html += `<div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-num">
+          <input type="checkbox" class="chk-custom prob-chk" value="${pKey}">
+          ${probNum}${itemUnit}
+        </div>
+        <div>
+          <button class="btn btn-sm btn-danger" style="margin-right:4px;" onclick="deleteProblem('${pKey}')">삭제</button>
+          <button class="btn btn-sm btn-primary" onclick="openProbModal('${pKey}', null, ${isLecture})">+ 수강/회독 기록</button>
+        </div>
+      </div>
+      <div class="history-list">${historyHtml || '기록 없음'}</div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
 }
 
 function renderFilteredProblems() {
@@ -925,8 +982,9 @@ function renderFilteredProblems() {
     if (matchedHistory.length > 0) {
       filteredCards.push({
         pKey,
-        pathStr: `${subj} > ${sub} > ${task} > ${ch}`,
+        pathStr: ch === 'NONE' ? `${subj} > ${sub} > ${task}` : `${subj} > ${sub} > ${task} > ${ch}`,
         num,
+        isLecture: ch === 'NONE',
         history: matchedHistory
       });
     }
@@ -937,11 +995,11 @@ function renderFilteredProblems() {
   });
 
   if (filteredCards.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">선택하신 중복 조건에 일치하는 문제가 없습니다.</div>';
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">선택하신 중복 조건에 일치하는 항목이 없습니다.</div>';
     return;
   }
 
-  let html = `<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">🔍 중복 필터 검색 결과: ${filteredCards.length}개 문제</div>`;
+  let html = `<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">🔍 중복 필터 검색 결과: ${filteredCards.length}개 항목</div>`;
 
   filteredCards.forEach(item => {
     let historyHtml = item.history.map((h) => {
@@ -953,10 +1011,12 @@ function renderFilteredProblems() {
       </div>`;
     }).join('');
 
+    const unitText = item.isLecture ? '강' : '번 문제';
+
     html += `<div class="prob-card">
       <div class="prob-header">
-        <div class="prob-num">${item.num}번 문제</div>
-        <button class="btn btn-sm btn-primary" onclick="openProbModal('${item.pKey}')">+ 회독 추가</button>
+        <div class="prob-num">${item.num}${unitText}</div>
+        <button class="btn btn-sm btn-primary" onclick="openProbModal('${item.pKey}', null, ${item.isLecture})">+ 기록 추가</button>
       </div>
       <div style="font-size:11px;color:var(--accent);margin-bottom:6px;">${item.pathStr}</div>
       <div class="history-list">${historyHtml}</div>
@@ -981,11 +1041,11 @@ function getSelectedProbKeys() {
 function deleteSelectedProblems() {
   const selectedKeys = getSelectedProbKeys();
   if (selectedKeys.length === 0) {
-    alert('삭제할 문제를 체크박스로 하나 이상 선택해 주세요.');
+    alert('삭제할 항목을 체크박스로 하나 이상 선택해 주세요.');
     return;
   }
 
-  if (!confirm(`선택한 ${selectedKeys.length}개 문제 기록을 삭제하시겠습니까?`)) return;
+  if (!confirm(`선택한 ${selectedKeys.length}개 항목을 삭제하시겠습니까?`)) return;
 
   const records = getData();
   selectedKeys.forEach(k => {
@@ -993,16 +1053,37 @@ function deleteSelectedProblems() {
   });
 
   saveData(records);
-  alert(`${selectedKeys.length}개 문제가 성공적으로 삭제되었습니다.`);
+  alert(`${selectedKeys.length}개 항목이 성공적으로 삭제되었습니다.`);
   renderStudy();
 }
 
-function openSelectedBulkDateModal() {
+function openSelectedBulkDateModal(isLecture = false) {
   const selectedKeys = getSelectedProbKeys();
   if (selectedKeys.length === 0) {
-    alert('수정할 문제를 체크박스로 하나 이상 선택해 주세요.');
+    alert('수정할 항목을 체크박스로 하나 이상 선택해 주세요.');
     return;
   }
+
+  // 강좌 여부에 따른 상태 옵션 동적 생성
+  const statusSelect = document.getElementById('bulkStatus');
+  if (isLecture) {
+    statusSelect.innerHTML = `
+      <option value="O">O (수강완료)</option>
+      <option value="re1">re1 (1차 재수강)</option>
+      <option value="re2">re2 (2차 재수강)</option>
+      <option value="re3">re3 (3차 재수강)</option>
+      <option value="미진행">미진행</option>
+    `;
+  } else {
+    statusSelect.innerHTML = `
+      <option value="O">O (맞음)</option>
+      <option value="△">△ (실수) - 14일 후 복습</option>
+      <option value="☆">☆ (오답) - 2일 후 복습</option>
+      <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
+      <option value="미진행">미진행</option>
+    `;
+  }
+
   document.getElementById('bulkTargetDate').value = formatDateToYMD(new Date());
   document.getElementById('bulkMemo').value = '';
   document.getElementById('bulkDateModal').classList.add('open');
@@ -1025,14 +1106,12 @@ function executeSelectedBulkDateChange() {
   let updatedCount = 0;
   let reviewCreatedCount = 0;
 
-  let reviewDays = 0;
-  if (status.includes('☆') || status.includes('★')) reviewDays = 2;
-  else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
-  else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
-
   selectedKeys.forEach(k => {
     if (!records[k]) records[k] = { history: [] };
     
+    const parts = k.split('|');
+    const isLecture = parts[3] === 'NONE';
+
     const existingIdx = records[k].history.findIndex(h => String(h.round) === String(round));
 
     if (existingIdx !== -1) {
@@ -1054,26 +1133,33 @@ function executeSelectedBulkDateChange() {
     }
     updatedCount++;
 
-    if (reviewDays > 0) {
-      const baseDate = new Date(targetDate);
-      baseDate.setDate(baseDate.getDate() + reviewDays);
-      const reviewDateStr = formatDateToYMD(baseDate);
-      const nextRound = String(Number(round) + 1);
+    if (!isLecture) {
+      let reviewDays = 0;
+      if (status.includes('☆') || status.includes('★')) reviewDays = 2;
+      else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
+      else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
 
-      records[k].history.push({
-        round: nextRound,
-        status: '미진행',
-        date: reviewDateStr,
-        scheduledDate: reviewDateStr,
-        memo: `[일괄 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
-      });
-      reviewCreatedCount++;
+      if (reviewDays > 0) {
+        const baseDate = new Date(targetDate);
+        baseDate.setDate(baseDate.getDate() + reviewDays);
+        const reviewDateStr = formatDateToYMD(baseDate);
+        const nextRound = String(Number(round) + 1);
+
+        records[k].history.push({
+          round: nextRound,
+          status: '미진행',
+          date: reviewDateStr,
+          scheduledDate: reviewDateStr,
+          memo: `[일괄 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
+        });
+        reviewCreatedCount++;
+      }
     }
   });
 
   saveData(records);
 
-  let msg = `선택된 ${selectedKeys.length}개 문제의 ${round}회독 정보가 [${status} / ${targetDate}]로 반영되었습니다.`;
+  let msg = `선택된 ${selectedKeys.length}개 항목의 ${round}회독 정보가 [${status} / ${targetDate}]로 반영되었습니다.`;
   if (reviewCreatedCount > 0) {
     msg += `\n* 오답 복습 할 일 ${reviewCreatedCount}개가 자동으로 생성되었습니다.`;
   }
@@ -1112,6 +1198,8 @@ function getDailyEvents(targetDateStr) {
     if (parts.length >= 5) {
       const [subj, sub, task, ch, num] = parts;
       const history = records[pKey].history || [];
+      const unitText = ch === 'NONE' ? '강' : '번 문제';
+      const labelPath = ch === 'NONE' ? `${subj} > ${task}` : `${subj} > ${task} > ${ch}`;
 
       history.forEach(h => {
         const isPast = h.scheduledDate < todayStr;
@@ -1121,19 +1209,19 @@ function getDailyEvents(targetDateStr) {
           if (isUnfinished && isPast && targetDateStr < todayStr) {
             events.push({
               type: 'rollover-past',
-              text: `➡️ [이월됨] ${subj} > ${task} : ${num}번 문제 (${h.status})`
+              text: `➡️ [이월됨] ${labelPath} : ${num}${unitText} (${h.status})`
             });
           } else {
             events.push({
               type: isUnfinished ? 'pending' : 'done',
-              text: `[${subj} > ${task} > ${ch}] ${num}번 문제 (${h.status})`
+              text: `[${labelPath}] ${num}${unitText} (${h.status})`
             });
           }
         }
         else if (targetDateStr === todayStr && isPast && isUnfinished) {
           events.push({
             type: 'rollover-today',
-            text: `↪️ [이월 할일] ${subj} > ${task} : ${num}번 문제 (원래:${h.scheduledDate})`
+            text: `↪️ [이월 할일] ${labelPath} : ${num}${unitText} (원래:${h.scheduledDate})`
           });
         }
       });
@@ -1357,20 +1445,40 @@ function renderCalendar() {
 let targetProbKey = null;
 let editingHistoryIndex = null;
 
-function openProbModal(pKey, historyIndex = null) {
+function openProbModal(pKey, historyIndex = null, isLecture = false) {
   targetProbKey = pKey;
   editingHistoryIndex = historyIndex;
+
+  // 강좌와 문제집 상태 선택 옵션 분기
+  const statusSelect = document.getElementById('probStatus');
+  if (isLecture) {
+    statusSelect.innerHTML = `
+      <option value="O">O (수강완료)</option>
+      <option value="re1">re1 (1차 재수강)</option>
+      <option value="re2">re2 (2차 재수강)</option>
+      <option value="re3">re3 (3차 재수강)</option>
+      <option value="미진행">미진행</option>
+    `;
+  } else {
+    statusSelect.innerHTML = `
+      <option value="O">O (맞음)</option>
+      <option value="△">△ (실수) - 14일 후 복습</option>
+      <option value="☆">☆ (오답) - 2일 후 복습</option>
+      <option value="♥">♥ (다시풀기) - 7일 후 복습</option>
+      <option value="미진행">미진행</option>
+    `;
+  }
   
   if (historyIndex !== null) {
     const records = getData();
     const item = records[pKey].history[historyIndex];
-    document.getElementById('probModalTitle').textContent = '문제 기록 수정';
+    document.getElementById('probModalTitle').textContent = isLecture ? '수강 기록 수정' : '문제 기록 수정';
     document.getElementById('probRound').value = item.round || '1';
-    document.getElementById('probStatus').value = item.status || 'O';
+    statusSelect.value = item.status || 'O';
     document.getElementById('probDate').value = item.date || formatDateToYMD(new Date());
     document.getElementById('probMemo').value = item.memo || '';
   } else {
-    document.getElementById('probModalTitle').textContent = '문제 기록 추가';
+    document.getElementById('probModalTitle').textContent = isLecture ? '수강 기록 추가' : '문제 기록 추가';
     document.getElementById('probDate').value = formatDateToYMD(new Date());
     document.getElementById('probMemo').value = '';
   }
@@ -1387,6 +1495,9 @@ function saveProbRecord() {
   const status = document.getElementById('probStatus').value;
   const date = document.getElementById('probDate').value;
   const memo = document.getElementById('probMemo').value;
+
+  const parts = targetProbKey.split('|');
+  const isLecture = parts[3] === 'NONE';
 
   if (!records[targetProbKey]) records[targetProbKey] = { history: [] };
 
@@ -1405,26 +1516,28 @@ function saveProbRecord() {
     }
   }
 
-  let reviewDays = 0;
-  if (status.includes('☆') || status.includes('★')) reviewDays = 2;
-  else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
-  else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
+  if (!isLecture) {
+    let reviewDays = 0;
+    if (status.includes('☆') || status.includes('★')) reviewDays = 2;
+    else if (status.includes('♥') || status.includes('♡')) reviewDays = 7;
+    else if (status.includes('△') || status.includes('▲')) reviewDays = 14;
 
-  if (reviewDays > 0) {
-    const baseDate = new Date(date);
-    baseDate.setDate(baseDate.getDate() + reviewDays);
-    const reviewDateStr = formatDateToYMD(baseDate);
-    const nextRound = String(Number(round) + 1);
+    if (reviewDays > 0) {
+      const baseDate = new Date(date);
+      baseDate.setDate(baseDate.getDate() + reviewDays);
+      const reviewDateStr = formatDateToYMD(baseDate);
+      const nextRound = String(Number(round) + 1);
 
-    records[targetProbKey].history.push({
-      round: nextRound,
-      status: '미진행',
-      date: reviewDateStr,
-      scheduledDate: reviewDateStr,
-      memo: `[자동 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
-    });
+      records[targetProbKey].history.push({
+        round: nextRound,
+        status: '미진행',
+        date: reviewDateStr,
+        scheduledDate: reviewDateStr,
+        memo: `[자동 복습] ${round}회독 ${status} 오답 복습 (${reviewDays}일 후)`
+      });
 
-    alert(`[오답 복습 스케줄 생성]\n${reviewDays}일 후인 ${reviewDateStr}에 ${nextRound}회독 복습 할 일이 자동으로 생성되었습니다.`);
+      alert(`[오답 복습 스케줄 생성]\n${reviewDays}일 후인 ${reviewDateStr}에 ${nextRound}회독 복습 할 일이 자동으로 생성되었습니다.`);
+    }
   }
 
   saveData(records);
@@ -1440,8 +1553,11 @@ function deleteProbRecord(pKey, idx) {
   renderStudy();
 }
 
-function addProblem(pathKey) {
-  const input = prompt('추가할 문제 번호/범위 입력 (예: 1-10 또는 5)');
+function addProblem(pathKey, isLecture = false) {
+  const promptMsg = isLecture 
+    ? '추가할 강의 수 또는 번호 범위 입력 (예: 1-40 또는 5)' 
+    : '추가할 문제 번호/범위 입력 (예: 1-10 또는 5)';
+  const input = prompt(promptMsg);
   if (!input) return;
   const records = getData();
   if (input.includes('-')) {
@@ -1457,7 +1573,7 @@ function addProblem(pathKey) {
 }
 
 function deleteProblem(pKey) {
-  if (!confirm('이 문제를 완전히 삭제하시겠습니까?')) return;
+  if (!confirm('이 항목을 완전히 삭제하시겠습니까?')) return;
   const records = getData();
   delete records[pKey];
   saveData(records);
@@ -1470,7 +1586,10 @@ function moveItem(depth, path, index, direction) {
   if (depth === 0) target = struct;
   else if (depth === 1) target = struct[path[0]];
   else if (depth === 2) target = struct[path[0]][path[1]];
-  else if (depth === 3) target = struct[path[0]][path[1]][path[2]];
+  else if (depth === 3) {
+    const taskObj = struct[path[0]][path[1]][path[2]];
+    target = taskObj ? taskObj.chapters : [];
+  }
 
   if (Array.isArray(target)) {
     const newIdx = index + direction;
@@ -1551,13 +1670,33 @@ function editSubSubject(subj, oldName) {
 }
 
 function addTask(subj, sub) {
-  const name = prompt('문제집/강좌 이름');
+  const name = prompt('교재/강좌 이름 입력');
   if (!name) return;
+
+  const typeInput = prompt('유형을 선택하세요 (1: 문제집, 2: 강좌)\n기본값은 1(문제집)입니다.', '1');
+  const isLecture = typeInput === '2';
+
   const struct = getStructure();
-  if (!struct[subj][sub][name]) struct[subj][sub][name] = [];
+  if (isLecture) {
+    struct[subj][sub][name] = { type: 'lecture', chapters: [] };
+    const totalCount = prompt('총 강의 수를 입력하세요 (예: 40)\n미입력 시 0개 생성됩니다.', '40');
+    const countNum = parseInt(totalCount, 10);
+    if (!isNaN(countNum) && countNum > 0) {
+      const records = getData();
+      const pathKey = `${subj}|${sub}|${name}|NONE`;
+      for (let i = 1; i <= countNum; i++) {
+        records[`${pathKey}|${i}`] = records[`${pathKey}|${i}`] || { history: [] };
+      }
+      saveData(records);
+    }
+  } else {
+    struct[subj][sub][name] = { type: 'book', chapters: [] };
+  }
+
   saveStructure(struct);
   renderStudy();
 }
+
 function deleteTask(subj, sub, task) {
   if (!confirm(`${task} 항목을 삭제하시겠습니까?`)) return;
   const struct = getStructure();
@@ -1582,14 +1721,15 @@ function addChapter(subj, sub, task) {
   const name = prompt('챕터 이름');
   if (!name) return;
   const struct = getStructure();
-  struct[subj][sub][task].push(name);
+  if (!struct[subj][sub][task].chapters) struct[subj][sub][task].chapters = [];
+  struct[subj][sub][task].chapters.push(name);
   saveStructure(struct);
   renderStudy();
 }
 function deleteChapter(subj, sub, task, ch) {
   if (!confirm(`${ch} 챕터를 삭제하시겠습니까?`)) return;
   const struct = getStructure();
-  struct[subj][sub][task] = struct[subj][sub][task].filter(c => c !== ch);
+  struct[subj][sub][task].chapters = struct[subj][sub][task].chapters.filter(c => c !== ch);
   saveStructure(struct);
   renderStudy();
 }
@@ -1597,7 +1737,7 @@ function editChapter(subj, sub, task, oldName) {
   const newName = prompt('수정할 이름', oldName);
   if (!newName || newName === oldName) return;
   const struct = getStructure();
-  const arr = struct[subj][sub][task];
+  const arr = struct[subj][sub][task].chapters;
   const idx = arr.indexOf(oldName);
   if (idx !== -1) arr[idx] = newName;
   saveStructure(struct);
